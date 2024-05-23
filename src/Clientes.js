@@ -54,38 +54,42 @@ const Clientes = () => {
 
     if (cliente.nombres && cliente.email) {
       let _clientes = [...clientes];
-      if (cliente.idcliente) {
-        const response = await axios.put(
-          `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
-          cliente
-        );
-        const index = _clientes.findIndex(
-          (c) => c.idcliente === cliente.idcliente
-        );
-        _clientes[index] = response.data;
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Cliente Updated",
-          life: 3000,
-        });
-      } else {
-        const response = await axios.post(
-          `${Config.apiUrl}/api/clientes`,
-          cliente
-        );
-        _clientes.push(response.data);
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Cliente Created",
-          life: 3000,
-        });
-      }
+      try {
+        if (cliente.idcliente) {
+          const response = await axios.put(
+            `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
+            cliente
+          );
+          const index = _clientes.findIndex(
+            (c) => c.idcliente === cliente.idcliente
+          );
+          _clientes[index] = response.data;
+          toast.current.show({
+            severity: "success",
+            summary: "Successful",
+            detail: "Cliente Updated",
+            life: 3000,
+          });
+        } else {
+          const response = await axios.post(
+            `${Config.apiUrl}/api/clientes`,
+            cliente
+          );
+          _clientes.push(response.data);
+          toast.current.show({
+            severity: "success",
+            summary: "Successful",
+            detail: "Cliente Created",
+            life: 3000,
+          });
+        }
 
-      setClientes(_clientes);
-      setClienteDialog(false);
-      setCliente({});
+        setClientes(_clientes);
+        setClienteDialog(false);
+        setCliente({});
+      } catch (error) {
+        console.error("Error saving cliente:", error);
+      }
     }
   };
 
