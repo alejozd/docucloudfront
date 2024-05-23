@@ -12,6 +12,7 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./Clientes.css";
+import Config from "./Config";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -22,13 +23,9 @@ const Clientes = () => {
   const [submitted, setSubmitted] = useState(false);
   const toast = useRef(null);
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
-
   const fetchClientes = async () => {
     try {
-      const response = await axios.get("http://zetamini.ddns.net/api/clientes");
+      const response = await axios.get(`${Config.apiUrl}/api/clientes`);
       setClientes(response.data);
     } catch (error) {
       console.error("Error fetching clientes", error);
@@ -71,7 +68,10 @@ const Clientes = () => {
           life: 3000,
         });
       } else {
-        const response = await axios.post("/api/clientes", cliente);
+        const response = await axios.post(
+          `${Config.apiUrl}/api/clientes`,
+          cliente
+        );
         _clientes.push(response.data);
         toast.current.show({
           severity: "success",
@@ -98,7 +98,7 @@ const Clientes = () => {
   };
 
   const deleteCliente = async () => {
-    await axios.delete(`/api/clientes/${cliente.idcliente}`);
+    await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
     let _clientes = clientes.filter(
       (val) => val.idcliente !== cliente.idcliente
     );
