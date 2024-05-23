@@ -1,18 +1,16 @@
-// Clientes.js
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
+import { Dialog } from "primereact/dialog";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import "./Clientes.css";
 import Config from "./Config";
+import ClienteDialog from "./ClienteDialog";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -31,6 +29,10 @@ const Clientes = () => {
       console.error("Error fetching clientes", error);
     }
   };
+
+  useEffect(() => {
+    fetchClientes();
+  }, []);
 
   const openNew = () => {
     setCliente({});
@@ -54,7 +56,7 @@ const Clientes = () => {
       let _clientes = [...clientes];
       if (cliente.idcliente) {
         const response = await axios.put(
-          `/api/clientes/${cliente.idcliente}`,
+          `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
           cliente
         );
         const index = _clientes.findIndex(
@@ -124,13 +126,13 @@ const Clientes = () => {
     return (
       <React.Fragment>
         <Button
-          label="New"
+          label="Nuevo"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={openNew}
         />
         <Button
-          label="Show"
+          label="Mostrar"
           icon="pi pi-refresh"
           className="p-button-help"
           onClick={fetchClientes}
@@ -156,23 +158,6 @@ const Clientes = () => {
     );
   };
 
-  const clienteDialogFooter = (
-    <React.Fragment>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={hideDialog}
-      />
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        className="p-button-text"
-        onClick={saveCliente}
-      />
-    </React.Fragment>
-  );
-
   const deleteClienteDialogFooter = (
     <React.Fragment>
       <Button
@@ -195,8 +180,6 @@ const Clientes = () => {
       <Toast ref={toast} />
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
-        // Continuación del componente Clientes.js
-
         value={clientes}
         selection={selectedClientes}
         onSelectionChange={(e) => setSelectedClientes(e.value)}
@@ -204,60 +187,31 @@ const Clientes = () => {
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25]}
+        scrollable
       >
-        <Column field="idcliente" header="ID" />
-        <Column field="nombres" header="Nombre" />
+        <Column field="idcliente" header="ID" hidden />
+        <Column field="nombres" header="Nombre" frozen />
         <Column field="identidad" header="Identidad" />
         <Column field="direccion" header="Dirección" />
         <Column field="telefono" header="Teléfono" />
         <Column field="email" header="Email" />
-        <Column field="contacto1" header="Contacto 1" />
-        <Column field="telefonoc1" header="Teléfono C1" />
-        <Column field="emailc1" header="Email C1" />
-        <Column field="contacto2" header="Contacto 2" />
-        <Column field="telefonoc2" header="Teléfono C2" />
-        <Column field="emailc2" header="Email C2" />
-        <Column body={actionBodyTemplate} header="Actions" />
+        <Column field="contacto1" header="Contacto 1" hidden />
+        <Column field="telefonoc1" header="Teléfono C1" hidden />
+        <Column field="emailc1" header="Email C1" hidden />
+        <Column field="contacto2" header="Contacto 2" hidden />
+        <Column field="telefonoc2" header="Teléfono C2" hidden />
+        <Column field="emailc2" header="Email C2" hidden />
+        <Column body={actionBodyTemplate} frozen />
       </DataTable>
 
-      <Dialog
+      <ClienteDialog
         visible={clienteDialog}
-        style={{ width: "450px" }}
-        header="Cliente Details"
-        modal
-        className="p-fluid"
-        footer={clienteDialogFooter}
-        onHide={hideDialog}
-      >
-        <div className="field">
-          <label htmlFor="nombres">Nombre</label>
-          <InputText
-            id="nombres"
-            value={cliente.nombres}
-            onChange={(e) => onInputChange(e, "nombres")}
-            required
-            autoFocus
-            className={submitted && !cliente.nombres ? "p-invalid" : ""}
-          />
-          {submitted && !cliente.nombres && (
-            <small className="p-error">Nombre is required.</small>
-          )}
-        </div>
-        <div className="field">
-          <label htmlFor="email">Email</label>
-          <InputText
-            id="email"
-            value={cliente.email}
-            onChange={(e) => onInputChange(e, "email")}
-            required
-            className={submitted && !cliente.email ? "p-invalid" : ""}
-          />
-          {submitted && !cliente.email && (
-            <small className="p-error">Email is required.</small>
-          )}
-        </div>
-        {/* Agregar otros campos de entrada aquí */}
-      </Dialog>
+        cliente={cliente}
+        submitted={submitted}
+        hideDialog={hideDialog}
+        saveCliente={saveCliente}
+        onInputChange={onInputChange}
+      />
 
       <Dialog
         visible={deleteClienteDialog}
