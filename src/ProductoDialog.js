@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
 
 const ProductoDialog = ({
   visible,
@@ -11,13 +12,40 @@ const ProductoDialog = ({
   saveProducto,
   onInputChange,
 }) => {
+  const [formattedPrecio, setFormattedPrecio] = useState(producto.precio || 0);
+
+  const handlePrecioChange = (event) => {
+    const newValue = event.value;
+    setFormattedPrecio(newValue);
+    onInputChange({ target: { value: newValue } }, "precio");
+  };
+
+  const productoDialogFooter = (
+    <React.Fragment>
+      <Button
+        label="Cancelar"
+        icon="pi pi-times"
+        outlined
+        severity="danger"
+        onClick={hideDialog}
+      />
+      <Button
+        label="Guardar"
+        icon="pi pi-check"
+        severity="success"
+        onClick={saveProducto}
+      />
+    </React.Fragment>
+  );
+
   return (
     <Dialog
       visible={visible}
-      onHide={hideDialog}
       header={`${producto.idproducto ? "Editar" : "Nuevo"} Producto`}
       modal
       className="p-fluid"
+      footer={productoDialogFooter}
+      onHide={hideDialog}
     >
       <div className="p-field">
         <label htmlFor="nombre">Nombre</label>
@@ -37,10 +65,13 @@ const ProductoDialog = ({
       </div>
       <div className="p-field">
         <label htmlFor="precio">Precio</label>
-        <InputText
+        <InputNumber
           id="precio"
-          value={producto.precio || ""}
-          onChange={(e) => onInputChange(e, "precio")}
+          value={formattedPrecio}
+          onValueChange={handlePrecioChange}
+          mode="currency"
+          currency="COP"
+          locale="es-CO"
         />
       </div>
       <div className="p-field">
@@ -49,21 +80,6 @@ const ProductoDialog = ({
           id="codigoBarras"
           value={producto.codigoBarras || ""}
           onChange={(e) => onInputChange(e, "codigoBarras")}
-        />
-      </div>
-
-      <div className="p-dialog-footer">
-        <Button
-          label="Cancelar"
-          icon="pi pi-times"
-          className="p-button-text"
-          onClick={hideDialog}
-        />
-        <Button
-          label="Guardar"
-          icon="pi pi-check"
-          className="p-button-text"
-          onClick={saveProducto}
         />
       </div>
     </Dialog>
