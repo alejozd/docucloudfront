@@ -6,11 +6,24 @@ import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
 import Config from "./Config";
 import ClienteDialog from "./ClienteDialog";
+// import "./Clientes.css";
+
+const initialClienteState = {
+  idcliente: null,
+  nombres: "",
+  identidad: "",
+  direccion: "",
+  telefono: "",
+  email: "",
+  contacto1: "",
+  telefonoc1: "",
+  emailc1: "",
+  contacto2: "",
+  telefonoc2: "",
+  emailc2: "",
+};
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -30,12 +43,12 @@ const Clientes = () => {
     }
   };
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
+  // useEffect(() => {
+  //   fetchClientes();
+  // }, []);
 
   const openNew = () => {
-    setCliente({});
+    setCliente(initialClienteState);
     setSubmitted(false);
     setClienteDialog(true);
   };
@@ -66,8 +79,8 @@ const Clientes = () => {
           _clientes[index] = response.data;
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Cliente Updated",
+            summary: "Realizado",
+            detail: "Cliente Actualizado",
             life: 3000,
           });
         } else {
@@ -79,15 +92,15 @@ const Clientes = () => {
           _clientes.push(response.data);
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Cliente Created",
+            summary: "Realizado",
+            detail: "Cliente Creado",
             life: 3000,
           });
         }
 
         setClientes(_clientes);
         setClienteDialog(false);
-        setCliente({});
+        setCliente(initialClienteState);
       } catch (error) {
         console.error("Error saving cliente:", error.response.data.error);
       }
@@ -111,11 +124,11 @@ const Clientes = () => {
     );
     setClientes(_clientes);
     setDeleteClienteDialog(false);
-    setCliente({});
+    setCliente(initialClienteState);
     toast.current.show({
       severity: "success",
-      summary: "Successful",
-      detail: "Cliente Deleted",
+      summary: "Realizado",
+      detail: "Cliente Eliminado",
       life: 3000,
     });
   };
