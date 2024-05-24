@@ -71,6 +71,7 @@ const Clientes = () => {
             life: 3000,
           });
         } else {
+          console.log("cliente: ", cliente);
           const response = await axios.post(
             `${Config.apiUrl}/api/clientes`,
             cliente
@@ -88,7 +89,7 @@ const Clientes = () => {
         setClienteDialog(false);
         setCliente({});
       } catch (error) {
-        console.error("Error saving cliente:", error);
+        console.error("Error saving cliente:", error.response.data.error);
       }
     }
   };
