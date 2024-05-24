@@ -190,8 +190,16 @@ const Productos = () => {
     </React.Fragment>
   );
 
+  const precioBodyTemplate = (rowData) => {
+    return rowData.precio.toLocaleString("es-CO", {
+      style: "currency",
+      currency: "COP",
+    });
+  };
+
   return (
     <div className="productos-container">
+      <h1>Productos</h1>
       <Toast ref={toast} />
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
@@ -207,7 +215,7 @@ const Productos = () => {
         <Column field="idproducto" header="ID" hidden />
         <Column field="nombre" header="Nombre" frozen />
         <Column field="referencia" header="Referencia" />
-        <Column field="precio" header="Precio" />
+        <Column field="precio" header="Precio" body={precioBodyTemplate} />
         <Column field="codigoBarras" header="Código de Barras" />
         <Column body={actionBodyTemplate} frozen />
       </DataTable>

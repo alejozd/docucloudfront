@@ -195,6 +195,7 @@ const Clientes = () => {
 
   return (
     <div className="clientes-container">
+      <h1>Clientes</h1>
       <Toast ref={toast} />
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
