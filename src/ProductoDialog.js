@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
@@ -12,12 +12,15 @@ const ProductoDialog = ({
   saveProducto,
   onInputChange,
 }) => {
-  const [formattedPrecio, setFormattedPrecio] = useState(producto.precio || 0);
+  const [precio, setPrecio] = useState(0);
+
+  useEffect(() => {
+    setPrecio(producto.idproducto ? producto.precio : 0);
+  }, [producto]);
 
   const handlePrecioChange = (event) => {
-    const newValue = event.value;
-    setFormattedPrecio(newValue);
-    onInputChange({ target: { value: newValue } }, "precio");
+    setPrecio(event.value);
+    onInputChange({ target: { value: event.value } }, "precio");
   };
 
   const productoDialogFooter = (
@@ -67,7 +70,7 @@ const ProductoDialog = ({
         <label htmlFor="precio">Precio</label>
         <InputNumber
           id="precio"
-          value={formattedPrecio}
+          value={precio}
           onValueChange={handlePrecioChange}
           mode="currency"
           currency="COP"

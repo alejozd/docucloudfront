@@ -14,7 +14,7 @@ const initialProductoState = {
   idproducto: null,
   nombre: "",
   referencia: "",
-  precio: "",
+  precio: 0,
   codigoBarras: "",
 };
 
@@ -41,7 +41,11 @@ const Productos = () => {
   // }, []);
 
   const openNew = () => {
-    setProducto(initialProductoState);
+    const newPrecio = producto.idproducto ? producto.precio : 0;
+    setProducto({
+      ...initialProductoState,
+      precio: newPrecio,
+    });
     setSubmitted(false);
     setProductoDialog(true);
   };
@@ -105,7 +109,11 @@ const Productos = () => {
   };
 
   const editProducto = (producto) => {
-    setProducto({ ...producto });
+    setProducto((prevProducto) => ({
+      ...prevProducto,
+      ...producto,
+      precio: producto.idproducto ? producto.precio : 0,
+    }));
     setProductoDialog(true);
   };
 
