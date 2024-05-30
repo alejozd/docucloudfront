@@ -24,7 +24,6 @@ const Productos = () => {
   const [deleteProductoDialog, setDeleteProductoDialog] = useState(false);
   const [producto, setProducto] = useState({});
   const [selectedProductos, setSelectedProductos] = useState([]);
-  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
@@ -41,17 +40,17 @@ const Productos = () => {
   };
 
   const openNew = () => {
+    console.log("producto:", producto);
     const newPrecio = producto.idproducto ? producto.precio : 0;
+    console.log("new precio:", newPrecio);
     setProducto({
       ...initialProductoState,
       precio: newPrecio,
     });
-    setSubmitted(false);
     setProductoDialog(true);
   };
 
   const hideDialog = () => {
-    setSubmitted(false);
     setProductoDialog(false);
   };
 
@@ -60,8 +59,6 @@ const Productos = () => {
   };
 
   const saveProducto = async () => {
-    setSubmitted(true);
-
     if (
       producto.nombre &&
       producto.referencia &&
@@ -113,11 +110,7 @@ const Productos = () => {
   };
 
   const editProducto = (producto) => {
-    setProducto((prevProducto) => ({
-      ...prevProducto,
-      ...producto,
-      precio: producto.idproducto ? producto.precio : 0,
-    }));
+    setProducto({ ...producto });
     setProductoDialog(true);
   };
 
@@ -247,7 +240,6 @@ const Productos = () => {
       <ProductoDialog
         visible={productoDialog}
         producto={producto}
-        submitted={submitted}
         hideDialog={hideDialog}
         saveProducto={saveProducto}
         onInputChange={onInputChange}

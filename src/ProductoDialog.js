@@ -7,20 +7,19 @@ import { InputNumber } from "primereact/inputnumber";
 const ProductoDialog = ({
   visible,
   producto,
-  submitted,
   hideDialog,
   saveProducto,
   onInputChange,
 }) => {
-  const [precio, setPrecio] = useState(0);
+  const [precio, setPrecio] = useState(producto.precio || 0);
 
   useEffect(() => {
-    setPrecio(producto.idproducto ? producto.precio : 0);
+    setPrecio(producto.precio || 0);
   }, [producto]);
 
-  const handlePrecioChange = (event) => {
-    setPrecio(event.value);
-    onInputChange({ target: { value: event.value } }, "precio");
+  const handlePrecioChange = (e) => {
+    setPrecio(e.value);
+    onInputChange({ target: { value: e.value } }, "precio");
   };
 
   const productoDialogFooter = (
