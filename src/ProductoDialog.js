@@ -10,12 +10,11 @@ const ProductoDialog = ({
   hideDialog,
   saveProducto,
   onInputChange,
+  loading,
 }) => {
   const [precio, setPrecio] = useState(producto.precio || 0);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("Dialog-producto", producto);
     setPrecio(producto.precio || 0);
   }, [producto]);
 
