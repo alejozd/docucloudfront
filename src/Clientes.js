@@ -100,10 +100,11 @@ const Clientes = () => {
           });
         }
 
-        setClientes(_clientes);
+        // setClientes(_clientes);
         setClienteDialog(false);
         setCliente(initialClienteState);
         setLoading(false);
+        fetchClientes();
       } catch (error) {
         console.error("Error guardando cliente:", error.response.data.error);
         setLoading(false);
