@@ -242,6 +242,7 @@ const Productos = () => {
         hideDialog={hideDialog}
         saveProducto={saveProducto}
         onInputChange={onInputChange}
+        loading={loading}
       />
 
       <Dialog
