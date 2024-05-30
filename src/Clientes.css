@@ -1,7 +1,6 @@
 /* Clientes.css */
 .clientes-container {
-    text-align: center;
-    padding: 20px;
+    text-align: center;    
   }
   
   .datatable-container {
@@ -48,4 +47,7 @@ background: #e9ecef;
 .confirmation-content i {
   color: #f8d7da;
 }
-  
+
+.low-height-row {
+  height: 30px!important;
+}
