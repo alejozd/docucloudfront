@@ -97,10 +97,11 @@ const Productos = () => {
           });
         }
 
-        setProductos(_productos);
+        // setProductos(_productos);
         setProductoDialog(false);
         setProducto(initialProductoState);
         setLoading(false);
+        fetchProductos();
       } catch (error) {
         console.error("Error guardando producto:", error.response.data.error);
         setLoading(false);
