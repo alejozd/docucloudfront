@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -42,14 +42,10 @@ const Clientes = () => {
       setClientes(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Error trayendo clientes", error);
+      console.error("Error recuperando clientes", error);
       setLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   fetchClientes();
-  // }, []);
 
   const openNew = () => {
     setCliente(initialClienteState);
@@ -73,6 +69,7 @@ const Clientes = () => {
       let _clientes = [...clientes];
       try {
         if (cliente.idcliente) {
+          setLoading(true);
           const response = await axios.put(
             `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
             cliente
@@ -80,6 +77,7 @@ const Clientes = () => {
           const index = _clientes.findIndex(
             (c) => c.idcliente === cliente.idcliente
           );
+          setLoading(false);
           _clientes[index] = response.data;
           toast.current.show({
             severity: "success",
@@ -105,8 +103,10 @@ const Clientes = () => {
         setClientes(_clientes);
         setClienteDialog(false);
         setCliente(initialClienteState);
+        setLoading(false);
       } catch (error) {
-        console.error("Error saving cliente:", error.response.data.error);
+        console.error("Error guardando cliente:", error.response.data.error);
+        setLoading(false);
       }
     }
   };
@@ -192,7 +192,7 @@ const Clientes = () => {
         onClick={hideDeleteClienteDialog}
       />
       <Button
-        label="Yes"
+        label="Si"
         icon="pi pi-check"
         className="p-button-text"
         onClick={deleteCliente}

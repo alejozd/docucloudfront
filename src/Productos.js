@@ -25,20 +25,20 @@ const Productos = () => {
   const [producto, setProducto] = useState({});
   const [selectedProductos, setSelectedProductos] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   const fetchProductos = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${Config.apiUrl}/api/productos`);
       setProductos(response.data);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching productos", error);
+      console.error("Error recuperando productos", error);
+      setLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   fetchProductos();
-  // }, []);
 
   const openNew = () => {
     const newPrecio = producto.idproducto ? producto.precio : 0;
@@ -71,6 +71,7 @@ const Productos = () => {
       let _productos = [...productos];
       try {
         if (producto.idproducto) {
+          setLoading(true);
           const response = await axios.put(
             `${Config.apiUrl}/api/productos/${producto.idproducto}`,
             producto
@@ -78,6 +79,7 @@ const Productos = () => {
           const index = _productos.findIndex(
             (p) => p.idproducto === producto.idproducto
           );
+          setLoading(false);
           _productos[index] = response.data;
           toast.current.show({
             severity: "success",
@@ -102,8 +104,10 @@ const Productos = () => {
         setProductos(_productos);
         setProductoDialog(false);
         setProducto(initialProductoState);
+        setLoading(false);
       } catch (error) {
-        console.error("Error saving producto:", error.response.data.error);
+        console.error("Error guardando producto:", error.response.data.error);
+        setLoading(false);
       }
     }
   };
@@ -169,12 +173,15 @@ const Productos = () => {
       <React.Fragment>
         <Button
           icon="pi pi-pencil"
-          className="p-button-rounded p-button-success mr-2"
+          rounded
+          text
           onClick={() => editProducto(rowData)}
         />
         <Button
           icon="pi pi-trash"
-          className="p-button-rounded p-button-warning"
+          rounded
+          text
+          severity="danger"
           onClick={() => confirmDeleteProducto(rowData)}
         />
       </React.Fragment>
@@ -190,7 +197,7 @@ const Productos = () => {
         onClick={hideDeleteProductoDialog}
       />
       <Button
-        label="Yes"
+        label="Si"
         icon="pi pi-check"
         className="p-button-text"
         onClick={deleteProducto}
@@ -209,7 +216,7 @@ const Productos = () => {
     <div className="productos-container">
       <h1>Productos</h1>
       <Toast ref={toast} />
-      <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
+      <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
       <DataTable
         value={productos}
         selection={selectedProductos}
@@ -219,13 +226,22 @@ const Productos = () => {
         rows={10}
         rowsPerPageOptions={[5, 10, 25]}
         scrollable
+        size="small"
+        loading={loading}
+        emptyMessage="No hay registros"
       >
         <Column field="idproducto" header="ID" hidden />
-        <Column field="nombre" header="Nombre" frozen />
+        <Column
+          field="nombre"
+          header="Nombre"
+          frozen
+          alignFrozen="left"
+          sortable
+        />
         <Column field="referencia" header="Referencia" />
         <Column field="precio" header="Precio" body={precioBodyTemplate} />
         <Column field="codigoBarras" header="Código de Barras" />
-        <Column body={actionBodyTemplate} frozen />
+        <Column body={actionBodyTemplate} frozen alignFrozen="right" />
       </DataTable>
 
       <ProductoDialog
@@ -252,7 +268,7 @@ const Productos = () => {
           />
           {producto && (
             <span>
-              Are you sure you want to delete <b>{producto.nombre}</b>?
+              Esta seguro que desea eliminar <b>{producto.nombre}</b>?
             </span>
           )}
         </div>
