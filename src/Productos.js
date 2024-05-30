@@ -50,6 +50,7 @@ const Productos = () => {
 
   const hideDialog = () => {
     setProductoDialog(false);
+    setProducto(initialProductoState);
   };
 
   const hideDeleteProductoDialog = () => {

@@ -15,6 +15,7 @@ const ProductoDialog = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log("Dialog-producto", producto);
     setPrecio(producto.precio || 0);
   }, [producto]);
 
