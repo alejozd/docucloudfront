@@ -10,6 +10,7 @@ const ClienteDialog = ({
   hideDialog,
   saveCliente,
   onInputChange,
+  loading,
 }) => {
   const clienteDialogFooter = (
     <React.Fragment>
@@ -25,6 +26,7 @@ const ClienteDialog = ({
         icon="pi pi-check"
         severity="success"
         onClick={saveCliente}
+        loading={loading}
       />
     </React.Fragment>
   );

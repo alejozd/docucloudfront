@@ -246,6 +246,7 @@ const Clientes = () => {
         hideDialog={hideDialog}
         saveCliente={saveCliente}
         onInputChange={onInputChange}
+        loading={loading}
       />
 
       <Dialog
