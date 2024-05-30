@@ -40,9 +40,7 @@ const Productos = () => {
   };
 
   const openNew = () => {
-    console.log("producto:", producto);
     const newPrecio = producto.idproducto ? producto.precio : 0;
-    console.log("new precio:", newPrecio);
     setProducto({
       ...initialProductoState,
       precio: newPrecio,

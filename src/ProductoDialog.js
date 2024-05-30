@@ -12,6 +12,7 @@ const ProductoDialog = ({
   onInputChange,
 }) => {
   const [precio, setPrecio] = useState(producto.precio || 0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setPrecio(producto.precio || 0);
@@ -36,6 +37,7 @@ const ProductoDialog = ({
         icon="pi pi-check"
         severity="success"
         onClick={saveProducto}
+        loading={loading}
       />
     </React.Fragment>
   );
