@@ -11,6 +11,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import Config from "./Config";
 import ClienteDialog from "./ClienteDialog";
+// import "./Clientes.css";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -19,20 +20,24 @@ const Clientes = () => {
   const [cliente, setCliente] = useState({});
   const [selectedClientes, setSelectedClientes] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   const fetchClientes = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${Config.apiUrl}/api/clientes`);
       setClientes(response.data);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching clientes", error);
+      console.error("Error trayendo clientes", error);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
+  // useEffect(() => {
+  //   fetchClientes();
+  // }, []);
 
   const openNew = () => {
     setCliente({});
@@ -66,8 +71,8 @@ const Clientes = () => {
           _clientes[index] = response.data;
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Cliente Updated",
+            summary: "Realizado",
+            detail: "Cliente actualizado",
             life: 3000,
           });
         } else {
@@ -78,8 +83,8 @@ const Clientes = () => {
           _clientes.push(response.data);
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Cliente Created",
+            summary: "Realizado",
+            detail: "Cliente Creado",
             life: 3000,
           });
         }
@@ -88,7 +93,7 @@ const Clientes = () => {
         setClienteDialog(false);
         setCliente({});
       } catch (error) {
-        console.error("Error saving cliente:", error);
+        console.error("Error guardando cliente:", error);
       }
     }
   };
@@ -150,12 +155,15 @@ const Clientes = () => {
       <React.Fragment>
         <Button
           icon="pi pi-pencil"
-          className="p-button-rounded p-button-success mr-2"
+          rounded
+          text
           onClick={() => editCliente(rowData)}
         />
         <Button
           icon="pi pi-trash"
-          className="p-button-rounded p-button-warning"
+          rounded
+          text
+          severity="danger"
           onClick={() => confirmDeleteCliente(rowData)}
         />
       </React.Fragment>
@@ -180,9 +188,9 @@ const Clientes = () => {
   );
 
   return (
-    <div className="clientes-container">
+    <div className="flex-auto p-4 pt-0 pb-0 pl-0 pr-0">
       <Toast ref={toast} />
-      <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
+      <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
       <DataTable
         value={clientes}
         selection={selectedClientes}
@@ -192,20 +200,29 @@ const Clientes = () => {
         rows={10}
         rowsPerPageOptions={[5, 10, 25]}
         scrollable
+        size="small"
+        loading={loading}
+        emptyMessage="No hay registros"
       >
         <Column field="idcliente" header="ID" hidden />
-        <Column field="nombres" header="Nombre" frozen />
-        <Column field="identidad" header="Identidad" />
-        <Column field="direccion" header="Dirección" />
-        <Column field="telefono" header="Teléfono" />
-        <Column field="email" header="Email" />
+        <Column
+          field="nombres"
+          header="Nombre"
+          frozen
+          alignFrozen="left"
+          sortable
+        />
+        <Column field="identidad" header="Identidad" sortable />
+        <Column field="direccion" header="Dirección" sortable />
+        <Column field="telefono" header="Teléfono" sortable />
+        <Column field="email" header="Email" sortable />
         <Column field="contacto1" header="Contacto 1" hidden />
         <Column field="telefonoc1" header="Teléfono C1" hidden />
         <Column field="emailc1" header="Email C1" hidden />
         <Column field="contacto2" header="Contacto 2" hidden />
         <Column field="telefonoc2" header="Teléfono C2" hidden />
         <Column field="emailc2" header="Email C2" hidden />
-        <Column body={actionBodyTemplate} frozen />
+        <Column body={actionBodyTemplate} frozen alignFrozen="right" />
       </DataTable>
 
       <ClienteDialog
@@ -232,7 +249,7 @@ const Clientes = () => {
           />
           {cliente && (
             <span>
-              Are you sure you want to delete <b>{cliente.nombres}</b>?
+              Esta seguro que desea eliminar <b>{cliente.nombres}</b>?
             </span>
           )}
         </div>
