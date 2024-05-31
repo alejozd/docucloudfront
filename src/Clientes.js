@@ -159,6 +159,7 @@ const Clientes = () => {
           icon="pi pi-refresh"
           className="p-button-help"
           onClick={fetchClientes}
+          loading={loading}
         />
       </React.Fragment>
     );

@@ -156,6 +156,7 @@ const Productos = () => {
           icon="pi pi-refresh"
           className="p-button-help"
           onClick={fetchProductos}
+          loading={loading}
         />
       </React.Fragment>
     );
@@ -231,7 +232,7 @@ const Productos = () => {
           alignFrozen="left"
           sortable
         />
-        <Column field="referencia" header="Referencia" />
+        <Column field="referencia" header="Referencia" sortable />
         <Column field="precio" header="Precio" body={precioBodyTemplate} />
         <Column field="codigoBarras" header="Código de Barras" />
         <Column body={actionBodyTemplate} frozen alignFrozen="right" />
