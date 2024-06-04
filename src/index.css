@@ -12,11 +12,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.card {
+/* .card {
   background: var(--surface-card);
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 2rem;
   border-radius: 10px;
   margin-bottom: 1rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+} */
+
+.card {
+  background: var(--surface-card);  
+  border: 1px solid var(--surface-border);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  /* margin-bottom: 1rem;  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  max-width: 800px;  margin: 0 auto; */
 }
