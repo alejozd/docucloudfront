@@ -203,43 +203,47 @@ const Clientes = () => {
   );
 
   return (
-    <div className="clientes-container">
+    <div className="flex-column">
       <h1>Clientes</h1>
       <Toast ref={toast} />
-      <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
-      <DataTable
-        value={clientes}
-        selection={selectedClientes}
-        onSelectionChange={(e) => setSelectedClientes(e.value)}
-        dataKey="idcliente"
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 25]}
-        scrollable
-        size="small"
-        loading={loading}
-        emptyMessage="No hay registros"
-      >
-        <Column field="idcliente" header="ID" hidden />
-        <Column
-          field="nombres"
-          header="Nombre"
-          frozen
-          alignFrozen="left"
-          sortable
-        />
-        <Column field="identidad" header="Identidad" sortable />
-        <Column field="direccion" header="Dirección" sortable />
-        <Column field="telefono" header="Teléfono" sortable />
-        <Column field="email" header="Email" sortable />
-        <Column field="contacto1" header="Contacto 1" hidden />
-        <Column field="telefonoc1" header="Teléfono C1" hidden />
-        <Column field="emailc1" header="Email C1" hidden />
-        <Column field="contacto2" header="Contacto 2" hidden />
-        <Column field="telefonoc2" header="Teléfono C2" hidden />
-        <Column field="emailc2" header="Email C2" hidden />
-        <Column body={actionBodyTemplate} frozen alignFrozen="right" />
-      </DataTable>
+      <div className="card">
+        <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
+      </div>
+      <div className="card">
+        <DataTable
+          value={clientes}
+          selection={selectedClientes}
+          onSelectionChange={(e) => setSelectedClientes(e.value)}
+          dataKey="idcliente"
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
+          scrollable
+          size="small"
+          loading={loading}
+          emptyMessage="No hay registros"
+        >
+          <Column field="idcliente" header="ID" hidden />
+          <Column
+            field="nombres"
+            header="Nombre"
+            frozen
+            alignFrozen="left"
+            sortable
+          />
+          <Column field="identidad" header="Identidad" sortable />
+          <Column field="direccion" header="Dirección" sortable />
+          <Column field="telefono" header="Teléfono" sortable />
+          <Column field="email" header="Email" sortable />
+          <Column field="contacto1" header="Contacto 1" hidden />
+          <Column field="telefonoc1" header="Teléfono C1" hidden />
+          <Column field="emailc1" header="Email C1" hidden />
+          <Column field="contacto2" header="Contacto 2" hidden />
+          <Column field="telefonoc2" header="Teléfono C2" hidden />
+          <Column field="emailc2" header="Email C2" hidden />
+          <Column body={actionBodyTemplate} frozen alignFrozen="right" />
+        </DataTable>
+      </div>
 
       <ClienteDialog
         visible={clienteDialog}
