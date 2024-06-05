@@ -28,6 +28,12 @@ const Navbar = () => {
       url: "/contacto",
       id: "contacto",
     },
+    {
+      label: "Weather",
+      icon: "pi pi-sun",
+      url: "/weather",
+      id: "weather",
+    },
   ];
 
   const start = (
@@ -42,7 +48,8 @@ const Navbar = () => {
   const end = (
     <div className="flex align-items-center gap-2">
       <Avatar
-        image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+        // image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+        image="https://i.annihil.us/u/prod/marvel/i/mg/9/c0/527bb7b37ff55/landscape_medium.jpg"
         shape="circle"
       />
     </div>
