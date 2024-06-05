@@ -5,17 +5,21 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Panel } from "primereact/panel";
+import Forecast from "./Forecast";
 
 const Weather = () => {
   const [city, setCity] = useState("");
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showForecast, setShowForecast] = useState(false);
 
   const apiKey = "18b7S9OWWSNUdxY1sl150YeK3L28rz3n";
 
   const fetchCityId = () => {
-    const citySearchUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+    // const citySearchUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+    const citySearchUrl = `/api/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+    // const citySearchUrl = `https://cors-anywhere.herokuapp.com/http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
 
     setLoading(true);
     setError(null);
@@ -25,6 +29,7 @@ const Weather = () => {
       .then((response) => {
         if (response.data && response.data.length > 0) {
           const cityId = response.data[0].Key;
+          console.log("City ID:", cityId);
           fetchWeather(cityId);
         } else {
           setError("Ciudad no encontrada");
@@ -33,13 +38,18 @@ const Weather = () => {
       })
       .catch((error) => {
         console.error("Error fetching city ID", error);
-        setError("Error al obtener ID de la ciudad");
+        if (error.response) {
+          setError(error.response.data.Message);
+        } else {
+          setError("Error al obtener ID de la ciudad");
+        }
         setLoading(false);
       });
   };
 
   const fetchWeather = (cityId) => {
-    const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    // const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    const weatherUrl = `api/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
 
     axios
       .get(weatherUrl)
@@ -64,6 +74,10 @@ const Weather = () => {
     if (event.key === "Enter") {
       fetchCityId();
     }
+  };
+
+  const toggleForecast = () => {
+    setShowForecast(!showForecast);
   };
 
   return (
@@ -173,8 +187,13 @@ const Weather = () => {
                 </Panel>
               </div>
             </div>
+            <Button
+              label="Ver Pronóstico del Día Siguiente"
+              onClick={toggleForecast}
+            />
           </div>
         )}
+        {showForecast && <Forecast city={city} />}
       </Card>
     </div>
   );
