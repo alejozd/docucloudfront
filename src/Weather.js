@@ -3,7 +3,7 @@ import axios from "axios";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { ProgressSpinner } from "primereact/progressspinner";
+import { Skeleton } from "primereact/skeleton";
 
 const Weather = () => {
   const [city, setCity] = useState("");
@@ -26,13 +26,13 @@ const Weather = () => {
           const cityId = response.data[0].Key;
           fetchWeather(cityId);
         } else {
-          setError("City not found");
+          setError("Ciudad no encontrada");
           setLoading(false);
         }
       })
       .catch((error) => {
         console.error("Error fetching city ID", error);
-        setError("Error fetching city ID");
+        setError("Error al obtener ID de la ciudad");
         setLoading(false);
       });
   };
@@ -48,7 +48,7 @@ const Weather = () => {
       })
       .catch((error) => {
         console.error("Error fetching weather data", error);
-        setError("Error fetching weather data");
+        setError("Error al obtener datos del clima");
         setLoading(false);
       });
   };
@@ -65,17 +65,27 @@ const Weather = () => {
         title="Pronóstico del Tiempo"
         style={{ width: "25em", textAlign: "center" }}
       >
-        <div className="p-inputgroup p-mb-3">
+        <div className="p-inputgroup p-mb-5 p-d-flex p-jc-center">
           <InputText
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Ingrese el nombre de la ciudad"
+            style={{ marginRight: "0.5em", width: "80%" }}
           />
-          <Button label="Buscar" icon="pi pi-search" onClick={fetchCityId} />
+          <Button
+            label="Buscar"
+            icon="pi pi-search"
+            onClick={fetchCityId}
+            severity="warning"
+          />
         </div>
         {loading && (
-          <div className="p-d-flex p-jc-center">
-            <ProgressSpinner />
+          <div className="p-d-flex p-flex-column p-ai-center">
+            <Skeleton shape="circle" size="4em" className="p-mb-2" />
+            <Skeleton width="80%" className="p-mb-2" />
+            <Skeleton width="60%" className="p-mb-2" />
+            <Skeleton width="70%" className="p-mb-2" />
+            <Skeleton width="50%" className="p-mb-2" />
           </div>
         )}
         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -116,6 +126,27 @@ const Weather = () => {
               <strong>Visibilidad:</strong>{" "}
               {weatherData.Visibility.Metric.Value}{" "}
               {weatherData.Visibility.Metric.Unit}
+            </p>
+            <p>
+              <strong>Nivel de Nubosidad:</strong> {weatherData.CloudCover}%
+            </p>
+            <p>
+              <strong>Índice UV:</strong> {weatherData.UVIndex} (
+              {weatherData.UVIndexText})
+            </p>
+            <p>
+              <strong>Presión:</strong> {weatherData.Pressure.Metric.Value}{" "}
+              {weatherData.Pressure.Metric.Unit}
+            </p>
+            <p>
+              <strong>Enlace:</strong>{" "}
+              <a
+                href={weatherData.Link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Más información
+              </a>
             </p>
           </div>
         )}
