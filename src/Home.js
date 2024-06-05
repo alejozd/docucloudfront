@@ -1,6 +1,6 @@
 // Home.js
 import React, { useState, useEffect } from "react";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { Card } from "primereact/card";
 
 const Home = () => {
