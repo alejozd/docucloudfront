@@ -3,8 +3,7 @@ import axios from "axios";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Skeleton } from "primereact/skeleton";
-import { Divider } from "primereact/divider";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { Panel } from "primereact/panel";
 
 const Weather = () => {
@@ -61,109 +60,118 @@ const Weather = () => {
     }${icon}-s.png`;
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      fetchCityId();
+    }
+  };
+
   return (
     <div className="p-d-flex p-jc-center p-ai-center p-mt-5">
       <Card
         title="Pronóstico del Tiempo"
-        style={{ width: "50em", textAlign: "center" }}
+        style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
       >
         <div className="p-inputgroup p-mb-5 p-d-flex p-jc-center">
           <InputText
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Ingrese el nombre de la ciudad"
-            style={{ marginRight: "0.5em", width: "70%" }}
+            onKeyPress={handleKeyPress}
+            placeholder="Ingrese el nombre de la ciudad y presione Enter"
+            style={{ marginRight: "0.5em", flex: 1 }}
           />
           <Button label="Buscar" icon="pi pi-search" onClick={fetchCityId} />
         </div>
         {loading && (
-          <div className="p-d-flex p-flex-column p-ai-center">
-            <Skeleton shape="circle" size="4em" className="p-mb-2" />
-            <Skeleton width="80%" className="p-mb-2" />
-            <Skeleton width="60%" className="p-mb-2" />
-            <Skeleton width="70%" className="p-mb-2" />
-            <Skeleton width="50%" className="p-mb-2" />
+          <div className="p-d-flex p-jc-center p-ai-center p-mt-4">
+            <ProgressSpinner />
           </div>
         )}
         {error && <p style={{ color: "red" }}>{error}</p>}
         {weatherData && (
-          <div className="p-grid p-dir-col p-md-dir-row p-mt-4">
-            <div className="p-col-12 p-md-6">
-              <Panel header="Información Principal">
-                <div className="p-d-flex p-ai-center">
-                  <img
-                    src={weatherIconUrl(weatherData.WeatherIcon)}
-                    alt={weatherData.WeatherText}
-                    style={{ marginRight: "1em" }}
-                  />
+          <div>
+            <h3 style={{ textAlign: "center" }}>{weatherData.LocalizedName}</h3>
+            <div
+              className="p-grid p-dir-col p-md-dir-row p-mt-4"
+              style={{ textAlign: "left" }}
+            >
+              <div className="p-col-12 p-md-6">
+                <Panel header="Información Principal">
+                  <div className="p-d-flex p-ai-center">
+                    <img
+                      src={weatherIconUrl(weatherData.WeatherIcon)}
+                      alt={weatherData.WeatherText}
+                      style={{ marginRight: "1em" }}
+                    />
+                    <div>
+                      <p>
+                        <strong>Condición:</strong> {weatherData.WeatherText}
+                      </p>
+                      <p>
+                        <strong>Temperatura:</strong>{" "}
+                        {weatherData.Temperature.Metric.Value}°
+                        {weatherData.Temperature.Metric.Unit}
+                      </p>
+                      <p>
+                        <strong>Temperatura Real:</strong>{" "}
+                        {weatherData.RealFeelTemperature.Metric.Value}°
+                        {weatherData.RealFeelTemperature.Metric.Unit} (
+                        {weatherData.RealFeelTemperature.Metric.Phrase})
+                      </p>
+                      <p>
+                        <strong>Hora de Observación:</strong>{" "}
+                        {new Date(
+                          weatherData.LocalObservationDateTime
+                        ).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>Humedad Relativa:</strong>{" "}
+                        {weatherData.RelativeHumidity}%
+                      </p>
+                    </div>
+                  </div>
+                </Panel>
+              </div>
+              <div className="p-col-12 p-md-6">
+                <Panel header="Detalles Adicionales">
                   <div>
                     <p>
-                      <strong>Condición:</strong> {weatherData.WeatherText}
+                      <strong>Velocidad del Viento:</strong>{" "}
+                      {weatherData.Wind.Speed.Metric.Value}{" "}
+                      {weatherData.Wind.Speed.Metric.Unit} (
+                      {weatherData.Wind.Direction.Localized})
                     </p>
                     <p>
-                      <strong>Temperatura:</strong>{" "}
-                      {weatherData.Temperature.Metric.Value}°
-                      {weatherData.Temperature.Metric.Unit}
+                      <strong>Visibilidad:</strong>{" "}
+                      {weatherData.Visibility.Metric.Value}{" "}
+                      {weatherData.Visibility.Metric.Unit}
                     </p>
                     <p>
-                      <strong>Temperatura Real:</strong>{" "}
-                      {weatherData.RealFeelTemperature.Metric.Value}°
-                      {weatherData.RealFeelTemperature.Metric.Unit} (
-                      {weatherData.RealFeelTemperature.Metric.Phrase})
+                      <strong>Nivel de Nubosidad:</strong>{" "}
+                      {weatherData.CloudCover}%
+                    </p>
+                    <p>
+                      <strong>Índice UV:</strong> {weatherData.UVIndex} (
+                      {weatherData.UVIndexText})
+                    </p>
+                    <p>
+                      <strong>Presión:</strong>{" "}
+                      {weatherData.Pressure.Metric.Value}{" "}
+                      {weatherData.Pressure.Metric.Unit}
+                    </p>
+                    <p>
+                      <strong>Enlace:</strong>{" "}
+                      <a
+                        href={weatherData.Link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Más información
+                      </a>
                     </p>
                   </div>
-                </div>
-              </Panel>
-            </div>
-            <div className="p-col-12 p-md-6">
-              <Panel header="Detalles Adicionales">
-                <div>
-                  <p>
-                    <strong>Humedad Relativa:</strong>{" "}
-                    {weatherData.RelativeHumidity}%
-                  </p>
-                  <p>
-                    <strong>Hora de Observación:</strong>{" "}
-                    {new Date(
-                      weatherData.LocalObservationDateTime
-                    ).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Velocidad del Viento:</strong>{" "}
-                    {weatherData.Wind.Speed.Metric.Value}{" "}
-                    {weatherData.Wind.Speed.Metric.Unit} (
-                    {weatherData.Wind.Direction.Localized})
-                  </p>
-                  <p>
-                    <strong>Visibilidad:</strong>{" "}
-                    {weatherData.Visibility.Metric.Value}{" "}
-                    {weatherData.Visibility.Metric.Unit}
-                  </p>
-                  <p>
-                    <strong>Nivel de Nubosidad:</strong>{" "}
-                    {weatherData.CloudCover}%
-                  </p>
-                  <p>
-                    <strong>Índice UV:</strong> {weatherData.UVIndex} (
-                    {weatherData.UVIndexText})
-                  </p>
-                  <p>
-                    <strong>Presión:</strong>{" "}
-                    {weatherData.Pressure.Metric.Value}{" "}
-                    {weatherData.Pressure.Metric.Unit}
-                  </p>
-                  <p>
-                    <strong>Enlace:</strong>{" "}
-                    <a
-                      href={weatherData.Link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Más información
-                    </a>
-                  </p>
-                </div>
-              </Panel>
+                </Panel>
+              </div>
             </div>
           </div>
         )}

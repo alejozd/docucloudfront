@@ -7,7 +7,7 @@ import Clientes from "./Clientes"; // Importa tu componente Clientes
 import Contacto from "./Contacto"; // Importa tu componente Contacto
 import Productos from "./Productos"; // Importa tu componente Productos
 import Weather from "./Weather"; // Importa tu componente Weather
-import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/primereact.css";
 import "primeicons/primeicons.css";
