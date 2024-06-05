@@ -1,11 +1,51 @@
 // Home.js
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios, { Axios } from "axios";
+import { Card } from "primereact/card";
 
 const Home = () => {
+  const [phrase, setPhrase] = useState("");
+  const [author, setAuthor] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get(
+        "https://cors-anywhere.herokuapp.com/https://frasedeldia.azurewebsites.net/api/phrase"
+      )
+      .then((response) => {
+        setPhrase(response.data.phrase);
+        setAuthor(response.data.author);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching the phrase of the day", error);
+        setError(error.message);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div>
-      <h1>Bienvenido a Docucloud</h1>
-      <p>¡Aquí puedes hacer documentos y más!</p>
+      <div>
+        <h1>Bienvenido a Docucloud</h1>
+        <p>¡Aquí puedes hacer documentos y más!</p>
+      </div>
+      <div className="card flex justify-content-center">
+        {loading ? (
+          <p>Cargando...</p>
+        ) : (
+          <Card
+            title="Frase del día"
+            subTitle={"Autor: " + author}
+            key={author}
+          >
+            <p style={{ fontSize: "1.5em" }}>{phrase}</p>
+            <p>{error}</p>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
