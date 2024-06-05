@@ -6,6 +6,7 @@ import Home from "./Home"; // Importa tu componente Home
 import Clientes from "./Clientes"; // Importa tu componente Clientes
 import Contacto from "./Contacto"; // Importa tu componente Contacto
 import Productos from "./Productos"; // Importa tu componente Productos
+import Weather from "./Weather"; // Importa tu componente Weather
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/primereact.css";
@@ -23,6 +24,7 @@ function App() {
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/productos" element={<Productos />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/weather" element={<Weather />} />
           </Routes>
         </div>
       </div>
