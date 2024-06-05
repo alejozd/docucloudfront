@@ -17,8 +17,8 @@ const Weather = () => {
   const apiKey = "18b7S9OWWSNUdxY1sl150YeK3L28rz3n";
 
   const fetchCityId = () => {
-    // const citySearchUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
-    const citySearchUrl = `/api/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+    const citySearchUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+    // const citySearchUrl = `/api/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
     // const citySearchUrl = `https://cors-anywhere.herokuapp.com/http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
 
     setLoading(true);
@@ -48,8 +48,8 @@ const Weather = () => {
   };
 
   const fetchWeather = (cityId) => {
-    // const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
-    const weatherUrl = `api/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    // const weatherUrl = `api/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
 
     axios
       .get(weatherUrl)
