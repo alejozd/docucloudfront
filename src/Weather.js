@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Card } from "primereact/card";
+import { Button } from "primereact/button";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const Weather = () => {
   const [weatherData, setWeatherData] = useState(null);
@@ -27,27 +30,48 @@ const Weather = () => {
       });
   };
 
+  const weatherIconUrl = (icon) => {
+    return `https://developer.accuweather.com/sites/default/files/${
+      icon < 10 ? "0" : ""
+    }${icon}-s.png`;
+  };
+
   return (
-    <div>
-      <h2>Pronóstico del Tiempo</h2>
-      <button onClick={fetchWeather}>Obtener Pronóstico</button>
-      {loading && <p>Cargando...</p>}
-      {error && <p>{error}</p>}
-      {weatherData && (
-        <div>
-          <p>
-            <strong>Condición:</strong> {weatherData.WeatherText}
-          </p>
-          <p>
-            <strong>Temperatura:</strong> {weatherData.Temperature.Metric.Value}
-            °{weatherData.Temperature.Metric.Unit}
-          </p>
-          <p>
-            <strong>Hora de Observación:</strong>{" "}
-            {new Date(weatherData.LocalObservationDateTime).toLocaleString()}
-          </p>
-        </div>
-      )}
+    <div className="p-d-flex p-jc-center p-ai-center p-mt-5">
+      <Card title="Pronóstico del Tiempo" style={{ width: "25em" }}>
+        <Button
+          label="Obtener Pronóstico"
+          icon="pi pi-refresh"
+          onClick={fetchWeather}
+          className="p-mb-3"
+        />
+        {loading && (
+          <div className="p-d-flex p-jc-center">
+            <ProgressSpinner />
+          </div>
+        )}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {weatherData && (
+          <div className="p-d-flex p-flex-column p-ai-center">
+            <img
+              src={weatherIconUrl(weatherData.WeatherIcon)}
+              alt={weatherData.WeatherText}
+            />
+            <p>
+              <strong>Condición:</strong> {weatherData.WeatherText}
+            </p>
+            <p>
+              <strong>Temperatura:</strong>{" "}
+              {weatherData.Temperature.Metric.Value}°
+              {weatherData.Temperature.Metric.Unit}
+            </p>
+            <p>
+              <strong>Hora de Observación:</strong>{" "}
+              {new Date(weatherData.LocalObservationDateTime).toLocaleString()}
+            </p>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
