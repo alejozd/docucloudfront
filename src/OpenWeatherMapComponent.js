@@ -101,7 +101,7 @@ const OpenWeatherMapComponent = ({ city }) => {
           />
           <div className="p-col-12 p-md-6 p-text-center">
             <p>
-              <FontAwesomeIcon icon={faTemperatureHigh} size="1x" />
+              <FontAwesomeIcon icon={faTemperatureHigh} size="1x" />{" "}
               <strong>Temperatura:</strong> {weatherData.main.temp}°C{" "}
             </p>
             <p>
@@ -125,7 +125,7 @@ const OpenWeatherMapComponent = ({ city }) => {
           <Divider />
           <div className="p-col-12 p-md-6 p-text-center">
             <p>
-              <FontAwesomeIcon icon={faTint} size="1x" />
+              <FontAwesomeIcon icon={faTint} size="1x" />{" "}
               <strong>Humedad:</strong> {weatherData.main.humidity}%
             </p>
             <p>
