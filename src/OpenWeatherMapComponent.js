@@ -2,7 +2,22 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Card } from "primereact/card";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { Message } from "primereact/message";
 import { Panel } from "primereact/panel";
+import { Divider } from "primereact/divider";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTemperatureHigh,
+  faWind,
+  faTint,
+  faCloud,
+  faEye,
+  faSun,
+  faThermometerQuarter,
+  faTemperatureLow,
+  faTachometerAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 
 const OpenWeatherMapComponent = ({ city }) => {
   const [weatherData, setWeatherData] = useState(null);
@@ -13,18 +28,17 @@ const OpenWeatherMapComponent = ({ city }) => {
 
   const fetchCityCoordinates = useCallback(
     (city) => {
-      // const geoSearchUrl = `/geo/direct?q=${city}&appid=${apiKey}`;
-      const geoSearchUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
+      //   const geoUrl = `/geo/direct?q=${city}&appid=${apiKey}`;
+      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
 
       setLoading(true);
       setError(null);
 
       axios
-        .get(geoSearchUrl)
+        .get(geoUrl)
         .then((response) => {
           if (response.data && response.data.length > 0) {
             const { lat, lon } = response.data[0];
-            console.log("lat", lat, "lon", lon);
             fetchWeather(lat, lon);
           } else {
             setError("Ciudad no encontrada");
@@ -36,7 +50,7 @@ const OpenWeatherMapComponent = ({ city }) => {
           if (error.response) {
             setError(error.response.data.message);
           } else {
-            setError("Error al obtener coordenadas de la ciudad");
+            setError("Error al obtener las coordenadas de la ciudad");
           }
           setLoading(false);
         });
@@ -53,98 +67,110 @@ const OpenWeatherMapComponent = ({ city }) => {
 
   const fetchWeather = (lat, lon) => {
     // const weatherUrl = `/data/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es`;
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es`;
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
 
     axios
       .get(weatherUrl)
       .then((response) => {
-        console.log("weatherUrl", weatherUrl);
         setWeatherData(response.data);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching weather data", error);
-        setError("Error al obtener datos del clima");
-        console.log("weatherUrl", weatherUrl);
+        if (error.response) {
+          setError(error.response.data.message);
+        } else {
+          setError("Error al obtener datos del clima");
+        }
         setLoading(false);
       });
   };
 
-  return (
-    <Card
-      title="Pronóstico del Tiempo con OpenWeatherMap"
-      style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
-    >
-      {loading && (
-        <div className="p-d-flex p-jc-center p-ai-center p-mt-4">
-          <ProgressSpinner />
-        </div>
-      )}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {weatherData && (
-        <div>
-          <h3 style={{ textAlign: "center" }}>{weatherData.name}</h3>
-          <div
-            className="p-grid p-dir-col p-md-dir-row p-mt-4"
-            style={{ textAlign: "left" }}
-          >
-            <div className="p-col-12 p-md-6">
-              <Panel header="Información Principal">
-                <div className="p-d-flex p-ai-center">
-                  <img
-                    src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`}
-                    alt={weatherData.weather[0].description}
-                    style={{ marginRight: "1em" }}
-                  />
-                  <div>
-                    <p>
-                      <strong>Condición:</strong>{" "}
-                      {weatherData.weather[0].description}
-                    </p>
-                    <p>
-                      <strong>Temperatura:</strong>{" "}
-                      {(weatherData.main.temp - 273.15).toFixed(2)}°C
-                    </p>
-                    <p>
-                      <strong>Sensación Térmica:</strong>{" "}
-                      {(weatherData.main.feels_like - 273.15).toFixed(2)}°C
-                    </p>
-                    <p>
-                      <strong>Humedad:</strong> {weatherData.main.humidity}%
-                    </p>
-                    <p>
-                      <strong>Presión:</strong> {weatherData.main.pressure} hPa
-                    </p>
-                  </div>
-                </div>
-              </Panel>
-            </div>
-            <div className="p-col-12 p-md-6">
-              <Panel header="Detalles Adicionales">
-                <div>
-                  <p>
-                    <strong>Velocidad del Viento:</strong>{" "}
-                    {weatherData.wind.speed} m/s
-                  </p>
-                  <p>
-                    <strong>Dirección del Viento:</strong>{" "}
-                    {weatherData.wind.deg}°
-                  </p>
-                  <p>
-                    <strong>Visibilidad:</strong>{" "}
-                    {weatherData.visibility / 1000} km
-                  </p>
-                  <p>
-                    <strong>Nivel de Nubosidad:</strong>{" "}
-                    {weatherData.clouds.all}%
-                  </p>
-                </div>
-              </Panel>
-            </div>
+  const renderWeatherData = () => {
+    if (!weatherData) return null;
+
+    return (
+      <Panel
+        header={`Clima en ${weatherData.name}, ${weatherData.sys.country}`}
+      >
+        <div className="p-grid p-align-center p-justify-center">
+          <img
+            src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`}
+            alt={weatherData.weather[0].description}
+            style={{ marginRight: "1em" }}
+          />
+          <div className="p-col-12 p-md-6 p-text-center">
+            <p>
+              <FontAwesomeIcon icon={faTemperatureHigh} size="1x" />
+              <strong>Temperatura:</strong> {weatherData.main.temp}°C{" "}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faThermometerQuarter} size="1x" />{" "}
+              <strong>Sensación Térmica:</strong> {weatherData.main.feels_like}
+              °K{" "}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faTemperatureLow} size="1x" />{" "}
+              <strong>Temperatura Mínima:</strong> {weatherData.main.temp_min}°C{" "}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faTemperatureHigh} size="1x" />{" "}
+              <strong>Temperatura Máxima:</strong> {weatherData.main.temp_max}°C{" "}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faTachometerAlt} size="1x" />{" "}
+              <strong>Presión:</strong> {weatherData.main.pressure} hPa{" "}
+            </p>
+          </div>
+          <Divider />
+          <div className="p-col-12 p-md-6 p-text-center">
+            <p>
+              <FontAwesomeIcon icon={faTint} size="1x" />
+              <strong>Humedad:</strong> {weatherData.main.humidity}%
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faEye} size="1x" />{" "}
+              <strong>Visibilidad:</strong> {weatherData.visibility} m
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faWind} size="1x" />{" "}
+              <strong>Viento:</strong> {weatherData.wind.speed} m/s
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faCloud} size="1x" />{" "}
+              <strong>Condición:</strong> {weatherData.weather[0].description}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faSun} size="1x" />{" "}
+              <strong>Amanecer:</strong>{" "}
+              {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faSun} size="1x" />{" "}
+              <strong>Atardecer:</strong>{" "}
+              {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}
+            </p>
           </div>
         </div>
-      )}
-    </Card>
+      </Panel>
+    );
+  };
+
+  return (
+    <div className="p-d-flex p-jc-center p-ai-center p-mt-5">
+      <Card
+        title="Pronóstico del Tiempo - OpenWeatherMap"
+        style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
+      >
+        {loading && (
+          <div className="p-d-flex p-jc-center p-ai-center p-mt-4">
+            <ProgressSpinner />
+          </div>
+        )}
+        {error && <Message severity="error" text={error} />}
+        {renderWeatherData()}
+      </Card>
+    </div>
   );
 };
 
