@@ -10,11 +10,14 @@ const Home = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // const apifrase = "https://frasedeldia.azurewebsites.net/api/phrase";
+    const apifrase =
+      "https://cors-anywhere.herokuapp.com/https://frasedeldia.azurewebsites.net/api/phrase";
+
     axios
-      .get(
-        "https://cors-anywhere.herokuapp.com/https://frasedeldia.azurewebsites.net/api/phrase"
-      )
+      .get(apifrase)
       .then((response) => {
+        console.log("response.data", response.data);
         setPhrase(response.data.phrase);
         setAuthor(response.data.author);
         setLoading(false);
