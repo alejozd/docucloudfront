@@ -43,8 +43,8 @@ const Weather = () => {
             value={selectedProvider}
             options={providers}
             onChange={(e) => setSelectedProvider(e.value)}
-            placeholder="Seleccione el proveedor de clima"
-            style={{ width: "300px", marginBottom: "1rem" }}
+            placeholder="Selecciona un servicio meteorológico"
+            style={{ width: "320px", marginBottom: "1rem" }}
           />
         </div>
         <div className="p-inputgroup p-mb-5 p-d-flex p-jc-center">
