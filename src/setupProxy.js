@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
-module.exports = function addProxyMiddleware(app) {
-  console.log("Proxy middleware setup");
+module.exports = function (app) {
+  // Proxy para el endpoint de frases del día
   app.use(
     "/api/phrase",
     createProxyMiddleware({
@@ -10,38 +10,54 @@ module.exports = function addProxyMiddleware(app) {
       pathRewrite: {
         "^/api/phrase": "/api/phrase",
       },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `Proxying request to: ${proxyReq.getHeader("host")}${proxyReq.path}`
-        );
+    })
+  );
+
+  // Proxy para el endpoint de búsqueda de ciudades
+  app.use(
+    "/api/locations",
+    createProxyMiddleware({
+      target: "http://dataservice.accuweather.com",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/api/locations": "/locations/v1/cities/search",
       },
     })
   );
-  // app.use(
-  //   "/api",
-  //   createProxyMiddleware({
-  //     target: "http://dataservice.accuweather.com",
-  //     changeOrigin: true,
-  //   })
-  // );
-  // app.use(
-  //   "/geo",
-  //   createProxyMiddleware({
-  //     target: "http://api.openweathermap.org",
-  //     changeOrigin: true,
-  //     pathRewrite: {
-  //       "^/geo": "/geo/1.0",
-  //     },
-  //   })
-  // );
-  // app.use(
-  //   "/data",
-  //   createProxyMiddleware({
-  //     target: "https://api.openweathermap.org",
-  //     changeOrigin: true,
-  //     pathRewrite: {
-  //       "^/data": "/data/2.5",
-  //     },
-  //   })
-  // );
+
+  // Proxy para el endpoint de condiciones actuales
+  app.use(
+    "/api/currentconditions",
+    createProxyMiddleware({
+      target: "http://dataservice.accuweather.com",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/api/currentconditions": "/currentconditions/v1",
+      },
+    })
+  );
+
+  // Proxy para el endpoint de coordenadas de OpenWeatherMap
+  app.use(
+    "/api/openweathermap/geo",
+    createProxyMiddleware({
+      target: "http://api.openweathermap.org",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/api/openweathermap/geo": "/geo/1.0/direct",
+      },
+    })
+  );
+
+  // Proxy para el endpoint de clima de OpenWeatherMap
+  app.use(
+    "/api/openweathermap/weather",
+    createProxyMiddleware({
+      target: "https://api.openweathermap.org",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/api/openweathermap/weather": "/data/2.5/weather",
+      },
+    })
+  );
 };

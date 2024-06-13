@@ -12,41 +12,41 @@ const AccuWeatherComponent = ({ city }) => {
   const apiKey = "18b7S9OWWSNUdxY1sl150YeK3L28rz3n";
 
   useEffect(() => {
+    const fetchCityId = () => {
+      const citySearchUrl = `/api/locations?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+
+      setLoading(true);
+      setError(null);
+
+      axios
+        .get(citySearchUrl)
+        .then((response) => {
+          if (response.data && response.data.length > 0) {
+            const cityId = response.data[0].Key;
+            fetchWeather(cityId);
+          } else {
+            setError("Ciudad no encontrada");
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching city ID", error);
+          if (error.response) {
+            setError(error.response.data.Message);
+          } else {
+            setError("Error al obtener ID de la ciudad");
+          }
+          setLoading(false);
+        });
+    };
+
     if (city) {
       fetchCityId();
     }
   }, [city]);
 
-  const fetchCityId = () => {
-    const citySearchUrl = `/api/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
-
-    setLoading(true);
-    setError(null);
-
-    axios
-      .get(citySearchUrl)
-      .then((response) => {
-        if (response.data && response.data.length > 0) {
-          const cityId = response.data[0].Key;
-          fetchWeather(cityId);
-        } else {
-          setError("Ciudad no encontrada");
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching city ID", error);
-        if (error.response) {
-          setError(error.response.data.Message);
-        } else {
-          setError("Error al obtener ID de la ciudad");
-        }
-        setLoading(false);
-      });
-  };
-
   const fetchWeather = (cityId) => {
-    const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    const weatherUrl = `/api/currentconditions/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
 
     axios
       .get(weatherUrl)
