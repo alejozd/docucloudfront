@@ -28,8 +28,7 @@ const OpenWeatherMapComponent = ({ city }) => {
 
   const fetchCityCoordinates = useCallback(
     (city) => {
-      //   const geoUrl = `/geo/direct?q=${city}&appid=${apiKey}`;
-      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
+      const geoUrl = `/api/openweathermap/geo?q=${city}&appid=${apiKey}`;
 
       setLoading(true);
       setError(null);
@@ -37,6 +36,7 @@ const OpenWeatherMapComponent = ({ city }) => {
       axios
         .get(geoUrl)
         .then((response) => {
+          console.log(response.data);
           if (response.data && response.data.length > 0) {
             const { lat, lon } = response.data[0];
             fetchWeather(lat, lon);
@@ -59,15 +59,13 @@ const OpenWeatherMapComponent = ({ city }) => {
   );
 
   useEffect(() => {
-    console.log("city", city);
     if (city) {
       fetchCityCoordinates(city);
     }
   }, [city, fetchCityCoordinates]);
 
   const fetchWeather = (lat, lon) => {
-    // const weatherUrl = `/data/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es`;
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
+    const weatherUrl = `/api/openweathermap/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
 
     axios
       .get(weatherUrl)
