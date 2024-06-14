@@ -29,7 +29,7 @@ const Home = () => {
     <div>
       <div>
         <h1>Bienvenido a Docucloud</h1>
-        <p>¡Aquí puedes hacer documentos y más!</p>
+        <p>¡Aquí puedes hacer documentos y más!...</p>
       </div>
       <div className="card flex justify-content-center">
         {loading ? (
