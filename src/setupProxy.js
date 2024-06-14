@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 module.exports = function (app) {
-  // Proxy para el endpoint de frases del día
+  // Proxy para el endpoint de frases del día a
   app.use(
     "/api/phrase",
     createProxyMiddleware({

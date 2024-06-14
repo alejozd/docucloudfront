@@ -4,7 +4,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
-import emailjs from "emailjs-com"; // Librería para enviar correos electrónicos
+import emailjs from "emailjs-com"; // Librería para enviar correos electrónicos automaticamente
 
 const Contacto = () => {
   const toast = useRef(null);

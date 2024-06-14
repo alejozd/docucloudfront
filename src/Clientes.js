@@ -8,7 +8,7 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import Config from "./Config";
 import ClienteDialog from "./ClienteDialog";
-// import "./Clientes.css";
+// import "./Clientes.css"; // Importa el archivo CSS
 
 const initialClienteState = {
   idcliente: null,
