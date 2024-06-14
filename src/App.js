@@ -1,7 +1,7 @@
 import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./Navbar"; // Importa tu componente Navbar
+import Navbar from "./Navbar"; // Importa tu componente Navbark
 import Home from "./Home"; // Importa tu componente Home
 import Clientes from "./Clientes"; // Importa tu componente Clientes
 import Contacto from "./Contacto"; // Importa tu componente Contacto

@@ -1,6 +1,6 @@
 import React from "react";
 import { Menubar } from "primereact/menubar";
-import { Avatar } from "primereact/avatar";
+import { Avatar } from "primereact/avatar"; //
 
 const Navbar = () => {
   const items = [

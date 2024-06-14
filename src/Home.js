@@ -1,6 +1,6 @@
 // Home.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "axios"; //
 import { Card } from "primereact/card";
 
 const Home = () => {
@@ -29,7 +29,7 @@ const Home = () => {
     <div>
       <div>
         <h1>Bienvenido a Docucloud</h1>
-        <p>¡Aquí puedes hacer documentos y más!</p>
+        <p>¡Aquí puedes hacer }documentos y más!</p>
       </div>
       <div className="card flex justify-content-center">
         {loading ? (

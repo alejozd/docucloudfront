@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
+import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
 
 const ClienteDialog = ({
   visible,
