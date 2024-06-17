@@ -28,7 +28,9 @@ const OpenWeatherMapComponent = ({ city }) => {
 
   const fetchCityCoordinates = useCallback(
     (city) => {
-      const geoUrl = `/api/openweathermap/geo?q=${city}&appid=${apiKey}`;
+      //http://api.openweathermap.org/geo/1.0/direct?q=bogotá&limit=10&appid=c133f55ded28c5ca5b60d1b8fa22b586
+      // const geoUrl = `/api/openweathermap/geo?q=${city}&appid=${apiKey}`;
+      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
 
       setLoading(true);
       setError(null);
@@ -65,7 +67,9 @@ const OpenWeatherMapComponent = ({ city }) => {
   }, [city, fetchCityCoordinates]);
 
   const fetchWeather = (lat, lon) => {
-    const weatherUrl = `/api/openweathermap/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
+    //https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
+    // const weatherUrl = `/api/openweathermap/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=es&units=metric`;
 
     axios
       .get(weatherUrl)
