@@ -93,7 +93,7 @@ const OpenWeatherMapComponent = ({ city }) => {
 
     return (
       <Panel
-        header={`Clima en ${weatherData.name}, ${weatherData.sys.country}`}
+        header={`Clima en ${city}, ${weatherData.name}, ${weatherData.sys.country}`}
       >
         <div className="p-grid p-align-center p-justify-center">
           <img
