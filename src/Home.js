@@ -11,7 +11,8 @@ const Home = () => {
 
   useEffect(() => {
     axios
-      .get("/api/phrase")
+      // .get("/api/phrase")
+      .get("https://frasedeldia.azurewebsites.net/api/phrase")
       .then((response) => {
         console.log("response.data", response.data);
         setPhrase(response.data.phrase);
