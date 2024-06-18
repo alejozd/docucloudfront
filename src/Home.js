@@ -14,13 +14,11 @@ const Home = () => {
       // .get("/api/phrase")
       .get("https://frasedeldia.azurewebsites.net/api/phrase", {
         method: "GET",
-        mode: "no-cors",
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Credentials": "true",
         },
-        withCredentials: true,
-        credentials: "same-origin",
       })
       .then((response) => {
         console.log("response.data", response.data);
