@@ -12,7 +12,16 @@ const Home = () => {
   useEffect(() => {
     axios
       // .get("/api/phrase")
-      .get("https://frasedeldia.azurewebsites.net/api/phrase")
+      .get("https://frasedeldia.azurewebsites.net/api/phrase", {
+        method: "GET",
+        mode: "no-cors",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+        credentials: "same-origin",
+      })
       .then((response) => {
         console.log("response.data", response.data);
         setPhrase(response.data.phrase);
