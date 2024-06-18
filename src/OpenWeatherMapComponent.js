@@ -101,7 +101,7 @@ const OpenWeatherMapComponent = ({ city }) => {
             alt={weatherData.weather[0].description}
             style={{ marginRight: "1em", backgroundColor: "lightgrey" }}
           />
-          <div className="p-col-12 p-md-6 p-text-center">
+          <div className="card p-col-12 p-md-6 p-text-center">
             <p>
               <FontAwesomeIcon icon={faTemperatureHigh} size="1x" />{" "}
               <strong>Temperatura:</strong> {weatherData.main.temp}°C{" "}
