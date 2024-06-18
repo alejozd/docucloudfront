@@ -1,8 +1,7 @@
 {
   "name": "docucloudfront",
   "version": "0.1.0",
-  "private": true,
-  "proxy": "http://localhost:3000",
+  "private": true,  
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
