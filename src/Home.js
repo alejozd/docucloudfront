@@ -9,15 +9,28 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // useEffect(() => {
+  //   axios
+  //     // .get("/api/phrase")
+  //     .get("https://frasedeldia.azurewebsites.net/api/phrase", {
+  //       headers: { "Access-Control-Allow-Origin": "*" },
+  //     })
+  //     .then((response) => {
+  //       console.log("response.data", response.data);
+  //       setPhrase(response.data.phrase);
+  //       setAuthor(response.data.author);
+  //       setLoading(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching the phrase of the day", error);
+  //       setError(error.message);
+  //       setLoading(false);
+  //     });
+  // }, []);
+
   useEffect(() => {
     axios
-      // .get("/api/phrase")
-      .get("https://frasedeldia.azurewebsites.net/api/phrase", {
-        mode: "cors",
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-      })
+      .get("/api/proxy-phrase")
       .then((response) => {
         console.log("response.data", response.data);
         setPhrase(response.data.phrase);
