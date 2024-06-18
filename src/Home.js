@@ -13,11 +13,9 @@ const Home = () => {
     axios
       // .get("/api/phrase")
       .get("https://frasedeldia.azurewebsites.net/api/phrase", {
-        method: "GET",
+        mode: "cors",
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Credentials": "true",
         },
       })
       .then((response) => {
