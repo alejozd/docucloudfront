@@ -99,7 +99,7 @@ const OpenWeatherMapComponent = ({ city }) => {
           <img
             src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`}
             alt={weatherData.weather[0].description}
-            style={{ marginRight: "1em" }}
+            style={{ marginRight: "1em", backgroundColor: "lightgrey" }}
           />
           <div className="p-col-12 p-md-6 p-text-center">
             <p>
@@ -159,7 +159,7 @@ const OpenWeatherMapComponent = ({ city }) => {
   };
 
   return (
-    <div className="p-d-flex p-jc-center p-ai-center p-mt-5">
+    <div className="card p-d-flex p-jc-center p-ai-center p-mt-5">
       <Card
         title="Pronóstico del Tiempo - OpenWeatherMap"
         style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
