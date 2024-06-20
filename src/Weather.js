@@ -52,6 +52,7 @@ const Weather = () => {
               onChange={(e) => {
                 setSelectedProvider(e.value);
                 setCity(""); // Limpiar la ciudad al cambiar de proveedor
+                setSubmittedCity("");
               }}
               placeholder="Selecciona un servicio meteorológico"
               style={{ width: "320px", marginBottom: "1rem" }}
