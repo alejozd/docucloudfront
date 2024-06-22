@@ -38,6 +38,7 @@ const OpenWeatherMapComponent = ({ city }) => {
       axios
         .get(geoUrl)
         .then((response) => {
+          console.log("Respuesta de coordenadas de la ciudad:", response.data);
           console.log(response.data);
           if (response.data && response.data.length > 0) {
             const { lat, lon } = response.data[0];
@@ -74,6 +75,7 @@ const OpenWeatherMapComponent = ({ city }) => {
     axios
       .get(weatherUrl)
       .then((response) => {
+        console.log("Respuesta de datos del clima:", response.data);
         setWeatherData(response.data);
         setLoading(false);
       })
