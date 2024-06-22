@@ -14,6 +14,7 @@ const AccuWeatherComponent = ({ city }) => {
 
   useEffect(() => {
     const fetchCityId = () => {
+      console.log("Fetching city ID...");
       // const citySearchUrl = `/api/locations?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
       const citySearchUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
 
@@ -25,6 +26,7 @@ const AccuWeatherComponent = ({ city }) => {
       axios
         .get(citySearchUrl)
         .then((response) => {
+          console.log("City ID response:", response.data);
           if (response.data && response.data.length > 0) {
             const cityId = response.data[0].Key;
             setPlaceData(response.data[0]);
@@ -51,6 +53,7 @@ const AccuWeatherComponent = ({ city }) => {
   }, [city]);
 
   const fetchWeather = (cityId) => {
+    console.log("Fetching weather data...");
     // const weatherUrl = `/api/currentconditions/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
     const weatherUrl = `https://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
 
@@ -59,6 +62,7 @@ const AccuWeatherComponent = ({ city }) => {
     axios
       .get(weatherUrl)
       .then((response) => {
+        console.log("Weather data response:", response.data);
         setWeatherData(response.data[0]);
         setLoading(false);
       })

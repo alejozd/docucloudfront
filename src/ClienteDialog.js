@@ -31,6 +31,8 @@ const ClienteDialog = ({
     </React.Fragment>
   );
 
+  console.log("Cliente en el dialogo:", cliente);
+
   return (
     <Dialog
       visible={visible}

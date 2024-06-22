@@ -33,6 +33,7 @@ const Productos = () => {
       const response = await axios.get(`${Config.apiUrl}/api/productos`);
       setProductos(response.data);
       setLoading(false);
+      console.log("Productos recuperados:", response.data);
     } catch (error) {
       console.error("Error recuperando productos", error);
       setLoading(false);
@@ -40,6 +41,7 @@ const Productos = () => {
   };
 
   const openNew = () => {
+    console.log("Abriendo dialogo para nuevo producto");
     const newPrecio = producto.idproducto ? producto.precio : 0;
     setProducto({
       ...initialProductoState,
@@ -49,11 +51,13 @@ const Productos = () => {
   };
 
   const hideDialog = () => {
+    console.log("Ocultando dialogo de producto");
     setProductoDialog(false);
     setProducto(initialProductoState);
   };
 
   const hideDeleteProductoDialog = () => {
+    console.log("Ocultando dialogo de eliminación");
     setDeleteProductoDialog(false);
   };
 
@@ -77,6 +81,7 @@ const Productos = () => {
           );
           setLoading(false);
           _productos[index] = response.data;
+          console.log("Producto actualizado:", response.data);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
@@ -89,6 +94,7 @@ const Productos = () => {
             producto
           );
           _productos.push(response.data);
+          console.log("Producto creado:", response.data);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
@@ -110,29 +116,38 @@ const Productos = () => {
   };
 
   const editProducto = (producto) => {
+    console.log("Editando producto:", producto);
     setProducto({ ...producto });
     setProductoDialog(true);
   };
 
   const confirmDeleteProducto = (producto) => {
+    console.log("Confirmar eliminación de producto:", producto);
     setProducto(producto);
     setDeleteProductoDialog(true);
   };
 
   const deleteProducto = async () => {
-    await axios.delete(`${Config.apiUrl}/api/productos/${producto.idproducto}`);
-    let _productos = productos.filter(
-      (val) => val.idproducto !== producto.idproducto
-    );
-    setProductos(_productos);
-    setDeleteProductoDialog(false);
-    setProducto(initialProductoState);
-    toast.current.show({
-      severity: "success",
-      summary: "Realizado",
-      detail: "Producto Eliminado",
-      life: 3000,
-    });
+    try {
+      await axios.delete(
+        `${Config.apiUrl}/api/productos/${producto.idproducto}`
+      );
+      let _productos = productos.filter(
+        (val) => val.idproducto !== producto.idproducto
+      );
+      setProductos(_productos);
+      setDeleteProductoDialog(false);
+      setProducto(initialProductoState);
+      toast.current.show({
+        severity: "success",
+        summary: "Realizado",
+        detail: "Producto Eliminado",
+        life: 3000,
+      });
+      console.log("Producto eliminado");
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    }
   };
 
   const onInputChange = (e, name) => {

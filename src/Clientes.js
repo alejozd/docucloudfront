@@ -41,6 +41,7 @@ const Clientes = () => {
       const response = await axios.get(`${Config.apiUrl}/api/clientes`);
       setClientes(response.data);
       setLoading(false);
+      console.log("Clientes recuperados:", response.data);
     } catch (error) {
       console.error("Error recuperando clientes", error);
       setLoading(false);
@@ -51,15 +52,18 @@ const Clientes = () => {
     setCliente(initialClienteState);
     setSubmitted(false);
     setClienteDialog(true);
+    console.log("Nuevo cliente abierto");
   };
 
   const hideDialog = () => {
     setSubmitted(false);
     setClienteDialog(false);
+    console.log("Dialogo de cliente oculto");
   };
 
   const hideDeleteClienteDialog = () => {
     setDeleteClienteDialog(false);
+    console.log("Dialogo de eliminación de cliente oculto");
   };
 
   const saveCliente = async () => {
@@ -85,6 +89,7 @@ const Clientes = () => {
             detail: "Cliente Actualizado",
             life: 3000,
           });
+          console.log("Cliente actualizado:", response.data);
         } else {
           console.log("cliente: ", cliente);
           const response = await axios.post(
@@ -98,6 +103,7 @@ const Clientes = () => {
             detail: "Cliente Creado",
             life: 3000,
           });
+          console.log("Cliente creado:", response.data);
         }
 
         // setClientes(_clientes);
@@ -115,27 +121,34 @@ const Clientes = () => {
   const editCliente = (cliente) => {
     setCliente({ ...cliente });
     setClienteDialog(true);
+    console.log("Editando cliente:", cliente);
   };
 
   const confirmDeleteCliente = (cliente) => {
     setCliente(cliente);
     setDeleteClienteDialog(true);
+    console.log("Confirmación de eliminación de cliente:", cliente);
   };
 
   const deleteCliente = async () => {
-    await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
-    let _clientes = clientes.filter(
-      (val) => val.idcliente !== cliente.idcliente
-    );
-    setClientes(_clientes);
-    setDeleteClienteDialog(false);
-    setCliente(initialClienteState);
-    toast.current.show({
-      severity: "success",
-      summary: "Realizado",
-      detail: "Cliente Eliminado",
-      life: 3000,
-    });
+    try {
+      await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
+      let _clientes = clientes.filter(
+        (val) => val.idcliente !== cliente.idcliente
+      );
+      setClientes(_clientes);
+      setDeleteClienteDialog(false);
+      setCliente(initialClienteState);
+      toast.current.show({
+        severity: "success",
+        summary: "Realizado",
+        detail: "Cliente Eliminado",
+        life: 3000,
+      });
+      console.log("Cliente eliminado:", cliente);
+    } catch (error) {
+      console.error("Error eliminando cliente:", error);
+    }
   };
 
   const onInputChange = (e, name) => {
@@ -143,6 +156,7 @@ const Clientes = () => {
     let _cliente = { ...cliente };
     _cliente[`${name}`] = val;
     setCliente(_cliente);
+    console.log("Cambio en el input:", name, val);
   };
 
   const leftToolbarTemplate = () => {
