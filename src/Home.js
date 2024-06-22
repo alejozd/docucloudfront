@@ -29,19 +29,20 @@ const Home = () => {
   // }, []);
 
   useEffect(() => {
-    axios
-      .get("/api/proxy-phrase")
-      .then((response) => {
-        console.log("response.data", response.data);
+    const fetchPhrase = async () => {
+      try {
+        const response = await axios.get("/api/proxy-phrase");
         setPhrase(response.data.phrase);
         setAuthor(response.data.author);
-        setLoading(false);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching the phrase of the day", error);
         setError(error.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchPhrase();
   }, []);
 
   return (
