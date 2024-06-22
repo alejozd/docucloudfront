@@ -29,23 +29,11 @@ const Home = () => {
   // }, []);
 
   useEffect(() => {
-    // const fetchPhrase = async () => {
-    //   try {
-    //     const response = await axios.get("/api/proxy-phrase");
-    //     setPhrase(response.data.phrase);
-    //     setAuthor(response.data.author);
-    //   } catch (error) {
-    //     console.error("Error fetching the phrase of the day", error);
-    //     setError(error.message);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-
     const fetchPhrase = async () => {
       try {
-        setPhrase("Esta es una prueba...");
-        setAuthor("Prueba");
+        const response = await axios.get("/api/proxy-phrase");
+        setPhrase(response.data.phrase);
+        setAuthor(response.data.author);
       } catch (error) {
         console.error("Error fetching the phrase of the day", error);
         setError(error.message);
@@ -53,6 +41,18 @@ const Home = () => {
         setLoading(false);
       }
     };
+
+    // const fetchPhrase = async () => {
+    //   try {
+    //     setPhrase("Esta es una prueba...");
+    //     setAuthor("Prueba");
+    //   } catch (error) {
+    //     console.error("Error fetching the phrase of the day", error);
+    //     setError(error.message);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
     fetchPhrase();
   }, []);
