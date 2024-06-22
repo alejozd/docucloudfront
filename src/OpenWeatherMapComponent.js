@@ -30,7 +30,7 @@ const OpenWeatherMapComponent = ({ city }) => {
     (city) => {
       //http://api.openweathermap.org/geo/1.0/direct?q=bogotá&limit=10&appid=c133f55ded28c5ca5b60d1b8fa22b586
       // const geoUrl = `/api/openweathermap/geo?q=${city}&appid=${apiKey}`;
-      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
+      const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`;
 
       setLoading(true);
       setError(null);
@@ -97,7 +97,7 @@ const OpenWeatherMapComponent = ({ city }) => {
       >
         <div className="p-grid p-align-center p-justify-center">
           <img
-            src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`}
+            src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`}
             alt={weatherData.weather[0].description}
             style={{ marginRight: "1em", backgroundColor: "lightgrey" }}
           />

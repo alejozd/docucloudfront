@@ -15,7 +15,7 @@ const AccuWeatherComponent = ({ city }) => {
   useEffect(() => {
     const fetchCityId = () => {
       // const citySearchUrl = `/api/locations?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
-      const citySearchUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
+      const citySearchUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
 
       //http://dataservice.accuweather.com/locations/v1/cities/search
 
@@ -52,7 +52,7 @@ const AccuWeatherComponent = ({ city }) => {
 
   const fetchWeather = (cityId) => {
     // const weatherUrl = `/api/currentconditions/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
-    const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
+    const weatherUrl = `https://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
 
     //http://dataservice.accuweather.com/forecasts/v1/daily/1day/107487
 
