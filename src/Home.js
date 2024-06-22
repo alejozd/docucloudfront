@@ -43,8 +43,15 @@ const Home = () => {
     // };
 
     const fetchPhrase = async () => {
-      setPhrase("Esta es una prueba...");
-      setAuthor("Prueba");
+      try {
+        setPhrase("Esta es una prueba...");
+        setAuthor("Prueba");
+      } catch (error) {
+        console.error("Error fetching the phrase of the day", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPhrase();
