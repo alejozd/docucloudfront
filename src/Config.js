@@ -1,6 +1,6 @@
 // Config.js
 const Config = {
-  apiUrl: "http://zetamini.ddns.net", // Url Prod
+  apiUrl: "https://zetamini.ddns.net", // Url Prod
 };
 
 export default Config;
