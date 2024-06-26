@@ -34,12 +34,6 @@ const Navbar = () => {
       url: "/weather",
       id: "weather",
     },
-    {
-      label: "Lista de Clientes",
-      icon: "pi pi-th-large",
-      url: "/clientlist",
-      id: "clientlist",
-    },
   ];
 
   const start = (
