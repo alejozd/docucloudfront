@@ -159,6 +159,14 @@ const Clientes = () => {
     console.log("Cambio en el input:", name, val);
   };
 
+  const handleWhatsAppClick = (phone) => {
+    window.open(`https://wa.me/${phone}`, "_blank");
+  };
+
+  const handleEmailClick = (email) => {
+    window.open(`mailto:${email}`, "_blank");
+  };
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -194,6 +202,20 @@ const Clientes = () => {
           text
           severity="danger"
           onClick={() => confirmDeleteCliente(rowData)}
+        />
+        <Button
+          icon="pi pi-whatsapp"
+          severity="success"
+          rounded
+          text
+          onClick={() => handleWhatsAppClick(rowData.telefono)}
+        />
+        <Button
+          icon="pi pi-envelope"
+          severity="info"
+          rounded
+          text
+          onClick={() => handleEmailClick(rowData.email)}
         />
       </React.Fragment>
     );
