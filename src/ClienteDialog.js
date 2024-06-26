@@ -2,6 +2,7 @@ import React from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
+import { InputMask } from "primereact/inputmask";
 
 const ClienteDialog = ({
   visible,
@@ -31,7 +32,7 @@ const ClienteDialog = ({
     </React.Fragment>
   );
 
-  console.log("Cliente en el dialogo:", cliente);
+  const telefonoInicial = cliente.telefono ? cliente.telefono : "(57) ";
 
   return (
     <Dialog
@@ -88,9 +89,19 @@ const ClienteDialog = ({
         </div>
         <div className="field">
           <label htmlFor="telefono">Teléfono</label>
-          <InputText
+          {/* <InputText
             id="telefono"
             value={cliente.telefono}
+            onChange={(e) => onInputChange(e, "telefono")}
+            required
+            className={submitted && !cliente.telefono ? "p-invalid" : ""}
+          /> */}
+          <InputMask
+            id="telefono"
+            mask="(99) 999-9999999"
+            placeholder="(57) 999-9999999"
+            // value={cliente.telefono}
+            value={telefonoInicial}
             onChange={(e) => onInputChange(e, "telefono")}
             required
             className={submitted && !cliente.telefono ? "p-invalid" : ""}
