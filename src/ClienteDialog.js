@@ -2,7 +2,11 @@ import React from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
-import { InputMask } from "primereact/inputmask";
+// import { InputMask } from "primereact/inputmask";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css"; // Importa los estilos de la librería
+import "./ClienteDialog.css";
+import es from "react-phone-number-input/locale/es";
 
 const ClienteDialog = ({
   visible,
@@ -11,6 +15,7 @@ const ClienteDialog = ({
   hideDialog,
   saveCliente,
   onInputChange,
+  onPhoneChange,
   loading,
 }) => {
   const clienteDialogFooter = (
@@ -32,7 +37,16 @@ const ClienteDialog = ({
     </React.Fragment>
   );
 
-  const telefonoInicial = cliente.telefono ? cliente.telefono : "(57) ";
+  // const telefonoInicial = cliente.telefono ? cliente.telefono : "(57) ";
+  // const handlePhoneChange = (value) => {
+  //   const event = {
+  //     target: {
+  //       name: "telefono",
+  //       value,
+  //     },
+  //   };
+  //   onInputChange(event, "telefono");
+  // };
 
   return (
     <Dialog
@@ -89,14 +103,7 @@ const ClienteDialog = ({
         </div>
         <div className="field">
           <label htmlFor="telefono">Teléfono</label>
-          {/* <InputText
-            id="telefono"
-            value={cliente.telefono}
-            onChange={(e) => onInputChange(e, "telefono")}
-            required
-            className={submitted && !cliente.telefono ? "p-invalid" : ""}
-          /> */}
-          <InputMask
+          {/* <InputMask
             id="telefono"
             mask="(99) 999-9999999"
             placeholder="(57) 999-9999999"
@@ -105,6 +112,15 @@ const ClienteDialog = ({
             onChange={(e) => onInputChange(e, "telefono")}
             required
             className={submitted && !cliente.telefono ? "p-invalid" : ""}
+          /> */}
+          <PhoneInput
+            id="telefono"
+            international
+            defaultCountry="CO"
+            labels={es} //
+            value={cliente.telefono}
+            onChange={(value) => onPhoneChange(value, "telefono")}
+            className="phone-input"
           />
           {submitted && !cliente.telefono && (
             <small className="p-error">Teléfono is required.</small>
