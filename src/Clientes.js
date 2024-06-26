@@ -167,6 +167,13 @@ const Clientes = () => {
     window.open(`mailto:${email}`, "_blank");
   };
 
+  const onPhoneChange = (value, name) => {
+    let _cliente = { ...cliente };
+    _cliente[`${name}`] = value;
+    setCliente(_cliente);
+    console.log("Cambio en el teléfono:", name, value);
+  };
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -288,6 +295,7 @@ const Clientes = () => {
         hideDialog={hideDialog}
         saveCliente={saveCliente}
         onInputChange={onInputChange}
+        onPhoneChange={onPhoneChange}
         loading={loading}
       />
 

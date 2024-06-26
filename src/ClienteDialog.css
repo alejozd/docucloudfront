@@ -1,0 +1,22 @@
+/* ClienteDialog.css */
+
+.phone-input {
+    width: 100%;
+    height: var(--input-height); /* Usa la misma altura que tus otros inputs de PrimeReact */
+    box-sizing: border-box;
+  }
+  
+  .phone-input .PhoneInputInput {
+    width: 100%;
+    height: 2.5rem; /* Ajusta según sea necesario */
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    outline: none;
+  }
+  
+  .phone-input .PhoneInputCountrySelect {
+    height: 2.5rem; /* Ajusta según sea necesario */
+  }
+  
