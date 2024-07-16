@@ -8,6 +8,7 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import Config from "./Config";
 import ClienteDialog from "./ClienteDialog";
+import ComprobantePDF from "./ComprobantePDF";
 // import "./Clientes.css"; // Importa el archivo CSS
 
 const initialClienteState = {
@@ -33,6 +34,8 @@ const Clientes = () => {
   const [selectedClientes, setSelectedClientes] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showComprobante, setShowComprobante] = useState(null);
+  const [autoGeneratePDF, setAutoGeneratePDF] = useState(false); // Estado para auto-generar PDF
   const toast = useRef(null);
 
   const fetchClientes = async () => {
@@ -174,6 +177,64 @@ const Clientes = () => {
     console.log("Cambio en el teléfono:", name, value);
   };
 
+  //Para mostrar el dialogo del comprobante
+  const handleShowComprobante = (cliente, autoGenerate = false) => {
+    // console.log("quotation:", quotation);
+    // Datos ficticios de productos
+    const productosFicticios = [
+      {
+        nombre: "Producto 1",
+        referencia: "REF001",
+        precio: 10.0,
+        cantidad: 2,
+        total: 20.0,
+      },
+      {
+        nombre: "Producto 2",
+        referencia: "REF002",
+        precio: 15.0,
+        cantidad: 1,
+        total: 15.0,
+      },
+      {
+        nombre: "Producto 3",
+        referencia: "REF003",
+        precio: 5.0,
+        cantidad: 5,
+        total: 25.0,
+      },
+    ];
+
+    //Se construye el objeto para enviarlo al dialogo
+    const datosCli = {
+      numerocotizacion: cliente.idcliente || "",
+      fecha: cliente.fechacotizacion || "",
+      cliente: {
+        nombre: cliente.nombres || "",
+        identidad: cliente.identidad || "",
+        direccion: cliente.direccion || "",
+        telmovil: cliente.telefono || "",
+        email: cliente.email || "",
+        notas: cliente.notas || "Prueba de notas",
+      },
+      productos: productosFicticios.map((producto) => ({
+        nombre: producto.nombre,
+        referencia: producto.referencia,
+        precio: producto.precio,
+        cantidad: producto.cantidad,
+        total: producto.total,
+      })),
+      total: cliente.idcliente,
+    };
+    console.log("datosCli:", datosCli);
+    setAutoGeneratePDF(autoGenerate);
+    setShowComprobante(datosCli);
+  };
+
+  const onHideDialog = () => {
+    setShowComprobante(null);
+  };
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -223,6 +284,20 @@ const Clientes = () => {
           rounded
           text
           onClick={() => handleEmailClick(rowData.email)}
+        />
+        <Button
+          icon="pi pi-external-link"
+          rounded
+          text
+          severity="info"
+          onClick={() => handleShowComprobante(rowData)}
+        />
+        <Button
+          icon="pi pi-file-pdf"
+          rounded
+          text
+          className="p-button-danger"
+          onClick={() => handleShowComprobante(rowData, true)}
         />
       </React.Fragment>
     );
@@ -318,6 +393,20 @@ const Clientes = () => {
             </span>
           )}
         </div>
+      </Dialog>
+      {/* Diálogo para mostrar el comprobante */}
+      <Dialog
+        visible={!!showComprobante}
+        onHide={onHideDialog}
+        maximizable
+        style={{ width: "80vw", minHeight: "60vh" }}
+      >
+        {showComprobante && (
+          <ComprobantePDF
+            datos={showComprobante}
+            autoGenerate={autoGeneratePDF}
+          />
+        )}
       </Dialog>
     </div>
   );
