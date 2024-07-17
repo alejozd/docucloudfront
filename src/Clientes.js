@@ -231,10 +231,6 @@ const Clientes = () => {
     setShowComprobante(datosCli);
   };
 
-  const onHideDialog = () => {
-    setShowComprobante(null);
-  };
-
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -396,8 +392,8 @@ const Clientes = () => {
       </Dialog>
       {/* Diálogo para mostrar el comprobante */}
       <Dialog
-        visible={!!showComprobante}
-        onHide={onHideDialog}
+        visible={!!showComprobante && !autoGeneratePDF}
+        onHide={() => setShowComprobante(null)}
         maximizable
         style={{ width: "80vw", minHeight: "60vh" }}
       >
@@ -408,6 +404,14 @@ const Clientes = () => {
           />
         )}
       </Dialog>
+
+      {/* Componente oculto para generar PDF automáticamente */}
+      {autoGeneratePDF && (
+        <ComprobantePDF
+          datos={showComprobante}
+          autoGenerate={autoGeneratePDF}
+        />
+      )}
     </div>
   );
 };

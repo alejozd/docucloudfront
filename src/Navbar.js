@@ -34,6 +34,12 @@ const Navbar = () => {
       url: "/weather",
       id: "weather",
     },
+    {
+      label: "Prueba",
+      icon: "pi pi-external-link",
+      url: "/prueba",
+      id: "prueba",
+    },
   ];
 
   const start = (
