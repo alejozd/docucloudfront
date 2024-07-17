@@ -12,11 +12,15 @@ import ReactToPrint from "react-to-print";
 
 const ComprobantePDF = ({ datos, autoGenerate }) => {
   const printRef = useRef();
-  console.log("ComprobantePDF", datos);
+  const hasGeneratedPDF = useRef(false); // Nueva referencia para controlar la generación del PDF
+
+  console.log("ComprobantePDF-datos:", datos);
+  console.log("ComprobantePDF-autoGenerate:", autoGenerate);
 
   useEffect(() => {
-    if (autoGenerate) {
+    if (autoGenerate && !hasGeneratedPDF.current) {
       generatePDF();
+      hasGeneratedPDF.current = true; // Marcar como generado
     }
   }, [autoGenerate]);
 
