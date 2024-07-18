@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -227,9 +227,24 @@ const Clientes = () => {
       total: cliente.idcliente,
     };
     console.log("datosCli:", datosCli);
-    setAutoGeneratePDF(autoGenerate);
-    setShowComprobante(datosCli);
+
+    // Restablecer el estado antes de actualizarlo
+    setAutoGeneratePDF(false);
+    setShowComprobante(null);
+
+    // Usar un timeout para asegurar que el estado se restablezca antes de actualizarlo
+    setTimeout(() => {
+      setAutoGeneratePDF(autoGenerate);
+      setShowComprobante(datosCli);
+    }, 0);
   };
+
+  useEffect(() => {
+    if (autoGeneratePDF && showComprobante) {
+      // Aquí puedes manejar la lógica para generar el PDF automáticamente
+      // Por ejemplo, llamar a una función en ComprobantePDF para generar el PDF
+    }
+  }, [autoGeneratePDF, showComprobante]);
 
   const leftToolbarTemplate = () => {
     return (
