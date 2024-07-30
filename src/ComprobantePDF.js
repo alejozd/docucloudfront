@@ -10,7 +10,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ReactToPrint from "react-to-print";
 
-const ComprobantePDF = ({ datos, autoGenerate }) => {
+const ComprobantePDF = ({ datos, autoGenerate, nombreArchivo }) => {
   const printRef = useRef();
   const hasGeneratedPDF = useRef(false); // Nueva referencia para controlar la generación del PDF
   // console.log("ComprobantePDF-datos:", datos);
@@ -41,7 +41,11 @@ const ComprobantePDF = ({ datos, autoGenerate }) => {
       const xPos = (pdfWidth - imgWidth) / 2;
       const yPos = 20; //(pdfHeight - imgHeight) / 2;
       pdf.addImage(imgData, "PNG", xPos, yPos, imgWidth, imgHeight);
-      pdf.save("comprobante.pdf");
+      if (nombreArchivo) {
+        pdf.save(`${nombreArchivo}.pdf`);
+      } else {
+        pdf.save("comprobante.pdf");
+      }
     });
   };
 

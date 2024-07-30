@@ -36,6 +36,7 @@ const Clientes = () => {
   const [loading, setLoading] = useState(false);
   const [showComprobante, setShowComprobante] = useState(null);
   const [autoGeneratePDF, setAutoGeneratePDF] = useState(false); // Estado para auto-generar PDF
+  const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
   const toast = useRef(null);
 
   const fetchClientes = async () => {
@@ -231,7 +232,7 @@ const Clientes = () => {
     // Restablecer el estado antes de actualizarlo
     setAutoGeneratePDF(false);
     setShowComprobante(null);
-
+    setNombreArchivo(cliente.nombres + "-" + cliente.identidad);
     // Usar un timeout para asegurar que el estado se restablezca antes de actualizarlo
     setTimeout(() => {
       setAutoGeneratePDF(autoGenerate);
@@ -425,6 +426,7 @@ const Clientes = () => {
         <ComprobantePDF
           datos={showComprobante}
           autoGenerate={autoGeneratePDF}
+          nombreArchivo={nombreArchivo}
         />
       )}
     </div>
