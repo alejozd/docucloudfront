@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 import emailjs from "emailjs-com"; // Librería para enviar correos electrónicos automaticamente
 
-const Contacto = () => {
+const Contactar = () => {
   const toast = useRef(null);
 
   const showSuccessMessage = () => {
@@ -153,4 +153,4 @@ const Contacto = () => {
   );
 };
 
-export default Contacto;
+export default Contactar;
