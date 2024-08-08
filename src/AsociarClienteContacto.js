@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 
-const Prueba = () => {
+const AsociarClienteContacto = () => {
   const toast = useRef(null);
   const hasShownToast = useRef(false);
 
@@ -24,4 +24,4 @@ const Prueba = () => {
   );
 };
 
-export default Prueba;
+export default AsociarClienteContacto;
