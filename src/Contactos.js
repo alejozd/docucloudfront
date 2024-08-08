@@ -7,25 +7,25 @@ import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import Config from "./Config";
-import ClienteDialog from "./ClienteDialog";
+import ContactoDialog from "./ContactoDialog";
 import ComprobantePDF from "./ComprobantePDF";
 // import "./Clientes.css"; // Importa el archivo CSS
 
-const initialClienteState = {
-  idcliente: null,
-  nombres: "",
-  identidad: "",
-  direccion: "",
-  telefono: "",
-  email: "",
+const initialContactoState = {
+  idcontacto: null,
+  nombresca: "",
+  identidadca: "",
+  direccionca: "",
+  telefonoca: "",
+  emailca: "",
 };
 
-const Clientes = () => {
-  const [clientes, setClientes] = useState([]);
-  const [clienteDialog, setClienteDialog] = useState(false);
-  const [deleteClienteDialog, setDeleteClienteDialog] = useState(false);
-  const [cliente, setCliente] = useState({});
-  const [selectedClientes, setSelectedClientes] = useState([]);
+const Contactos = () => {
+  const [contactos, setContactos] = useState([]);
+  const [contactoDialog, setContactoDialog] = useState(false);
+  const [deleteContactoDialog, setDeleteContactoDialog] = useState(false);
+  const [contacto, setContacto] = useState({});
+  const [selectedContactos, setSelectedContactos] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showComprobante, setShowComprobante] = useState(null);
@@ -33,122 +33,124 @@ const Clientes = () => {
   const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
   const toast = useRef(null);
 
-  const fetchClientes = async () => {
+  const fetchContactos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${Config.apiUrl}/api/clientes`);
-      setClientes(response.data);
+      const response = await axios.get(`${Config.apiUrl}/api/contactos`);
+      setContactos(response.data);
       setLoading(false);
-      console.log("Clientes recuperados:", response.data);
+      console.log("Contactos recuperados:", response.data);
     } catch (error) {
-      console.error("Error recuperando clientes", error);
+      console.error("Error recuperando contactos", error);
       setLoading(false);
     }
   };
 
   const openNew = () => {
-    setCliente(initialClienteState);
+    setContacto(initialContactoState);
     setSubmitted(false);
-    setClienteDialog(true);
+    setContactoDialog(true);
   };
 
   const hideDialog = () => {
     setSubmitted(false);
-    setClienteDialog(false);
+    setContactoDialog(false);
   };
 
-  const hideDeleteClienteDialog = () => {
-    setDeleteClienteDialog(false);
+  const hideDeleteContactoDialog = () => {
+    setDeleteContactoDialog(false);
   };
 
-  const saveCliente = async () => {
+  const saveContacto = async () => {
     setSubmitted(true);
 
-    if (cliente.nombres && cliente.email) {
-      let _clientes = [...clientes];
+    if (contacto.nombresca && contacto.emailca) {
+      let _contactos = [...contactos];
       try {
-        if (cliente.idcliente) {
+        if (contacto.idcontacto) {
           setLoading(true);
           const response = await axios.put(
-            `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
-            cliente
+            `${Config.apiUrl}/api/contactos/${contacto.idcontacto}`,
+            contacto
           );
-          const index = _clientes.findIndex(
-            (c) => c.idcliente === cliente.idcliente
+          const index = _contactos.findIndex(
+            (c) => c.idcontacto === contacto.idcontacto
           );
           setLoading(false);
-          _clientes[index] = response.data;
+          _contactos[index] = response.data;
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Cliente Actualizado",
+            detail: "Contacto Actualizado",
             life: 3000,
           });
-          console.log("Cliente actualizado:", response.data);
+          console.log("Contacto actualizado:", response.data);
         } else {
-          console.log("cliente: ", cliente);
+          console.log("contacto: ", contacto);
           const response = await axios.post(
-            `${Config.apiUrl}/api/clientes`,
-            cliente
+            `${Config.apiUrl}/api/contactos`,
+            contacto
           );
-          _clientes.push(response.data);
+          _contactos.push(response.data);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Cliente Creado",
+            detail: "Contacto Creado",
             life: 3000,
           });
-          console.log("Cliente creado:", response.data);
+          console.log("Contacto creado:", response.data);
         }
 
-        // setClientes(_clientes);
-        setClienteDialog(false);
-        setCliente(initialClienteState);
+        // setContactos(_contactos);
+        setContactoDialog(false);
+        setContacto(initialContactoState);
         setLoading(false);
-        fetchClientes();
+        fetchContactos();
       } catch (error) {
-        console.error("Error guardando cliente:", error.response.data.error);
+        console.error("Error guardando contacto:", error.response.data.error);
         setLoading(false);
       }
     }
   };
 
-  const editCliente = (cliente) => {
-    setCliente({ ...cliente });
-    setClienteDialog(true);
+  const editContacto = (contacto) => {
+    setContacto({ ...contacto });
+    setContactoDialog(true);
   };
 
-  const confirmDeleteCliente = (cliente) => {
-    setCliente(cliente);
-    setDeleteClienteDialog(true);
+  const confirmDeleteContacto = (contacto) => {
+    setContacto(contacto);
+    setDeleteContactoDialog(true);
   };
 
-  const deleteCliente = async () => {
+  const deleteContacto = async () => {
     try {
-      await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
-      let _clientes = clientes.filter(
-        (val) => val.idcliente !== cliente.idcliente
+      await axios.delete(
+        `${Config.apiUrl}/api/contacto/${contacto.idcontacto}`
       );
-      setClientes(_clientes);
-      setDeleteClienteDialog(false);
-      setCliente(initialClienteState);
+      let _contactos = contacto.filter(
+        (val) => val.idcontacto !== contacto.idcontacto
+      );
+      setContactos(_contactos);
+      setDeleteContactoDialog(false);
+      setContacto(initialContactoState);
       toast.current.show({
         severity: "success",
         summary: "Realizado",
-        detail: "Cliente Eliminado",
+        detail: "Contacto Eliminado",
         life: 3000,
       });
-      console.log("Cliente eliminado:", cliente);
+      console.log("Contacto eliminado:", contacto);
     } catch (error) {
-      console.error("Error eliminando cliente:", error);
+      console.error("Error eliminando contacto:", error);
     }
   };
 
   const onInputChange = (e, name) => {
     const val = (e.target && e.target.value) || "";
-    let _cliente = { ...cliente };
-    _cliente[`${name}`] = val;
-    setCliente(_cliente);
+    let _contacto = { ...contacto };
+    _contacto[`${name}`] = val;
+    setContacto(_contacto);
   };
 
   const handleWhatsAppClick = (phone) => {
@@ -160,13 +162,13 @@ const Clientes = () => {
   };
 
   const onPhoneChange = (value, name) => {
-    let _cliente = { ...cliente };
-    _cliente[`${name}`] = value;
-    setCliente(_cliente);
+    let _contacto = { ...contacto };
+    _contacto[`${name}`] = value;
+    setContacto(_contacto);
   };
 
   //Para mostrar el dialogo del comprobante
-  const handleShowComprobante = (cliente, autoGenerate = false) => {
+  const handleShowComprobante = (contacto, autoGenerate = false) => {
     // console.log("quotation:", quotation);
     // Datos ficticios de productos
     const productosFicticios = [
@@ -194,16 +196,16 @@ const Clientes = () => {
     ];
 
     //Se construye el objeto para enviarlo al dialogo
-    const datosCli = {
-      numerocotizacion: cliente.idcliente || "",
-      fecha: cliente.fechacotizacion || "",
-      cliente: {
-        nombre: cliente.nombres || "",
-        identidad: cliente.identidad || "",
-        direccion: cliente.direccion || "",
-        telmovil: cliente.telefono || "",
-        email: cliente.email || "",
-        notas: cliente.notas || "Prueba de notas",
+    const datosContacto = {
+      numerocotizacion: contacto.idcontacto || "",
+      fecha: contacto.fechacotizacion || "",
+      contacto: {
+        nombre: contacto.nombresca || "",
+        identidad: contacto.identidadca || "",
+        direccion: contacto.direccionca || "",
+        telmovil: contacto.telefonoca || "",
+        email: contacto.emailca || "",
+        notas: contacto.notas || "Prueba de notas",
       },
       productos: productosFicticios.map((producto) => ({
         nombre: producto.nombre,
@@ -212,18 +214,18 @@ const Clientes = () => {
         cantidad: producto.cantidad,
         total: producto.total,
       })),
-      total: cliente.idcliente,
+      total: contacto.idcontacto,
     };
-    console.log("datosCli:", datosCli);
+    console.log("datosCli:", datosContacto);
 
     // Restablecer el estado antes de actualizarlo
     setAutoGeneratePDF(false);
     setShowComprobante(null);
-    setNombreArchivo(cliente.nombres + "-" + cliente.identidad);
+    setNombreArchivo(contacto.nombresca + "-" + contacto.identidadca);
     // Usar un timeout para asegurar que el estado se restablezca antes de actualizarlo
     setTimeout(() => {
       setAutoGeneratePDF(autoGenerate);
-      setShowComprobante(datosCli);
+      setShowComprobante(datosContacto);
     }, 0);
   };
 
@@ -247,7 +249,7 @@ const Clientes = () => {
           label="Mostrar"
           icon="pi pi-refresh"
           className="p-button-help"
-          onClick={fetchClientes}
+          onClick={fetchContactos}
           loading={loading}
         />
       </React.Fragment>
@@ -261,28 +263,28 @@ const Clientes = () => {
           icon="pi pi-pencil"
           rounded
           text
-          onClick={() => editCliente(rowData)}
+          onClick={() => editContacto(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
           text
           severity="danger"
-          onClick={() => confirmDeleteCliente(rowData)}
+          onClick={() => confirmDeleteContacto(rowData)}
         />
         <Button
           icon="pi pi-whatsapp"
           severity="success"
           rounded
           text
-          onClick={() => handleWhatsAppClick(rowData.telefono)}
+          onClick={() => handleWhatsAppClick(rowData.telefonoca)}
         />
         <Button
           icon="pi pi-envelope"
           severity="info"
           rounded
           text
-          onClick={() => handleEmailClick(rowData.email)}
+          onClick={() => handleEmailClick(rowData.emailca)}
         />
         <Button
           icon="pi pi-external-link"
@@ -302,36 +304,36 @@ const Clientes = () => {
     );
   };
 
-  const deleteClienteDialogFooter = (
+  const deleteContactoDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
         icon="pi pi-times"
         className="p-button-text"
-        onClick={hideDeleteClienteDialog}
+        onClick={hideDeleteContactoDialog}
       />
       <Button
         label="Si"
         icon="pi pi-check"
         className="p-button-text"
-        onClick={deleteCliente}
+        onClick={deleteContacto}
       />
     </React.Fragment>
   );
 
   return (
     <div className="flex-column">
-      <h1>Clientes</h1>
+      <h1>Contactos</h1>
       <Toast ref={toast} />
       <div className="card">
         <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
       </div>
       <div className="card">
         <DataTable
-          value={clientes}
-          selection={selectedClientes}
-          onSelectionChange={(e) => setSelectedClientes(e.value)}
-          dataKey="idcliente"
+          value={contactos}
+          selection={selectedContactos}
+          onSelectionChange={(e) => setSelectedContactos(e.value)}
+          dataKey="idcontacto"
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
@@ -340,7 +342,7 @@ const Clientes = () => {
           loading={loading}
           emptyMessage="No hay registros"
         >
-          <Column field="idcliente" header="ID" hidden />
+          <Column field="idcontacto" header="ID" hidden />
           <Column
             field="nombres"
             header="Nombre"
@@ -348,41 +350,41 @@ const Clientes = () => {
             alignFrozen="left"
             sortable
           />
-          <Column field="identidad" header="Identidad" sortable />
-          <Column field="direccion" header="Dirección" sortable />
-          <Column field="telefono" header="Teléfono" sortable />
-          <Column field="email" header="Email" sortable />
+          <Column field="identidadca" header="Identidad" sortable />
+          <Column field="direccionca" header="Dirección" sortable />
+          <Column field="telefonoca" header="Teléfono" sortable />
+          <Column field="emailca" header="Email" sortable />
           <Column body={actionBodyTemplate} frozen alignFrozen="right" />
         </DataTable>
       </div>
 
-      <ClienteDialog
-        visible={clienteDialog}
-        cliente={cliente}
+      <ContactoDialog
+        visible={contactoDialog}
+        contacto={contacto}
         submitted={submitted}
         hideDialog={hideDialog}
-        saveCliente={saveCliente}
+        saveContacto={saveContacto}
         onInputChange={onInputChange}
         onPhoneChange={onPhoneChange}
         loading={loading}
       />
 
       <Dialog
-        visible={deleteClienteDialog}
+        visible={deleteContactoDialog}
         style={{ width: "450px" }}
         header="Confirm"
         modal
-        footer={deleteClienteDialogFooter}
-        onHide={hideDeleteClienteDialog}
+        footer={deleteContactoDialogFooter}
+        onHide={hideDeleteContactoDialog}
       >
         <div className="confirmation-content">
           <i
             className="pi pi-exclamation-triangle mr-3"
             style={{ fontSize: "2rem" }}
           />
-          {cliente && (
+          {contacto && (
             <span>
-              Esta seguro que desea eliminar <b>{cliente.nombres}</b>?
+              Esta seguro que desea eliminar <b>{contacto.nombresca}</b>?
             </span>
           )}
         </div>
@@ -414,4 +416,4 @@ const Clientes = () => {
   );
 };
 
-export default Clientes;
+export default Contactos;

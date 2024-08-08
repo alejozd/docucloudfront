@@ -24,10 +24,10 @@ const Navbar = () => {
       id: "productos",
     },
     {
-      label: "Contacto",
+      label: "Contactar",
       icon: "pi pi-envelope",
-      url: "/contacto",
-      id: "contacto",
+      url: "/contactar",
+      id: "contactar",
     },
     {
       label: "Weather",
@@ -42,6 +42,8 @@ const Navbar = () => {
         {
           label: "Contactos",
           icon: "pi pi-users",
+          url: "/contactos",
+          id: "contactos",
         },
         {
           label: "Cliente-Contacto",
