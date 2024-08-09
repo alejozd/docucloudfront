@@ -161,6 +161,8 @@ const AsociarClienteContacto = () => {
           source={contactos}
           target={contactosAsociados}
           itemTemplate={(item) => <span>{item.nombresca}</span>}
+          filter
+          filterBy="nombresca"
           sourceHeader="Contactos Disponibles"
           targetHeader="Contactos Asociados"
           sourceStyle={{ height: "200px" }}
@@ -169,6 +171,16 @@ const AsociarClienteContacto = () => {
           onMoveToSource={onMoveToSource}
           showSourceControls={false}
           showTargetControls={false}
+          sourceFilterPlaceholder="Buscar por nombre"
+          targetFilterPlaceholder="Buscar por nombre"
+          pt={{
+            moveAllToTargetButton: {
+              root: { className: "hidden" },
+            },
+            moveAllToSourceButton: {
+              root: { className: "hidden" },
+            },
+          }}
         />
       </div>
 
