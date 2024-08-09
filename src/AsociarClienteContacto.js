@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { PickList } from "primereact/picklist";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { Tooltip } from "primereact/tooltip";
 import axios from "axios";
 import Config from "./Config";
 
