@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import { ListBox } from "primereact/listbox";
 import { PickList } from "primereact/picklist";
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
 import axios from "axios";
 import Config from "./Config";
-// import 'primereact/resources/themes/saga-blue/theme.css';  // Opcional: Cambia por otro tema si prefieres
-// import 'primereact/resources/primereact.min.css';
-// import 'primeicons/primeicons.css';
-// import 'primeflex/primeflex.css';
 
 const AsociarClienteContacto = () => {
   const [clientes, setClientes] = useState([]);
@@ -16,7 +13,7 @@ const AsociarClienteContacto = () => {
   const [contactosAsociados, setContactosAsociados] = useState([]);
 
   useEffect(() => {
-    // Cargar clientes y contactos desde la API
+    // Cargar clientes desde la API
     const fetchClientes = async () => {
       try {
         const response = await axios.get(`${Config.apiUrl}/api/clientes`);
@@ -26,53 +23,100 @@ const AsociarClienteContacto = () => {
       }
     };
 
-    const fetchContactos = async () => {
-      try {
-        const response = await axios.get(`${Config.apiUrl}/api/contactos`);
-        setContactos(response.data);
-      } catch (error) {
-        console.error("Error fetching contactos:", error);
-      }
-    };
-
     fetchClientes();
-    fetchContactos();
   }, []);
+
+  useEffect(() => {
+    if (selectedCliente) {
+      // Cargar contactos disponibles y asociados cuando se selecciona un cliente
+      const fetchContactos = async () => {
+        try {
+          const responseContactos = await axios.get(
+            `${Config.apiUrl}/api/contactos`
+          );
+          const responseContactosAsociados = await axios.get(
+            `${Config.apiUrl}/api/clientes/${selectedCliente.idcliente}/contactos`
+          );
+          console.log("contactos: ", responseContactos.data);
+          setContactos(responseContactos.data);
+          setContactosAsociados(responseContactosAsociados.data);
+        } catch (error) {
+          console.error("Error fetching contactos:", error);
+        }
+      };
+
+      fetchContactos();
+    } else {
+      setContactos([]);
+      setContactosAsociados([]);
+    }
+  }, [selectedCliente]);
   const onClienteChange = (e) => {
     setSelectedCliente(e.value);
+    setContactos([]);
     // Aquí puedes cargar los contactos asociados desde el backend al seleccionar un cliente
     setContactosAsociados([]); // Limpiar o cargar los contactos asociados
   };
 
   const onMoveToTarget = (event) => {
+    setContactos(event.source);
     setContactosAsociados(event.target);
   };
 
   const onMoveToSource = (event) => {
     setContactos(event.source);
+    setContactosAsociados(event.target);
+  };
+
+  const handleSave = async () => {
+    if (!selectedCliente) {
+      alert("Por favor, seleccione un cliente.");
+      return;
+    }
+
+    // Extraer los IDs de los contactos asociados
+    const contactosAsociadosIds = contactosAsociados.map(
+      (contacto) => contacto.idcontacto
+    );
+
+    try {
+      // Enviar los datos al backend
+      await axios.post(
+        `${Config.apiUrl}/api/clientes/${selectedCliente.idcliente}/asociar-contactos`,
+        {
+          contactos: contactosAsociadosIds,
+        }
+      );
+
+      alert("Asociaciones guardadas correctamente.");
+    } catch (error) {
+      console.error("Error guardando asociaciones:", error);
+      alert("Error al guardar las asociaciones.");
+    }
   };
 
   return (
     <div className="p-fluid">
       <div className="p-field">
         <h3>Seleccionar Cliente</h3>
-        <ListBox
+        <Dropdown
           value={selectedCliente}
-          options={clientes}
           onChange={onClienteChange}
-          optionLabel="name"
+          options={clientes}
+          optionLabel="nombres"
+          placeholder="Seleccione un cliente"
           filter
-          style={{ width: "15rem" }}
-          listStyle={{ maxHeight: "200px" }}
+          className="w-full md:w-14rem"
         />
       </div>
 
       <div className="p-field">
         <h3>Asociar Contactos</h3>
         <PickList
+          dataKey="idcontacto"
           source={contactos}
           target={contactosAsociados}
-          itemTemplate={(item) => <span>{item.name}</span>}
+          itemTemplate={(item) => <span>{item.nombresca}</span>}
           sourceHeader="Contactos Disponibles"
           targetHeader="Contactos Asociados"
           sourceStyle={{ height: "200px" }}
@@ -85,7 +129,11 @@ const AsociarClienteContacto = () => {
       </div>
 
       <div className="p-field">
-        <Button label="Guardar Asociaciones" icon="pi pi-save" />
+        <Button
+          label="Guardar Asociaciones"
+          icon="pi pi-save"
+          onClick={handleSave}
+        />
       </div>
     </div>
   );

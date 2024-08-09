@@ -344,7 +344,7 @@ const Contactos = () => {
         >
           <Column field="idcontacto" header="ID" hidden />
           <Column
-            field="nombres"
+            field="nombresca"
             header="Nombre"
             frozen
             alignFrozen="left"
