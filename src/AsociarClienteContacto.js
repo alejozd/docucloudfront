@@ -141,7 +141,7 @@ const AsociarClienteContacto = () => {
   };
 
   return (
-    <div className="p-fluid">
+    <div>
       <div className="p-field">
         <h3>Seleccionar Cliente</h3>
         <Dropdown
@@ -185,7 +185,7 @@ const AsociarClienteContacto = () => {
         />
       </div>
 
-      <div className="p-field">
+      <div>
         <Button
           label="Guardar Asociaciones"
           icon="pi pi-save"
