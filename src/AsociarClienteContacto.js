@@ -30,15 +30,29 @@ const AsociarClienteContacto = () => {
       // Cargar contactos disponibles y asociados cuando se selecciona un cliente
       const fetchContactos = async () => {
         try {
+          // Cargar todos los contactos disponibles
           const responseContactos = await axios.get(
             `${Config.apiUrl}/api/contactos`
           );
+
+          // Cargar los contactos asociados al cliente seleccionado
           const responseContactosAsociados = await axios.get(
             `${Config.apiUrl}/api/clientes/${selectedCliente.idcliente}/contactos`
           );
-          console.log("contactos: ", responseContactos.data);
-          setContactos(responseContactos.data);
-          setContactosAsociados(responseContactosAsociados.data);
+
+          // Obtener los IDs de los contactos asociados
+          const contactosAsociadosIds = responseContactosAsociados.data.map(
+            (contacto) => contacto.idcontacto
+          );
+
+          // Filtrar los contactos disponibles para excluir los ya asociados
+          const contactosDisponibles = responseContactos.data.filter(
+            (contacto) => !contactosAsociadosIds.includes(contacto.idcontacto)
+          );
+
+          // Actualizar los estados
+          setContactos(contactosDisponibles); // Solo los contactos disponibles (no asociados)
+          setContactosAsociados(responseContactosAsociados.data); // Solo los contactos asociados
         } catch (error) {
           console.error("Error fetching contactos:", error);
         }
@@ -50,6 +64,7 @@ const AsociarClienteContacto = () => {
       setContactosAsociados([]);
     }
   }, [selectedCliente]);
+
   const onClienteChange = (e) => {
     setSelectedCliente(e.value);
     setContactos([]);
