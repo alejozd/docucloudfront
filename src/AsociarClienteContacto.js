@@ -59,13 +59,43 @@ const AsociarClienteContacto = () => {
   };
 
   const onMoveToTarget = (event) => {
-    setContactos(event.source);
-    setContactosAsociados(event.target);
+    console.log("Event object:", event);
+    if (!event || !event.value) {
+      console.error("Event object or its properties are undefined:", event);
+      return;
+    }
+
+    const movedItems = event.value; // Obtener los elementos movidos
+    const updatedContactos = contactos.filter(
+      (item) =>
+        !movedItems.some(
+          (movedItem) => movedItem.idcontacto === item.idcontacto
+        )
+    );
+    const updatedContactosAsociados = [...contactosAsociados, ...movedItems];
+
+    setContactos(updatedContactos);
+    setContactosAsociados(updatedContactosAsociados);
   };
 
   const onMoveToSource = (event) => {
-    setContactos(event.source);
-    setContactosAsociados(event.target);
+    console.log("Event object:", event);
+    if (!event || !event.value) {
+      console.error("Event object or its properties are undefined:", event);
+      return;
+    }
+
+    const movedItems = event.value; // Obtener los elementos movidos
+    const updatedContactos = [...contactos, ...movedItems];
+    const updatedContactosAsociados = contactosAsociados.filter(
+      (item) =>
+        !movedItems.some(
+          (movedItem) => movedItem.idcontacto === item.idcontacto
+        )
+    );
+
+    setContactos(updatedContactos);
+    setContactosAsociados(updatedContactosAsociados);
   };
 
   const handleSave = async () => {
