@@ -6,7 +6,6 @@ import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
 import Config from "./Config";
 import ContactoDialog from "./ContactoDialog";
@@ -20,6 +19,7 @@ const initialContactoState = {
   direccionca: "",
   telefonoca: "",
   emailca: "",
+  segmento: null, // Añadir el campo para el segmento
 };
 
 const Contactos = () => {
@@ -81,6 +81,7 @@ const Contactos = () => {
       let _contactos = [...contactos];
       try {
         if (contacto.idcontacto) {
+          console.log("contacto actaulizar: ", contacto);
           setLoading(true);
           const response = await axios.put(
             `${Config.apiUrl}/api/contactos/${contacto.idcontacto}`,
@@ -99,7 +100,7 @@ const Contactos = () => {
           });
           console.log("Contacto actualizado:", response.data);
         } else {
-          console.log("contacto: ", contacto);
+          console.log("contacto crear: ", contacto);
           const response = await axios.post(
             `${Config.apiUrl}/api/contactos`,
             contacto
@@ -160,10 +161,21 @@ const Contactos = () => {
   };
 
   const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || "";
-    let _contacto = { ...contacto };
-    _contacto[`${name}`] = val;
-    setContacto(_contacto);
+    if (name === "idsegmento") {
+      // Si es el campo idsegmento, extraemos el idsegmento del objeto
+      const selectedSegmento = e.value;
+      setContacto((prevContacto) => ({
+        ...prevContacto,
+        idsegmento: selectedSegmento ? selectedSegmento.idsegmento : null,
+      }));
+    } else {
+      // Para otros campos, simplemente actualizamos con el valor del campo
+      const val = e.target.value;
+      setContacto((prevContacto) => ({
+        ...prevContacto,
+        [name]: val,
+      }));
+    }
   };
 
   const handleWhatsAppClick = (phone) => {
@@ -423,6 +435,7 @@ const Contactos = () => {
         onInputChange={onInputChange}
         onPhoneChange={onPhoneChange}
         loading={loading}
+        segmentos={segmentos}
       />
 
       <Dialog
