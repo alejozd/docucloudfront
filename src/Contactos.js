@@ -6,6 +6,8 @@ import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { MultiSelect } from "primereact/multiselect";
 import Config from "./Config";
 import ContactoDialog from "./ContactoDialog";
 import ComprobantePDF from "./ComprobantePDF";
@@ -31,6 +33,7 @@ const Contactos = () => {
   const [showComprobante, setShowComprobante] = useState(null);
   const [autoGeneratePDF, setAutoGeneratePDF] = useState(false); // Estado para auto-generar PDF
   const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
+  const [segmentos, setSegmentos] = useState([]);
   const toast = useRef(null);
 
   const fetchContactos = async () => {
@@ -43,6 +46,16 @@ const Contactos = () => {
     } catch (error) {
       console.error("Error recuperando contactos", error);
       setLoading(false);
+    }
+  };
+
+  const fetchSegmentos = async () => {
+    try {
+      const response = await axios.get(`${Config.apiUrl}/api/segmentos`);
+      console.log("Segmentos recuperados:", response.data);
+      setSegmentos(response.data);
+    } catch (error) {
+      console.error("Error recuperando segmentos", error);
     }
   };
 
@@ -234,7 +247,30 @@ const Contactos = () => {
       // Aquí puedes manejar la lógica para generar el PDF automáticamente
       // Por ejemplo, llamar a una función en ComprobantePDF para generar el PDF
     }
+    fetchSegmentos();
   }, [autoGeneratePDF, showComprobante]);
+
+  const segmentoFilterTemplate = (options) => {
+    return (
+      <MultiSelect
+        value={options.value}
+        options={segmentos} // Usamos los segmentos recuperados del backend
+        onChange={(e) => options.filterApplyCallback(e.value)}
+        optionLabel="nombresegmento" // Campo a mostrar en el dropdown
+        placeholder="Seleccionar Segmento"
+        className="p-column-filter"
+        showClear
+        style={{ minWidth: "14rem" }}
+      />
+    );
+  };
+
+  const customFilter = (value, filter) => {
+    if (!filter || filter.length === 0) {
+      return true; // No hay filtro aplicado
+    }
+    return filter.some((segmento) => segmento.nombresegmento === value);
+  };
 
   const leftToolbarTemplate = () => {
     return (
@@ -341,6 +377,7 @@ const Contactos = () => {
           size="small"
           loading={loading}
           emptyMessage="No hay registros"
+          filterDisplay="row"
         >
           <Column field="idcontacto" header="ID" hidden />
           <Column
@@ -354,6 +391,19 @@ const Contactos = () => {
           <Column field="direccionca" header="Dirección" sortable />
           <Column field="telefonoca" header="Teléfono" sortable />
           <Column field="emailca" header="Email" sortable />
+          <Column
+            field="nombresegmento"
+            header="Segmento"
+            sortable
+            filterField="nombresegmento"
+            filter
+            filterElement={segmentoFilterTemplate}
+            showFilterMenu={false}
+            filterMatchMode="custom"
+            filterFunction={customFilter}
+            filterMenuStyle={{ width: "14rem" }}
+            style={{ minWidth: "14rem" }}
+          />
           <Column body={actionBodyTemplate} frozen alignFrozen="right" />
         </DataTable>
       </div>
