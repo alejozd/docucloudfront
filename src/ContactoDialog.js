@@ -2,7 +2,7 @@ import React from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
-// import { InputMask } from "primereact/inputmask";
+import { Dropdown } from "primereact/dropdown";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css"; // Importa los estilos de la librería
 import "./ClienteDialog.css";
@@ -17,6 +17,7 @@ const ContactoDialog = ({
   onInputChange,
   onPhoneChange,
   loading,
+  segmentos,
 }) => {
   const contactoDialogFooter = (
     <React.Fragment>
@@ -36,17 +37,6 @@ const ContactoDialog = ({
       />
     </React.Fragment>
   );
-
-  // const telefonoInicial = contacto.telefonoca ? contacto.telefonoca : "(57) ";
-  // const handlePhoneChange = (value) => {
-  //   const event = {
-  //     target: {
-  //       name: "telefono",
-  //       value,
-  //     },
-  //   };
-  //   onInputChange(event, "telefonoca");
-  // };
 
   return (
     <Dialog
@@ -103,16 +93,6 @@ const ContactoDialog = ({
         </div>
         <div className="field">
           <label htmlFor="telefono">Teléfono</label>
-          {/* <InputMask
-            id="telefono"
-            mask="(99) 999-9999999"
-            placeholder="(57) 999-9999999"
-            // value={contacto.telefonoca}
-            value={telefonoInicial}
-            onChange={(e) => onInputChange(e, "telefonoca")}
-            required
-            className={submitted && !contacto.telefonoca ? "p-invalid" : ""}
-          /> */}
           <PhoneInput
             id="telefono"
             international
@@ -139,6 +119,26 @@ const ContactoDialog = ({
           />
           {submitted && !contacto.direccionca && (
             <small className="p-error">Dirección is required.</small>
+          )}
+        </div>
+      </div>
+      <div className="card flex flex-column md:flex-row gap-3">
+        <div className="field">
+          <label htmlFor="segmento">Segmento</label>
+          <Dropdown
+            id="segmento"
+            // value={contacto.idsegmento}
+            value={segmentos.find(
+              (seg) => seg.idsegmento === contacto.idsegmento
+            )}
+            options={segmentos} // Usar segmentos pasados como prop
+            onChange={(e) => onInputChange(e, "idsegmento")}
+            optionLabel="nombresegmento"
+            placeholder="Seleccionar Segmento"
+            className={submitted && !contacto.segmento ? "p-invalid" : ""}
+          />
+          {submitted && !contacto.idsegmento && (
+            <small className="p-error">Segmento is required.</small>
           )}
         </div>
       </div>
