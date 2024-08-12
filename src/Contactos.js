@@ -52,7 +52,7 @@ const Contactos = () => {
   const fetchSegmentos = async () => {
     try {
       const response = await axios.get(`${Config.apiUrl}/api/segmentos`);
-      console.log("Segmentos recuperados:", response.data);
+      // console.log("Segmentos recuperados:", response.data);
       setSegmentos(response.data);
     } catch (error) {
       console.error("Error recuperando segmentos", error);
@@ -260,12 +260,14 @@ const Contactos = () => {
         placeholder="Seleccionar Segmento"
         className="p-column-filter"
         showClear
-        style={{ minWidth: "14rem" }}
+        style={{ minWidth: "14px" }}
       />
     );
   };
 
   const customFilter = (value, filter) => {
+    // console.log("value:", value);
+    // console.log("filter:", filter);
     if (!filter || filter.length === 0) {
       return true; // No hay filtro aplicado
     }
@@ -377,7 +379,7 @@ const Contactos = () => {
           size="small"
           loading={loading}
           emptyMessage="No hay registros"
-          filterDisplay="row"
+          filterDisplay="menu"
         >
           <Column field="idcontacto" header="ID" hidden />
           <Column
@@ -398,11 +400,15 @@ const Contactos = () => {
             filterField="nombresegmento"
             filter
             filterElement={segmentoFilterTemplate}
-            showFilterMenu={false}
+            showFilterMenuOptions={false} // No mostrar iconos de filtro
             filterMatchMode="custom"
             filterFunction={customFilter}
-            filterMenuStyle={{ width: "14rem" }}
-            style={{ minWidth: "14rem" }}
+            // showFilterMenu={false}  // No mostrar menu de filtro
+            showClearButton={false}
+            showApplyButton={false}
+            showAddButton={false}
+            filterMenuStyle={{ width: "12rem" }}
+            style={{ minWidth: "12rem" }}
           />
           <Column body={actionBodyTemplate} frozen alignFrozen="right" />
         </DataTable>
