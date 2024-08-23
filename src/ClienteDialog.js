@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
@@ -22,6 +22,40 @@ const ClienteDialog = ({
   loading,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [completedTabs, setCompletedTabs] = useState({
+    basicos: false,
+    adicionales: false,
+    fe: false,
+  });
+
+  // Estados para la pestaña 'Adicionales'
+  const [selectedRegimen, setSelectedRegimen] = useState(null);
+  const [checkedAreaICA, setCheckedAreaICA] = useState(false);
+
+  // Estados para la pestaña 'FE'
+  const [selectedRegimenFEL, setSelectedRegimenFEL] = useState(null);
+  const [selectedResponsabilidadFEL, setSelectedResponsabilidadFEL] =
+    useState(null);
+
+  // Restablecer el formulario
+  const resetForm = () => {
+    setActiveIndex(0);
+    setSelectedRegimen(null);
+    setCheckedAreaICA(false);
+    setSelectedRegimenFEL(null);
+    setSelectedResponsabilidadFEL(null);
+    setCompletedTabs({
+      basicos: false,
+      adicionales: false,
+      fe: false,
+    });
+  };
+
+  // Esta función se llamará al cerrar el diálogo
+  const handleHideDialog = () => {
+    resetForm();
+    hideDialog();
+  };
 
   const clienteDialogFooter = (
     <React.Fragment>
@@ -30,7 +64,7 @@ const ClienteDialog = ({
         icon="pi pi-times"
         outlined
         severity="danger"
-        onClick={hideDialog}
+        onClick={handleHideDialog}
       />
       <Button
         label="Guardar"
@@ -53,17 +87,58 @@ const ClienteDialog = ({
   //   onInputChange(event, "telefono");
   // };
 
+  // Función para verificar si la pestaña 'Basicos' está completa
+  useEffect(() => {
+    const isBasicosComplete =
+      cliente.nombres &&
+      cliente.identidad &&
+      cliente.email &&
+      cliente.telefono &&
+      cliente.direccion;
+    setCompletedTabs((prev) => ({ ...prev, basicos: isBasicosComplete }));
+  }, [cliente]);
+
+  // Verificar si la pestaña 'Adicionales' está completa
+  useEffect(() => {
+    const isAdicionalesComplete = selectedRegimen !== null && checkedAreaICA;
+    setCompletedTabs((prev) => ({
+      ...prev,
+      adicionales: isAdicionalesComplete,
+    }));
+  }, [selectedRegimen, checkedAreaICA]);
+
+  // Verificar si la pestaña 'FE' está completa
+  useEffect(() => {
+    const isFEComplete =
+      selectedRegimenFEL !== null && selectedResponsabilidadFEL !== null;
+    setCompletedTabs((prev) => ({ ...prev, fe: isFEComplete }));
+  }, [selectedRegimenFEL, selectedResponsabilidadFEL]);
+
+  // Obtener el título de la pestaña con el estado visual de completado
+  const getTabHeader = (title, isComplete) => {
+    return (
+      <span style={{ color: isComplete ? "green" : "inherit" }}>
+        {isComplete ? (
+          <i
+            className="pi pi-check-circle"
+            style={{ marginRight: "0.5em" }}
+          ></i>
+        ) : null}
+        {title}
+      </span>
+    );
+  };
+
   return (
     <Dialog
       visible={visible}
       style={{ width: "450px" }}
       header="Detalle - Cliente"
       modal
-      className="p-fluid"
       footer={clienteDialogFooter}
-      onHide={hideDialog}
+      onHide={handleHideDialog}
     >
-      <div className="card">
+      <div className="card p-fluid">
         <div className="flex mb-2 gap-2 justify-content-end">
           <Button
             onClick={() => setActiveIndex(0)}
@@ -91,7 +166,7 @@ const ClienteDialog = ({
           activeIndex={activeIndex}
           onTabChange={(e) => setActiveIndex(e.index)}
         >
-          <TabPanel header="Basicos">
+          <TabPanel header={getTabHeader("Basicos", completedTabs.basicos)}>
             <div className="card flex flex-column md:flex-row gap-3">
               <div className="field">
                 <label htmlFor="nombres">Nombre</label>
@@ -177,11 +252,23 @@ const ClienteDialog = ({
               </div>
             </div>
           </TabPanel>
-          <TabPanel header="Adicionales">
-            <ClienteDialogAdicional> </ClienteDialogAdicional>
+          <TabPanel
+            header={getTabHeader("Adicionales", completedTabs.adicionales)}
+          >
+            <ClienteDialogAdicional
+              selectedRegimen={selectedRegimen}
+              setSelectedRegimen={setSelectedRegimen}
+              checkedAreaICA={checkedAreaICA}
+              setCheckedAreaICA={setCheckedAreaICA}
+            />
           </TabPanel>
-          <TabPanel header="FE">
-            <ClienteDialogFE> </ClienteDialogFE>
+          <TabPanel header={getTabHeader("FE", completedTabs.fe)}>
+            <ClienteDialogFE
+              selectedRegimenFEL={selectedRegimenFEL}
+              setSelectedRegimenFEL={setSelectedRegimenFEL}
+              selectedResponsabilidadFEL={selectedResponsabilidadFEL}
+              setSelectedResponsabilidadFEL={setSelectedResponsabilidadFEL}
+            />
           </TabPanel>
         </TabView>
       </div>

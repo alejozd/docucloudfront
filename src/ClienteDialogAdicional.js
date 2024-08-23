@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { FloatLabel } from "primereact/floatlabel";
 import { Checkbox } from "primereact/checkbox";
 
-const ClienteDialogAdicional = () => {
-  const [selectedRegimen, setSelectedRegimen] = useState(null);
+const ClienteDialogAdicional = ({
+  selectedRegimen,
+  setSelectedRegimen,
+  checkedAreaICA,
+  setCheckedAreaICA,
+}) => {
   const regimenes = [
     { name: "responsable de IVA (48)", code: "1" },
     { name: "No responsable de IVA (49)", code: "2" },
   ];
-  const [checkedAreaICA, setCheckedAreaICA] = useState(false);
 
   return (
     <div className="card p-fluid">
