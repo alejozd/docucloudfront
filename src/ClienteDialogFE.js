@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { FloatLabel } from "primereact/floatlabel";
 
-const ClienteDialogFE = () => {
-  const [selectedRegimenFEL, setSelectedRegimenFEL] = useState(null);
+const ClienteDialogFE = ({
+  selectedRegimenFEL,
+  setSelectedRegimenFEL,
+  selectedResponsabilidadFEL,
+  setSelectedResponsabilidadFEL,
+}) => {
   const regimenesFEL = [
     { name: "responsable de IVA (48)", code: "1" },
     { name: "No responsable de IVA (49)", code: "2" },
   ];
-  const [selectedResponsabilidadFEL, setSelectedResponsabilidadFEL] =
-    useState(null);
+
   const responsabilidadesFEL = [
     { name: "Aplica", code: "01" },
     { name: "IVA", code: "2" },
