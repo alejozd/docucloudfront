@@ -129,34 +129,58 @@ const ClienteDialog = ({
     );
   };
 
+  // Obtener la clase de estilo del botón basado en si la pestaña está completa
+  const getButtonClass = (isComplete, isActive) => {
+    if (isComplete) {
+      return "p-button-success"; // Cambiar a verde cuando la pestaña está completa
+    } else if (isActive) {
+      return "p-button-primary"; // Cambiar a azul cuando es la pestaña activa
+    } else {
+      return "p-button-outlined"; // Botón por defecto cuando la pestaña no es activa y no está completa
+    }
+  };
+
   return (
     <Dialog
       visible={visible}
-      style={{ width: "450px" }}
+      style={{ width: "60vw", maxWidth: "650px", minHeight: "400px" }}
       header="Detalle - Cliente"
       modal
       footer={clienteDialogFooter}
       onHide={handleHideDialog}
+      className="p-fluid"
     >
-      <div className="card p-fluid">
+      <div className="card" style={{ minHeight: "350px" }}>
         <div className="flex mb-2 gap-2 justify-content-end">
           <Button
             onClick={() => setActiveIndex(0)}
-            className="w-2rem h-2rem p-0"
+            // className="w-2rem h-2rem p-0"
+            className={`w-2rem h-2rem p-0 ${getButtonClass(
+              completedTabs.basicos,
+              activeIndex === 0
+            )}`}
             rounded
             outlined={activeIndex !== 0}
             label="1"
           />
           <Button
             onClick={() => setActiveIndex(1)}
-            className="w-2rem h-2rem p-0"
+            // className="w-2rem h-2rem p-0"
+            className={`w-2rem h-2rem p-0 ${getButtonClass(
+              completedTabs.adicionales,
+              activeIndex === 1
+            )}`}
             rounded
             outlined={activeIndex !== 1}
             label="2"
           />
           <Button
             onClick={() => setActiveIndex(2)}
-            className="w-2rem h-2rem p-0"
+            // className="w-2rem h-2rem p-0"
+            className={`w-2rem h-2rem p-0 ${getButtonClass(
+              completedTabs.fe,
+              activeIndex === 2
+            )}`}
             rounded
             outlined={activeIndex !== 2}
             label="3"
