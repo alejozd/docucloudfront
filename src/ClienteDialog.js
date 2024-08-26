@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
-// import { InputMask } from "primereact/inputmask";
 import PhoneInput from "react-phone-number-input";
 import { TabView, TabPanel } from "primereact/tabview";
 import ClienteDialogAdicional from "./ClienteDialogAdicional";
@@ -76,17 +75,6 @@ const ClienteDialog = ({
     </React.Fragment>
   );
 
-  // const telefonoInicial = cliente.telefono ? cliente.telefono : "(57) ";
-  // const handlePhoneChange = (value) => {
-  //   const event = {
-  //     target: {
-  //       name: "telefono",
-  //       value,
-  //     },
-  //   };
-  //   onInputChange(event, "telefono");
-  // };
-
   // Función para verificar si la pestaña 'Basicos' está completa
   useEffect(() => {
     const isBasicosComplete =
@@ -117,7 +105,8 @@ const ClienteDialog = ({
   // Obtener el título de la pestaña con el estado visual de completado
   const getTabHeader = (title, isComplete) => {
     return (
-      <span style={{ color: isComplete ? "green" : "inherit" }}>
+      // <span style={{ color: isComplete ? "green" : "inherit" }}>
+      <span style={{ color: isComplete ? "var(--green-500)" : "inherit" }}>
         {isComplete ? (
           <i
             className="pi pi-check-circle"
@@ -236,16 +225,7 @@ const ClienteDialog = ({
               </div>
               <div className="field">
                 <label htmlFor="telefono">Teléfono</label>
-                {/* <InputMask
-            id="telefono"
-            mask="(99) 999-9999999"
-            placeholder="(57) 999-9999999"
-            // value={cliente.telefono}
-            value={telefonoInicial}
-            onChange={(e) => onInputChange(e, "telefono")}
-            required
-            className={submitted && !cliente.telefono ? "p-invalid" : ""}
-          /> */}
+                /> */}
                 <PhoneInput
                   id="telefono"
                   international
