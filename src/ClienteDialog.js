@@ -225,7 +225,6 @@ const ClienteDialog = ({
               </div>
               <div className="field">
                 <label htmlFor="telefono">Teléfono</label>
-                /> */}
                 <PhoneInput
                   id="telefono"
                   international
