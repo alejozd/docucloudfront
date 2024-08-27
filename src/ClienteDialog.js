@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button"; // Librería para enviar correos electrónicos
+import { Button } from "primereact/button";
 import PhoneInput from "react-phone-number-input";
 import { TabView, TabPanel } from "primereact/tabview";
 import ClienteDialogAdicional from "./ClienteDialogAdicional";
 import ClienteDialogFE from "./ClienteDialogFE";
-import "react-phone-number-input/style.css"; // Importa los estilos de la librería
+import "react-phone-number-input/style.css";
 import "./ClienteDialog.css";
 import es from "react-phone-number-input/locale/es";
 
@@ -27,16 +27,12 @@ const ClienteDialog = ({
     fe: false,
   });
 
-  // Estados para la pestaña 'Adicionales'
   const [selectedRegimen, setSelectedRegimen] = useState(null);
   const [checkedAreaICA, setCheckedAreaICA] = useState(false);
-
-  // Estados para la pestaña 'FE'
   const [selectedRegimenFEL, setSelectedRegimenFEL] = useState(null);
   const [selectedResponsabilidadFEL, setSelectedResponsabilidadFEL] =
     useState(null);
 
-  // Restablecer el formulario
   const resetForm = () => {
     setActiveIndex(0);
     setSelectedRegimen(null);
@@ -50,7 +46,6 @@ const ClienteDialog = ({
     });
   };
 
-  // Esta función se llamará al cerrar el diálogo
   const handleHideDialog = () => {
     resetForm();
     hideDialog();
@@ -75,7 +70,6 @@ const ClienteDialog = ({
     </React.Fragment>
   );
 
-  // Función para verificar si la pestaña 'Basicos' está completa
   useEffect(() => {
     const isBasicosComplete =
       cliente.nombres &&
@@ -83,49 +77,39 @@ const ClienteDialog = ({
       cliente.email &&
       cliente.telefono &&
       cliente.direccion;
-    setCompletedTabs((prev) => ({ ...prev, basicos: isBasicosComplete }));
-  }, [cliente]);
-
-  // Verificar si la pestaña 'Adicionales' está completa
-  useEffect(() => {
     const isAdicionalesComplete = selectedRegimen !== null && checkedAreaICA;
-    setCompletedTabs((prev) => ({
-      ...prev,
-      adicionales: isAdicionalesComplete,
-    }));
-  }, [selectedRegimen, checkedAreaICA]);
-
-  // Verificar si la pestaña 'FE' está completa
-  useEffect(() => {
     const isFEComplete =
       selectedRegimenFEL !== null && selectedResponsabilidadFEL !== null;
-    setCompletedTabs((prev) => ({ ...prev, fe: isFEComplete }));
-  }, [selectedRegimenFEL, selectedResponsabilidadFEL]);
 
-  // Obtener el título de la pestaña con el estado visual de completado
-  const getTabHeader = (title, isComplete) => {
-    return (
-      // <span style={{ color: isComplete ? "green" : "inherit" }}>
-      <span style={{ color: isComplete ? "var(--green-500)" : "inherit" }}>
-        {isComplete ? (
-          <i
-            className="pi pi-check-circle"
-            style={{ marginRight: "0.5em" }}
-          ></i>
-        ) : null}
-        {title}
-      </span>
-    );
-  };
+    setCompletedTabs({
+      basicos: isBasicosComplete,
+      adicionales: isAdicionalesComplete,
+      fe: isFEComplete,
+    });
+  }, [
+    cliente,
+    selectedRegimen,
+    checkedAreaICA,
+    selectedRegimenFEL,
+    selectedResponsabilidadFEL,
+  ]);
 
-  // Obtener la clase de estilo del botón basado en si la pestaña está completa
+  const getTabHeader = (title, isComplete) => (
+    <span style={{ color: isComplete ? "var(--green-500)" : "inherit" }}>
+      {isComplete && (
+        <i className="pi pi-check-circle" style={{ marginRight: "0.5em" }}></i>
+      )}
+      {title}
+    </span>
+  );
+
   const getButtonClass = (isComplete, isActive) => {
     if (isComplete) {
-      return "p-button-success"; // Cambiar a verde cuando la pestaña está completa
+      return "p-button-success";
     } else if (isActive) {
-      return "p-button-primary"; // Cambiar a azul cuando es la pestaña activa
+      return "p-button-primary";
     } else {
-      return "p-button-outlined"; // Botón por defecto cuando la pestaña no es activa y no está completa
+      return "p-button-outlined";
     }
   };
 
@@ -141,40 +125,21 @@ const ClienteDialog = ({
     >
       <div className="card" style={{ minHeight: "350px" }}>
         <div className="flex mb-2 gap-2 justify-content-end">
-          <Button
-            onClick={() => setActiveIndex(0)}
-            // className="w-2rem h-2rem p-0"
-            className={`w-2rem h-2rem p-0 ${getButtonClass(
-              completedTabs.basicos,
-              activeIndex === 0
-            )}`}
-            rounded
-            outlined={activeIndex !== 0}
-            label="1"
-          />
-          <Button
-            onClick={() => setActiveIndex(1)}
-            // className="w-2rem h-2rem p-0"
-            className={`w-2rem h-2rem p-0 ${getButtonClass(
-              completedTabs.adicionales,
-              activeIndex === 1
-            )}`}
-            rounded
-            outlined={activeIndex !== 1}
-            label="2"
-          />
-          <Button
-            onClick={() => setActiveIndex(2)}
-            // className="w-2rem h-2rem p-0"
-            className={`w-2rem h-2rem p-0 ${getButtonClass(
-              completedTabs.fe,
-              activeIndex === 2
-            )}`}
-            rounded
-            outlined={activeIndex !== 2}
-            label="3"
-          />
+          {[0, 1, 2].map((index) => (
+            <Button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={`w-2rem h-2rem p-0 ${getButtonClass(
+                completedTabs[Object.keys(completedTabs)[index]],
+                activeIndex === index
+              )}`}
+              rounded
+              outlined={activeIndex !== index}
+              label={(index + 1).toString()}
+            />
+          ))}
         </div>
+
         <TabView
           activeIndex={activeIndex}
           onTabChange={(e) => setActiveIndex(e.index)}
@@ -229,7 +194,7 @@ const ClienteDialog = ({
                   id="telefono"
                   international
                   defaultCountry="CO"
-                  labels={es} //
+                  labels={es}
                   value={cliente.telefono}
                   onChange={(value) => onPhoneChange(value, "telefono")}
                   className="phone-input"
