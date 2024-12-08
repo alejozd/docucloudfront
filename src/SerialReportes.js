@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import Config from "./Config";
 import axios from "axios";
+import { Button } from "primereact/button"; // Importar el botón de PrimeReact
 
 const SerialReportes = () => {
   const [serial, setSerial] = useState(""); // Estado para almacenar el serial ingresado
   const [responseData, setResponseData] = useState(null); // Estado para almacenar los datos de la respuesta
   const [loading, setLoading] = useState(false); // Estado para manejar el loading
   const [error, setError] = useState(null); // Estado para manejar errores
+  const [copySuccess, setCopySuccess] = useState(null); // Estado para mostrar un mensaje de éxito al copiar
 
   // Función para enviar el serial al endpoint
   const handleGenerateKey = async () => {
@@ -26,11 +28,22 @@ const SerialReportes = () => {
         }
       );
       setResponseData(response.data); // Guardar los datos de la respuesta
+      setCopySuccess(null); // Limpiar mensaje de éxito al copiar
     } catch (err) {
       setError("Error al generar la clave. Verifica el serial o la conexión.");
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para copiar la clave al portapapeles
+  const handleCopyKey = () => {
+    if (responseData?.clave) {
+      navigator.clipboard
+        .writeText(responseData.clave)
+        .then(() => setCopySuccess("Clave copiada al portapapeles"))
+        .catch(() => setCopySuccess("Error al copiar la clave"));
     }
   };
 
@@ -57,21 +70,13 @@ const SerialReportes = () => {
             fontSize: "16px",
           }}
         />
-        <button
+        <Button
+          label={loading ? "Generando..." : "Generar Clave"}
+          icon={loading ? "pi pi-spin pi-spinner" : "pi pi-key"}
           onClick={handleGenerateKey}
           disabled={loading}
-          style={{
-            backgroundColor: "#007bff",
-            color: "#fff",
-            padding: "10px 20px",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: "5px",
-            fontSize: "16px",
-          }}
-        >
-          {loading ? "Generando..." : "Generar Clave"}
-        </button>
+          className="p-button-raised p-button-primary"
+        />
       </div>
 
       {/* Mostrar mensajes de error */}
@@ -87,27 +92,35 @@ const SerialReportes = () => {
           }}
         >
           <h3>Datos Generados:</h3>
-          {/* Caja de texto para la clave */}
-          <label
-            htmlFor="clave"
-            style={{ display: "block", marginBottom: "8px" }}
-          >
-            Clave Generada:
-          </label>
-          <input
-            id="clave"
-            type="text"
-            value={responseData.clave}
-            readOnly
-            style={{
-              width: "100%",
-              padding: "8px",
-              marginBottom: "12px",
-              fontSize: "16px",
-              backgroundColor: "#f9f9f9",
-              border: "1px solid #ccc",
-            }}
-          />
+          {/* Caja de texto para la clave y botón de copiar */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <input
+              id="clave"
+              type="text"
+              value={responseData.clave}
+              readOnly
+              style={{
+                flex: 1,
+                padding: "8px",
+                fontSize: "16px",
+                backgroundColor: "#f9f9f9",
+                border: "1px solid #ccc",
+              }}
+            />
+            <Button
+              label="Copiar"
+              icon="pi pi-copy"
+              onClick={handleCopyKey}
+              className="p-button-outlined p-button-secondary"
+              tooltip="Copiar clave al portapapeles"
+              tooltipOptions={{ position: "top" }}
+            />
+          </div>
+
+          {/* Mostrar mensaje de éxito o error al copiar */}
+          {copySuccess && (
+            <p style={{ color: "green", marginTop: "8px" }}>{copySuccess}</p>
+          )}
 
           {/* Mostrar los demás datos */}
           <p>
@@ -127,9 +140,6 @@ const SerialReportes = () => {
           </p>
           <p>
             <strong>Módulo:</strong> {responseData.modulo}
-          </p>
-          <p>
-            <strong>Clave:</strong> {responseData.clave}
           </p>
         </div>
       )}
