@@ -12,10 +12,10 @@ const Navbar = () => {
       id: "inicio",
     },
     {
-      label: "Clientes",
-      icon: "pi pi-users",
-      url: "/clientes",
-      id: "clientes",
+      label: "Alejo",
+      icon: "pi pi-share-alt",
+      url: "/SerialReportes",
+      id: "SerialReportes",
     },
     {
       label: "Productos",
@@ -39,6 +39,12 @@ const Navbar = () => {
       label: "Administrar",
       icon: "pi pi-cog",
       items: [
+        {
+          label: "Clientes",
+          icon: "pi pi-users",
+          url: "/clientes",
+          id: "clientes",
+        },
         {
           label: "Contactos",
           icon: "pi pi-users",
