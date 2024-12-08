@@ -87,6 +87,29 @@ const SerialReportes = () => {
           }}
         >
           <h3>Datos Generados:</h3>
+          {/* Caja de texto para la clave */}
+          <label
+            htmlFor="clave"
+            style={{ display: "block", marginBottom: "8px" }}
+          >
+            Clave Generada:
+          </label>
+          <input
+            id="clave"
+            type="text"
+            value={responseData.clave}
+            readOnly
+            style={{
+              width: "100%",
+              padding: "8px",
+              marginBottom: "12px",
+              fontSize: "16px",
+              backgroundColor: "#f9f9f9",
+              border: "1px solid #ccc",
+            }}
+          />
+
+          {/* Mostrar los demás datos */}
           <p>
             <strong>Serial:</strong> {responseData.soloSerial}
           </p>
