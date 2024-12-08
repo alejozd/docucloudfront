@@ -13,7 +13,7 @@ const Navbar = () => {
     },
     {
       label: "Alejo",
-      icon: "pi pi-share-alt",
+      icon: "pi pi-key",
       url: "/SerialReportes",
       id: "SerialReportes",
     },
