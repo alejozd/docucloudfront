@@ -184,6 +184,25 @@ const SerialReportes = () => {
                   {copySuccess}
                 </p>
               )}
+              <p>
+                <strong>Procesador ID:</strong> {responseData.procesadorId}
+              </p>
+              <p>
+                <strong>Hard Drive Serial:</strong>{" "}
+                {responseData.hardDriveSerial}
+              </p>
+              <p>
+                <strong>Nombre del Sistema:</strong> {responseData.systemName}
+              </p>
+              <p>
+                <strong>Letra del Módulo:</strong> {responseData.letraModulo}
+              </p>
+              <p>
+                <strong>Módulo:</strong> {responseData.modulo}
+              </p>
+              <p>
+                <strong>Clave:</strong> {responseData.clave}
+              </p>
             </div>
           )}
         </div>
