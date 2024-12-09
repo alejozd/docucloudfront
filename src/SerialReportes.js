@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Config from "./Config";
 import { Button } from "primereact/button";
+import { Password } from "primereact/password";
 
 const SerialReportes = () => {
   const [serial, setSerial] = useState("");
@@ -88,20 +89,21 @@ const SerialReportes = () => {
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
       {!isAuthenticated ? (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <h1>Protección con Contraseña</h1>
           <p>Por favor, ingresa la contraseña para acceder:</p>
-          <input
-            type="password"
+          <Password
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            toggleMask
             placeholder="Contraseña"
-            style={{
-              width: "100%",
-              padding: "10px",
-              fontSize: "16px",
-              marginBottom: "12px",
-            }}
+            style={{ padding: "10px" }}
           />
           <Button
             label="Acceder"
