@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Config from "./Config";
 import axios from "axios";
+import Config from "./Config";
 import { Button } from "primereact/button";
 
 const SerialReportes = () => {
@@ -9,20 +9,44 @@ const SerialReportes = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copySuccess, setCopySuccess] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Control de autenticación
-  const [password, setPassword] = useState(""); // Almacenar contraseña ingresada
-  const correctPassword = "Alejo1979*-+"; // Contraseña fija (puedes moverla al backend para mayor seguridad)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [jwtToken, setJwtToken] = useState(""); // Estado para almacenar el token JWT
 
-  // Validar la contraseña
-  const handlePasswordSubmit = () => {
-    if (password === correctPassword) {
-      setIsAuthenticated(true);
-    } else {
-      alert("Contraseña incorrecta");
-      setPassword("");
+  const correctPassword = "Alejo1979*-+"; // Contraseña fija en este ejemplo (puedes moverla a una configuración más segura)
+
+  /**
+   * Valida la contraseña contra el servidor
+   */
+  const handlePasswordSubmit = async () => {
+    if (password === "") {
+      alert("Por favor ingresa la contraseña");
+      return;
+    }
+    // console.log("ruta y password", `${Config.apiUrl}/api/login`, password);
+    try {
+      const response = await axios.post(`${Config.apiUrl}/api/login`, {
+        password,
+      });
+
+      if (response.data && response.data.token) {
+        // console.log("token", response.data.token);
+        setJwtToken(response.data.token); // Guarda el token JWT en el estado
+        setIsAuthenticated(true);
+        setError(null);
+      } else {
+        alert("Contraseña incorrecta");
+        setError("Contraseña inválida.");
+      }
+    } catch (err) {
+      alert("Error al validar la contraseña.");
+      console.error(err);
     }
   };
 
+  /**
+   * Generar clave de reporte
+   */
   const handleGenerateKey = async () => {
     if (!serial.trim()) {
       setError("Por favor ingresa un serial válido.");
@@ -31,19 +55,24 @@ const SerialReportes = () => {
 
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.post(
         `${Config.apiUrl}/api/generateReportKey`,
         {
-          serial: serial,
+          serial,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`, // Enviar el token JWT
+          },
         }
       );
+
       setResponseData(response.data);
       setCopySuccess(null);
     } catch (err) {
-      setError("Error al generar la clave. Verifica el serial o la conexión.");
       console.error(err);
+      setError("Error al generar la clave. Verifica el serial o la conexión.");
     } finally {
       setLoading(false);
     }
@@ -82,6 +111,7 @@ const SerialReportes = () => {
             onClick={handlePasswordSubmit}
             className="p-button-raised p-button-primary"
           />
+          {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
         </div>
       ) : (
         <div>
@@ -147,8 +177,6 @@ const SerialReportes = () => {
                   icon="pi pi-copy"
                   onClick={handleCopyKey}
                   className="p-button-outlined p-button-secondary"
-                  tooltip="Copiar clave al portapapeles"
-                  tooltipOptions={{ position: "top" }}
                 />
               </div>
               {copySuccess && (
@@ -156,26 +184,6 @@ const SerialReportes = () => {
                   {copySuccess}
                 </p>
               )}
-
-              <p>
-                <strong>Serial:</strong> {responseData.soloSerial}
-              </p>
-              <p>
-                <strong>Procesador ID:</strong> {responseData.procesadorId}
-              </p>
-              <p>
-                <strong>Hard Drive Serial:</strong>{" "}
-                {responseData.hardDriveSerial}
-              </p>
-              <p>
-                <strong>Nombre del Sistema:</strong> {responseData.systemName}
-              </p>
-              <p>
-                <strong>Letra del Módulo:</strong> {responseData.letraModulo}
-              </p>
-              <p>
-                <strong>Módulo:</strong> {responseData.modulo}
-              </p>
             </div>
           )}
         </div>
