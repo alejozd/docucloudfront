@@ -13,8 +13,6 @@ const SerialReportes = () => {
   const [password, setPassword] = useState("");
   const [jwtToken, setJwtToken] = useState(""); // Estado para almacenar el token JWT
 
-  const correctPassword = "Alejo1979*-+"; // Contraseña fija en este ejemplo (puedes moverla a una configuración más segura)
-
   /**
    * Valida la contraseña contra el servidor
    */
