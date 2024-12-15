@@ -1,43 +1,68 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import Config from "./Config";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
+import { Toast } from "primereact/toast";
 
 // Custom hook for authentication
-const useAuthentication = () => {
+const useAuthentication = (toast) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [jwtToken, setJwtToken] = useState("");
   const [error, setError] = useState(null);
 
-  const authenticate = useCallback(async (password) => {
-    if (password === "") {
-      alert("Por favor ingresa la contraseña");
-      return;
-    }
-    try {
-      const response = await axios.post(`${Config.apiUrl}/api/login`, {
-        password,
-      });
-      if (response.data && response.data.token) {
-        setJwtToken(response.data.token);
-        setIsAuthenticated(true);
-        setError(null);
-      } else {
-        alert("Contraseña incorrecta");
-        setError("Contraseña inválida.");
+  const authenticate = useCallback(
+    async (password) => {
+      if (password === "") {
+        toast.current.show({
+          severity: "warn",
+          summary: "Advertencia",
+          detail: "Por favor ingresa la contraseña",
+          life: 3000,
+        });
+        return;
       }
-    } catch (err) {
-      alert("Error al validar la contraseña.");
-      console.error(err);
-    }
-  }, []);
+      try {
+        const response = await axios.post(`${Config.apiUrl}/api/login`, {
+          password,
+        });
+        if (response.data && response.data.token) {
+          setJwtToken(response.data.token);
+          setIsAuthenticated(true);
+          setError(null);
+          toast.current.show({
+            severity: "success",
+            summary: "Éxito",
+            detail: "Autenticación exitosa",
+            life: 3000,
+          });
+        } else {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Contraseña incorrecta",
+            life: 3000,
+          });
+          setError("Contraseña inválida.");
+        }
+      } catch (err) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Error al validar la contraseña",
+          life: 3000,
+        });
+        console.error(err);
+      }
+    },
+    [toast]
+  );
 
   return { isAuthenticated, jwtToken, error, authenticate };
 };
 
 // Custom hook for generating report keys
-const useReportKey = (jwtToken) => {
+const useReportKey = (jwtToken, toast) => {
   const [serial, setSerial] = useState("");
   const [responseData, setResponseData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -47,6 +72,12 @@ const useReportKey = (jwtToken) => {
   const generateKey = async () => {
     if (!serial.trim()) {
       setError("Por favor ingresa un serial válido.");
+      toast.current.show({
+        severity: "warn",
+        summary: "Advertencia",
+        detail: "Por favor ingresa un serial válido",
+        life: 3000,
+      });
       return;
     }
     setLoading(true);
@@ -59,9 +90,21 @@ const useReportKey = (jwtToken) => {
       );
       setResponseData(response.data);
       setCopySuccess(null);
+      toast.current.show({
+        severity: "success",
+        summary: "Éxito",
+        detail: "Clave generada exitosamente",
+        life: 3000,
+      });
     } catch (err) {
       console.error(err);
       setError("Error al generar la clave. Verifica el serial o la conexión.");
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Error al generar la clave",
+        life: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -71,8 +114,24 @@ const useReportKey = (jwtToken) => {
     if (responseData?.clave) {
       navigator.clipboard
         .writeText(responseData.clave)
-        .then(() => setCopySuccess("Clave copiada al portapapeles"))
-        .catch(() => setCopySuccess("Error al copiar la clave"));
+        .then(() => {
+          setCopySuccess("Clave copiada al portapapeles");
+          toast.current.show({
+            severity: "success",
+            summary: "Éxito",
+            detail: "Clave copiada al portapapeles",
+            life: 3000,
+          });
+        })
+        .catch(() => {
+          setCopySuccess("Error al copiar la clave");
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Error al copiar la clave",
+            life: 3000,
+          });
+        });
     }
   };
 
@@ -136,7 +195,7 @@ const Authentication = ({ onAuthenticate, error }) => {
 };
 
 // Report Key Generation component
-const ReportKeyGeneration = ({ jwtToken }) => {
+const ReportKeyGeneration = ({ jwtToken, toast }) => {
   const {
     serial,
     setSerial,
@@ -146,7 +205,7 @@ const ReportKeyGeneration = ({ jwtToken }) => {
     copySuccess,
     generateKey,
     copyKey,
-  } = useReportKey(jwtToken);
+  } = useReportKey(jwtToken, toast);
 
   return (
     <div>
@@ -239,15 +298,17 @@ const ReportKeyGeneration = ({ jwtToken }) => {
 
 // Main component
 const SerialReportes = () => {
+  const toast = useRef(null);
   const { isAuthenticated, jwtToken, error, authenticate } =
-    useAuthentication();
+    useAuthentication(toast);
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
+      <Toast ref={toast} />
       {!isAuthenticated ? (
         <Authentication onAuthenticate={authenticate} error={error} />
       ) : (
-        <ReportKeyGeneration jwtToken={jwtToken} />
+        <ReportKeyGeneration jwtToken={jwtToken} toast={toast} />
       )}
     </div>
   );
