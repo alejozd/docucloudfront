@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Config from "./Config";
 import { Button } from "primereact/button";
@@ -17,7 +17,7 @@ const SerialReportes = () => {
   /**
    * Valida la contraseña contra el servidor
    */
-  const handlePasswordSubmit = async () => {
+  const handlePasswordSubmit = useCallback(async () => {
     if (password === "") {
       alert("Por favor ingresa la contraseña");
       return;
@@ -41,7 +41,7 @@ const SerialReportes = () => {
       alert("Error al validar la contraseña.");
       console.error(err);
     }
-  };
+  }, [password]);
 
   /**
    * Generar clave de reporte
@@ -85,6 +85,25 @@ const SerialReportes = () => {
         .catch(() => setCopySuccess("Error al copiar la clave"));
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Enter") {
+        handlePasswordSubmit();
+      }
+    };
+
+    const passwordInput = document.querySelector('input[type="password"]');
+    if (passwordInput) {
+      passwordInput.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      if (passwordInput) {
+        passwordInput.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [handlePasswordSubmit]);
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
