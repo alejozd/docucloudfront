@@ -236,6 +236,7 @@ const ReportKeyGeneration = ({ jwtToken, toast }) => {
           onClick={generateKey}
           disabled={loading}
           className="p-button-raised p-button-primary"
+          severity="success"
         />
       </div>
       {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
@@ -268,6 +269,7 @@ const ReportKeyGeneration = ({ jwtToken, toast }) => {
               icon="pi pi-copy"
               onClick={copyKey}
               className="p-button-outlined p-button-secondary"
+              severity="warning"
             />
           </div>
           {copySuccess && (
