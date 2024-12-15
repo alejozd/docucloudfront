@@ -260,6 +260,7 @@ const ReportKeyGeneration = ({ jwtToken, toast }) => {
                 fontSize: "16px",
                 backgroundColor: "#f9f9f9",
                 border: "1px solid #ccc",
+                width: "100%",
               }}
             />
             <Button
