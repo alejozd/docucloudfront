@@ -150,6 +150,10 @@ const useReportKey = (jwtToken, toast) => {
 // Authentication component
 const Authentication = ({ onAuthenticate, error }) => {
   const [password, setPassword] = useState("");
+  const weakLabel = "Contraseña débil";
+  const mediumLabel = "Contraseña media";
+  const strongLabel = "Contraseña fuerte";
+  const promptLabel = "Fortaleza de la contraseña";
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -181,6 +185,10 @@ const Authentication = ({ onAuthenticate, error }) => {
         onChange={(e) => setPassword(e.target.value)}
         toggleMask
         placeholder="Contraseña"
+        weakLabel={weakLabel}
+        mediumLabel={mediumLabel}
+        strongLabel={strongLabel}
+        promptLabel={promptLabel}
         style={{ padding: "10px" }}
       />
       <Button
