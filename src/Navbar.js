@@ -47,13 +47,13 @@ const Navbar = () => {
         },
         {
           label: "Contactos",
-          icon: "pi pi-users",
+          icon: "pi pi-user-plus",
           url: "/contactos",
           id: "contactos",
         },
         {
           label: "Cliente-Contacto",
-          icon: "pi pi-link",
+          icon: "pi pi-sitemap",
           url: "/AsociarClienteContacto",
           id: "AsociarClienteContacto",
         },
