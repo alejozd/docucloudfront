@@ -18,10 +18,10 @@ const Navbar = () => {
       id: "SerialReportes",
     },
     {
-      label: "Productos",
-      icon: "pi pi-th-large",
-      url: "/productos",
-      id: "productos",
+      label: "WorkTimeCalculator",
+      icon: "pi pi-calculator",
+      url: "/WorkTimeCalculator",
+      id: "WorkTimeCalculator",
     },
     {
       label: "Contactar",
@@ -56,6 +56,12 @@ const Navbar = () => {
           icon: "pi pi-sitemap",
           url: "/AsociarClienteContacto",
           id: "AsociarClienteContacto",
+        },
+        {
+          label: "Productos",
+          icon: "pi pi-th-large",
+          url: "/productos",
+          id: "productos",
         },
       ],
     },

@@ -10,6 +10,7 @@ import Contactar from "./Contactar";
 import Weather from "./Weather"; // Importa tu componente Weather
 import AsociarClienteContacto from "./AsociarClienteContacto";
 import SerialReportes from "./SerialReportes";
+import WorkTimeCalculator from "./WorkTimeCalculator";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/primereact.css";
@@ -34,6 +35,10 @@ function App() {
               element={<AsociarClienteContacto />}
             />
             <Route path="/SerialReportes" element={<SerialReportes />} />
+            <Route
+              path="/WorkTimeCalculator"
+              element={<WorkTimeCalculator />}
+            />
           </Routes>
         </div>
       </div>
