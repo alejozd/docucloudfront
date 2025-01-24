@@ -44,23 +44,27 @@ const WorkTimeCalculator = () => {
       const totalWorked =
         (exitTime - entryTime - (lunchInTime - lunchOutTime)) / (1000 * 60);
       const hours = Math.floor(totalWorked / 60);
-      const minutes = totalWorked % 60;
-      setTotalTime(`${hours} horas y ${minutes} minutos`);
+      const minutes = Math.round(totalWorked % 60); // Redondear los minutos
+
+      // Condicionar la visualización de los minutos
+      if (minutes === 0) {
+        setTotalTime(`${hours} horas`);
+      } else {
+        setTotalTime(`${hours} horas y ${minutes} minutos`);
+      }
     } else {
       setTotalTime("");
     }
   };
 
   return (
-    <div className="p-4">
+    <div className="work-time-calculator p-4">
       <h2 className="text-center">Calculadora de Jornada Laboral</h2>
       <Card className="p-mt-4">
-        <div className="p-grid p-justify-center">
+        <div className="p-fluid">
           {/* Campo Hora de entrada */}
-          <div className="p-col-12 p-md-6 p-lg-3 p-d-flex p-flex-column p-ai-center">
-            <label htmlFor="entryTime" className="p-mb-2">
-              📅 Hora de entrada
-            </label>
+          <div className="p-field">
+            <label htmlFor="entryTime">📅 Hora de entrada</label>
             <Calendar
               id="entryTime"
               value={entryTime}
@@ -68,16 +72,13 @@ const WorkTimeCalculator = () => {
               showTime
               timeOnly
               hourFormat="12"
-              style={{ maxWidth: "100%" }}
               className="p-inputtext-sm"
             />
           </div>
 
           {/* Campo Salida almuerzo */}
-          <div className="p-col-12 p-md-6 p-lg-3 p-d-flex p-flex-column p-ai-center">
-            <label htmlFor="lunchOutTime" className="p-mb-2">
-              🍽️ Salida almuerzo
-            </label>
+          <div className="p-field">
+            <label htmlFor="lunchOutTime">🍽️ Salida almuerzo</label>
             <Calendar
               id="lunchOutTime"
               value={lunchOutTime}
@@ -85,16 +86,13 @@ const WorkTimeCalculator = () => {
               showTime
               timeOnly
               hourFormat="12"
-              style={{ maxWidth: "100%" }}
               className="p-inputtext-sm"
             />
           </div>
 
           {/* Campo Regreso almuerzo */}
-          <div className="p-col-12 p-md-6 p-lg-3 p-d-flex p-flex-column p-ai-center">
-            <label htmlFor="lunchInTime" className="p-mb-2">
-              📅 Regreso almuerzo
-            </label>
+          <div className="p-field">
+            <label htmlFor="lunchInTime">📅 Regreso almuerzo</label>
             <Calendar
               id="lunchInTime"
               value={lunchInTime}
@@ -102,16 +100,13 @@ const WorkTimeCalculator = () => {
               showTime
               timeOnly
               hourFormat="12"
-              style={{ maxWidth: "100%" }}
               className="p-inputtext-sm"
             />
           </div>
 
           {/* Campo Salida real */}
-          <div className="p-col-12 p-md-6 p-lg-3 p-d-flex p-flex-column p-ai-center">
-            <label htmlFor="exitTime" className="p-mb-2">
-              ⏰ Salida real (opcional)
-            </label>
+          <div className="p-field">
+            <label htmlFor="exitTime">⏰ Salida real (opcional)</label>
             <Calendar
               id="exitTime"
               value={exitTime}
@@ -119,7 +114,6 @@ const WorkTimeCalculator = () => {
               showTime
               timeOnly
               hourFormat="12"
-              style={{ maxWidth: "100%" }}
               className="p-inputtext-sm"
             />
           </div>
