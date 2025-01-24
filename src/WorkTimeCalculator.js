@@ -123,7 +123,9 @@ const WorkTimeCalculator = () => {
         <div className="p-d-flex p-jc-center p-mt-4">
           <Button
             label="Calcular"
-            className="p-button-rounded p-button-success"
+            icon="pi pi-calculator"
+            severity="success"
+            rounded
             onClick={calculate}
           />
         </div>
