@@ -6,53 +6,66 @@ import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 import emailjs from "emailjs-com"; // Librería para enviar correos electrónicos automaticamente
 
+// Utility function to show toast messages
+const showToast = (toast, severity, summary, detail) => {
+  toast.current.show({ severity, summary, detail });
+};
+
+// Email service abstraction
+const sendEmail = (templateParams) => {
+  return emailjs.send(
+    "service_p1m3hb3",
+    "template_7gotzgk",
+    templateParams,
+    "_wv37ukba9HbYShcd"
+  );
+};
+
+// Form validation logic
+const validateForm = (values) => {
+  const errors = {};
+
+  if (!values.nombre) {
+    errors.nombre = "El nombre es requerido.";
+  }
+
+  if (!values.telefono) {
+    errors.telefono = "El teléfono es requerido.";
+  }
+
+  if (!values.email) {
+    errors.email = "El correo electrónico es requerido.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = "Correo electrónico inválido.";
+  }
+
+  if (!values.mensaje) {
+    errors.mensaje = "El mensaje es requerido.";
+  }
+
+  return errors;
+};
+
+// Form field component
+const FormField = ({ id, label, component: Component, formik, ...props }) => (
+  <>
+    <label htmlFor={id}>{label}</label>
+    <Component
+      id={id}
+      name={id}
+      value={formik.values[id]}
+      onChange={formik.handleChange}
+      className={formik.errors[id] ? "p-invalid" : ""}
+      {...props}
+    />
+    {formik.errors[id] && (
+      <small className="p-error">{formik.errors[id]}</small>
+    )}
+  </>
+);
+
 const Contactar = () => {
   const toast = useRef(null);
-
-  const showSuccessMessage = () => {
-    toast.current.show({
-      severity: "success",
-      summary: "Formulario enviado",
-      detail: "El mensaje ha sido enviado con éxito",
-    });
-  };
-
-  const showErrorMessage = (error) => {
-    toast.current.show({ severity: "error", summary: "Error", detail: error });
-  };
-
-  const enviarCorreo = (values) => {
-    const templateParams = {
-      from_name: values.nombre,
-      to_name: "Alejandro",
-      message: values.mensaje,
-      phone: values.telefono,
-      reply_to: values.email,
-    };
-
-    emailjs
-      .send(
-        "service_p1m3hb3",
-        "template_7gotzgk",
-        templateParams,
-        "_wv37ukba9HbYShcd"
-      )
-      .then(
-        (response) => {
-          console.log(
-            "Correo enviado correctamente:",
-            response.status,
-            response.text
-          );
-          showSuccessMessage();
-          formik.resetForm();
-        },
-        (error) => {
-          console.error("Error al enviar el correo:", error);
-          showErrorMessage(error.text);
-        }
-      );
-  };
 
   const formik = useFormik({
     initialValues: {
@@ -61,31 +74,35 @@ const Contactar = () => {
       email: "",
       mensaje: "",
     },
-    validate: (values) => {
-      const errors = {};
+    validate: validateForm,
+    onSubmit: (values, { resetForm }) => {
+      const templateParams = {
+        from_name: values.nombre,
+        to_name: "Alejandro",
+        message: values.mensaje,
+        phone: values.telefono,
+        reply_to: values.email,
+      };
 
-      if (!values.nombre) {
-        errors.nombre = "El nombre es requerido.";
-      }
-
-      if (!values.telefono) {
-        errors.telefono = "El teléfono es requerido.";
-      }
-
-      if (!values.email) {
-        errors.email = "El correo electrónico es requerido.";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-        errors.email = "Correo electrónico inválido.";
-      }
-
-      if (!values.mensaje) {
-        errors.mensaje = "El mensaje es requerido.";
-      }
-
-      return errors;
-    },
-    onSubmit: (values) => {
-      enviarCorreo(values);
+      sendEmail(templateParams)
+        .then((response) => {
+          console.log(
+            "Correo enviado correctamente:",
+            response.status,
+            response.text
+          );
+          showToast(
+            toast,
+            "success",
+            "Formulario enviado",
+            "El mensaje ha sido enviado con éxito"
+          );
+          resetForm();
+        })
+        .catch((error) => {
+          console.error("Error al enviar el correo:", error);
+          showToast(toast, "error", "Error", error.text);
+        });
     },
   });
 
@@ -96,55 +113,32 @@ const Contactar = () => {
         <Toast ref={toast} />
 
         <form onSubmit={formik.handleSubmit} className="flex flex-column gap-2">
-          <label htmlFor="nombre">Nombre</label>
-          <InputText
+          <FormField
             id="nombre"
-            name="nombre"
-            value={formik.values.nombre}
-            onChange={formik.handleChange}
-            className={formik.errors.nombre ? "p-invalid" : ""}
+            label="Nombre"
+            component={InputText}
+            formik={formik}
           />
-          {formik.errors.nombre && (
-            <small className="p-error">{formik.errors.nombre}</small>
-          )}
-
-          <label htmlFor="telefono">Teléfono</label>
-          <InputText
+          <FormField
             id="telefono"
-            name="telefono"
-            value={formik.values.telefono}
-            onChange={formik.handleChange}
-            className={formik.errors.telefono ? "p-invalid" : ""}
+            label="Teléfono"
+            component={InputText}
+            formik={formik}
           />
-          {formik.errors.telefono && (
-            <small className="p-error">{formik.errors.telefono}</small>
-          )}
-
-          <label htmlFor="email">Correo Electrónico</label>
-          <InputText
+          <FormField
             id="email"
-            name="email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            className={formik.errors.email ? "p-invalid" : ""}
+            label="Correo Electrónico"
+            component={InputText}
+            formik={formik}
           />
-          {formik.errors.email && (
-            <small className="p-error">{formik.errors.email}</small>
-          )}
-
-          <label htmlFor="mensaje">Mensaje</label>
-          <InputTextarea
+          <FormField
             id="mensaje"
-            name="mensaje"
-            value={formik.values.mensaje}
-            onChange={formik.handleChange}
+            label="Mensaje"
+            component={InputTextarea}
+            formik={formik}
             rows={5}
             autoResize
-            className={formik.errors.mensaje ? "p-invalid" : ""}
           />
-          {formik.errors.mensaje && (
-            <small className="p-error">{formik.errors.mensaje}</small>
-          )}
 
           <Button type="submit" label="Enviar" />
         </form>
