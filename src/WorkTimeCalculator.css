@@ -1,95 +1,27 @@
-/* Contenedor general */
-.p-4 {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+/* WorkTimeCalculator.css */
+.work-time-calculator {
+    max-width: 600px;
+    margin: 0 auto;
   }
   
-  /* Encabezado */
-  .text-center {
-    text-align: center;
-    margin-bottom: 1.5rem;
+  .work-time-calculator .p-card {
+    padding: 1rem;
   }
   
-  /* Tarjeta principal */
-  .p-card {
-    width: 100%;
-    max-width: 500px; /* Limita el ancho en pantallas grandes */
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  .work-time-calculator .p-field {
+    margin-bottom: 1rem;
   }
   
-  /* Espaciado entre elementos */
-  .p-mt-4 {
-    margin-top: 2rem;
-  }
-  
-  .p-mb-2 {
+  .work-time-calculator .p-field label {
+    display: block;
     margin-bottom: 0.5rem;
   }
   
-  /* Estilo para los campos de entrada */
-  .p-inputtext-sm {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  /* Botón calcular */
-  .p-button-rounded {
-    border-radius: 20px;
-    width: 100%;
-    max-width: 200px;
-  }
-  
-  .p-button-success {
-    background-color: #28a745;
-    border-color: #28a745;
-  }
-  
-  .p-button-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-  }
-  
-  /* Mensaje de error */
-  .p-error {
-    color: #dc3545;
-    font-size: 1.1rem;
-    text-align: center;
-  }
-  
-  /* Resultados */
-  .p-text-center {
-    text-align: center;
-  }
-  
-  /* Ajustes para centrado de los campos */
-  .p-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
+  .work-time-calculator .p-button {
     width: 100%;
   }
   
-  /* Ajustes para cada campo */
-  .p-col-12 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .p-md-6, .p-lg-3 {
-    width: 100%; /* Asegura que ocupen todo el ancho */
-  }
-  
-  .p-d-flex {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+  .work-time-calculator .p-error {
+    color: red;
   }
   
