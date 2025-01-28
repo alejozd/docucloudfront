@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
+import InputMask from "react-input-mask"; // Importamos la biblioteca de máscaras
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
@@ -18,17 +18,20 @@ const RegistroSolicitudesPage = () => {
   const estados = [
     { label: "Autorizado", value: "autorizado" },
     { label: "No autorizado", value: "no_autorizado" },
-    // { label: "Pendiente", value: "pendiente" },
     { label: "Ninguno", value: "" },
   ];
 
   const fetchRegistros = async () => {
     setLoading(true);
+
+    // Limpiar la IP antes de enviarla
+    const cleanedIp = ipCliente.replace(/_/g, "").trim(); // Elimina guiones bajos y espacios
+
     try {
       const response = await axios.post(
         "https://zetamini.ddns.net/api/registro-solicitudes",
         {
-          ip_cliente: ipCliente,
+          ip_cliente: cleanedIp, // Usa la IP limpiada
           estado: estado,
         }
       );
@@ -47,27 +50,36 @@ const RegistroSolicitudesPage = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("es-CO"); // Formato dd/mm/aaaa
+    return date.toLocaleString("es-CO", {
+      dateStyle: "short", // Fecha corta (dd/mm/aaaa)
+      timeStyle: "medium", // Hora con minutos y segundos (hh:mm:ss AM/PM)
+      hour12: true, // Formato de 12 horas
+    });
   };
 
   return (
     <div className="p-4">
       <Toast ref={toast} />
       <Card title="Registro de Solicitudes" className="p-fluid">
-        {/* Filtros */}
         <div className="p-grid p-align-center">
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
-            <label htmlFor="ipCliente">IP Cliente</label>
-            <InputText
+            <label htmlFor="ipCliente" style={{ fontWeight: "bold" }}>
+              IP Cliente
+            </label>
+            {/* Aquí usamos InputMask para aplicar la máscara */}
+            <InputMask
               id="ipCliente"
               value={ipCliente}
               onChange={(e) => setIpCliente(e.target.value)}
+              mask="999.999.999.999"
               placeholder="Ingrese IP"
-              className="p-inputtext-lg"
+              className="p-inputtext p-component"
             />
           </div>
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
-            <label htmlFor="estado">Estado</label>
+            <label htmlFor="estado" style={{ fontWeight: "bold" }}>
+              Estado
+            </label>
             <Dropdown
               id="estado"
               value={estado}
@@ -79,16 +91,13 @@ const RegistroSolicitudesPage = () => {
             />
           </div>
         </div>
-
-        {/* Botón de búsqueda */}
         <Button
           label="Buscar"
           icon="pi pi-search"
           onClick={fetchRegistros}
-          className="p-button-primary p-mt-3"
+          className="p-button-primary p-button-lg"
+          style={{ marginBottom: "1em" }}
         />
-
-        {/* DataTable */}
         <div className="p-mt-5">
           <DataTable
             value={registros}
@@ -103,7 +112,7 @@ const RegistroSolicitudesPage = () => {
             <Column
               field="fecha_solicitud"
               header="Fecha Solicitud"
-              body={(rowData) => formatDate(rowData.fecha_solicitud)} // Formatear la fecha
+              body={(rowData) => formatDate(rowData.fecha_solicitud)}
               sortable
             />
           </DataTable>
