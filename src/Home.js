@@ -60,8 +60,8 @@ const Home = () => {
   return (
     <div>
       <div>
-        <h1>Bienvenido a la aplicación de Alejo</h1>
-        <p>¡Aquí puedes realizar pruebas de diferentes proyectos!...</p>
+        <h1>Bienvenido a Docucloud, una aplicación hehco por Alejo.</h1>
+        <p>¡Aquí realizo pruebas de diferentes proyectos!...</p>
       </div>
       <div className="card flex justify-content-center">
         {loading ? (
