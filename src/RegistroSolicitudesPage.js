@@ -18,7 +18,6 @@ const RegistroSolicitudesPage = () => {
   const estados = [
     { label: "Autorizado", value: "autorizado" },
     { label: "No autorizado", value: "no_autorizado" },
-    { label: "Ninguno", value: "" },
   ];
 
   const fetchRegistros = async () => {
@@ -26,7 +25,6 @@ const RegistroSolicitudesPage = () => {
 
     // Limpiar la IP antes de enviarla
     const cleanedIp = ipCliente.replace(/_/g, "").trim(); // Elimina guiones bajos y espacios
-
     try {
       const response = await axios.post(
         "https://zetamini.ddns.net/api/registro-solicitudes",
@@ -58,12 +56,18 @@ const RegistroSolicitudesPage = () => {
   };
 
   return (
-    <div className="p-4">
+    <div>
       <Toast ref={toast} />
       <Card title="Registro de Solicitudes" className="p-fluid">
         <div className="p-grid p-align-center">
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
-            <label htmlFor="ipCliente" style={{ fontWeight: "bold" }}>
+            <label
+              htmlFor="ipCliente"
+              style={{
+                fontWeight: "bold",
+                fontSize: "1.2em",
+              }}
+            >
               IP Cliente
             </label>
             {/* Aquí usamos InputMask para aplicar la máscara */}
@@ -77,7 +81,10 @@ const RegistroSolicitudesPage = () => {
             />
           </div>
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
-            <label htmlFor="estado" style={{ fontWeight: "bold" }}>
+            <label
+              htmlFor="estado"
+              style={{ fontWeight: "bold", fontSize: "1.2em" }}
+            >
               Estado
             </label>
             <Dropdown
@@ -87,6 +94,7 @@ const RegistroSolicitudesPage = () => {
               onChange={(e) => setEstado(e.value)}
               optionLabel="label"
               placeholder="Seleccione Estado"
+              showClear
               className="p-dropdown-lg"
             />
           </div>
@@ -103,6 +111,9 @@ const RegistroSolicitudesPage = () => {
             value={registros}
             paginator
             rows={10}
+            // size="small"
+            showGridlines
+            stripedRows
             loading={loading}
             responsiveLayout="scroll"
             className="p-datatable-sm"
