@@ -111,12 +111,14 @@ const RegistroSolicitudesPage = () => {
           <DataTable
             value={registros}
             paginator
-            rows={10}
+            rows={5}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="{first} a {last} de {totalRecords} registros"
             // size="small"
             showGridlines
             stripedRows
             loading={loading}
-            responsiveLayout="scroll"
             className="p-datatable-sm"
           >
             <Column field="ip_cliente" header="IP Cliente" sortable />
