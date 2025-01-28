@@ -164,7 +164,7 @@ const OpenWeatherMapComponent = ({ city }) => {
     <div className="card p-d-flex p-jc-center p-ai-center p-mt-5">
       <Card
         title="Pronóstico del Tiempo - OpenWeatherMap"
-        style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
+        style={{ width: "80vw", maxWidth: "750px", textAlign: "center" }}
       >
         {loading && (
           <div className="p-d-flex p-jc-center p-ai-center p-mt-4">
