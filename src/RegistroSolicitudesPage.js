@@ -111,8 +111,8 @@ const RegistroSolicitudesPage = () => {
           <DataTable
             value={registros}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rows={10}
+            rowsPerPageOptions={[10, 20, 30, 50]}
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} a {last} de {totalRecords} registros"
             // size="small"
