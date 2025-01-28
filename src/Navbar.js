@@ -24,6 +24,12 @@ const Navbar = () => {
       id: "WorkTimeCalculator",
     },
     {
+      label: "RegistroSolicitudespage",
+      icon: "pi pi-list",
+      url: "/RegistroSolicitudespage",
+      id: "RegistroSolicitudespage",
+    },
+    {
       label: "Contactar",
       icon: "pi pi-envelope",
       url: "/contactar",
