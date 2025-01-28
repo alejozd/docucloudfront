@@ -103,7 +103,8 @@ const RegistroSolicitudesPage = () => {
           label="Buscar"
           icon="pi pi-search"
           onClick={fetchRegistros}
-          className="p-button-primary p-button-lg"
+          // className="p-button-primary p-button-lg"
+          raised
           style={{ marginBottom: "1em" }}
         />
         <div className="p-mt-5">
