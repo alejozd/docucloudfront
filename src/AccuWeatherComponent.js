@@ -82,7 +82,7 @@ const AccuWeatherComponent = ({ city }) => {
   return (
     <Card
       title="Pronóstico del Tiempo con AccuWeather"
-      style={{ width: "80vw", maxWidth: "800px", textAlign: "center" }}
+      style={{ width: "80vw", maxWidth: "760px", textAlign: "center" }}
     >
       {loading && (
         <div className="p-d-flex p-jc-center p-ai-center p-mt-4">
