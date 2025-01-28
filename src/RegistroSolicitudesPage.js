@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
+import { InputMask } from "primereact/inputmask";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
@@ -58,13 +58,14 @@ const RegistroSolicitudesPage = () => {
         <div className="p-grid p-align-center">
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
             <label htmlFor="ipCliente">IP Cliente</label>
-            <InputText
+            <InputMask
               id="ipCliente"
+              mask="999.999.999.999"
               value={ipCliente}
               onChange={(e) => setIpCliente(e.target.value)}
               placeholder="Ingrese IP"
               className="p-inputtext-lg"
-              //   className="p-inputtext-sm"
+              autoClear={false}
             />
           </div>
           <div className="p-col-12 p-md-6" style={{ marginBottom: "1em" }}>
