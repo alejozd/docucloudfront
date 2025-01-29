@@ -118,7 +118,7 @@ const RegistroSolicitudesPage = () => {
             // size="small"
             showGridlines
             stripedRows
-            sortField="ip_cliente"
+            sortField="fecha_solicitud"
             sortOrder={-1}
             loading={loading}
             className="p-datatable-sm"
