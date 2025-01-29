@@ -118,10 +118,12 @@ const RegistroSolicitudesPage = () => {
             // size="small"
             showGridlines
             stripedRows
+            sortField="ip_cliente"
+            sortOrder={-1}
             loading={loading}
             className="p-datatable-sm"
           >
-            <Column field="ip_cliente" header="IP Cliente" sortable />
+            <Column field="ip_cliente" header="IP Cliente" sortable filter />
             <Column field="estado" header="Estado" sortable />
             <Column
               field="fecha_solicitud"
