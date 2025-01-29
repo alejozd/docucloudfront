@@ -130,6 +130,7 @@ const RegistroSolicitudesPage = () => {
               header="Fecha Solicitud"
               body={(rowData) => formatDate(rowData.fecha_solicitud)}
               sortable
+              filter
             />
           </DataTable>
         </div>
