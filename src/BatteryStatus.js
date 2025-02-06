@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
+import { MeterGroup } from "primereact/metergroup";
 
 const BatteryStatus = () => {
   const [batteryInfo, setBatteryInfo] = useState(null);
@@ -39,9 +40,17 @@ const BatteryStatus = () => {
       >
         {batteryInfo ? (
           <div className="space-y-2 text-center">
-            <p>
-              <strong>Nivel:</strong> {batteryInfo.batteryLevel}
-            </p>
+            <div className="flex justify-content-center">
+              <MeterGroup
+                values={[
+                  {
+                    label: "Bateria",
+                    value: parseFloat(batteryInfo.batteryLevel),
+                    icon: "pi pi-bolt",
+                  },
+                ]}
+              />
+            </div>
             <p>
               <strong>Estado:</strong> {batteryInfo.chargingStatus}
             </p>
