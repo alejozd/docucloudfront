@@ -12,7 +12,9 @@ import AsociarClienteContacto from "./AsociarClienteContacto";
 import SerialReportes from "./SerialReportes";
 import WorkTimeCalculator from "./WorkTimeCalculator";
 import RegistroSolicitudesPage from "./RegistroSolicitudesPage";
-import "primereact/resources/themes/lara-light-blue/theme.css";
+import BatteryStatus from "./BatteryStatus";
+// import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/themes/lara-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/primereact.css";
 import "primeicons/primeicons.css";
@@ -44,6 +46,7 @@ function App() {
               path="/RegistroSolicitudesPage"
               element={<RegistroSolicitudesPage />}
             />
+            <Route path="/BatteryStatus" element={<BatteryStatus />} />
           </Routes>
         </div>
       </div>

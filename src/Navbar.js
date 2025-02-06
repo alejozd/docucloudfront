@@ -1,7 +1,6 @@
 import React from "react";
 import { Menubar } from "primereact/menubar";
-import { Avatar } from "primereact/avatar"; //
-import { icon } from "@fortawesome/fontawesome-svg-core";
+import { Avatar } from "primereact/avatar";
 
 const Navbar = () => {
   const items = [
@@ -18,10 +17,22 @@ const Navbar = () => {
       id: "SerialReportes",
     },
     {
-      label: "WorkTimeCalculator",
-      icon: "pi pi-calculator",
-      url: "/WorkTimeCalculator",
-      id: "WorkTimeCalculator",
+      label: "Utilidades",
+      icon: "pi pi-cog",
+      items: [
+        {
+          label: "WorkTimeCalculator",
+          icon: "pi pi-calculator",
+          url: "/WorkTimeCalculator",
+          id: "WorkTimeCalculator",
+        },
+        {
+          label: "BatteryStatus",
+          icon: "pi pi-battery pi-bolt",
+          url: "/BatteryStatus",
+          id: "BatteryStatus",
+        },
+      ],
     },
     {
       label: "RegistroSolicitudespage",
