@@ -19,6 +19,14 @@ const BatteryStatus = () => {
     setLoading(false);
   };
 
+  // Función para determinar el color de la barra según el nivel de batería
+  const getBatteryColor = (level) => {
+    if (level <= 15) return "#D32F2F"; // Rojo (Crítico)
+    if (level <= 40) return "#FBC02D"; // Amarillo (Bajo)
+    if (level <= 70) return "#1976D2"; // Azul (Medio)
+    return "#388E3C"; // Verde (Alto)
+  };
+
   const footer = (
     <>
       <Button
@@ -34,7 +42,7 @@ const BatteryStatus = () => {
     <div className="card flex justify-content-center">
       <Card
         title="Estado de la Batería"
-        subTitle="Bateria HP Mini 210"
+        subTitle="Equipo HP Mini 210"
         className="w-full max-w-sm shadow-lg"
         footer={footer}
       >
@@ -44,8 +52,11 @@ const BatteryStatus = () => {
               <MeterGroup
                 values={[
                   {
-                    label: "Bateria",
+                    label: <span className="font-bold">Batería</span>,
                     value: parseFloat(batteryInfo.batteryLevel),
+                    color: getBatteryColor(
+                      parseFloat(batteryInfo.batteryLevel)
+                    ),
                     icon: "pi pi-bolt",
                   },
                 ]}
