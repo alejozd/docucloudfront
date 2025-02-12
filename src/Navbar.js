@@ -1,6 +1,7 @@
 import React from "react";
 import { Menubar } from "primereact/menubar";
 import { Avatar } from "primereact/avatar";
+import { icon } from "@fortawesome/fontawesome-svg-core";
 
 const Navbar = () => {
   const items = [
@@ -41,16 +42,34 @@ const Navbar = () => {
       id: "RegistroSolicitudespage",
     },
     {
-      label: "Contactar",
-      icon: "pi pi-envelope",
-      url: "/contactar",
-      id: "contactar",
+      label: "Reportes",
+      icon: "pi pi-chart-line",
+      items: [
+        {
+          label: "Dashboard de Ventas",
+          icon: "pi pi-chart-bar",
+          url: "/SalesDashboard",
+          id: "SalesDashboard",
+        },
+      ],
     },
     {
-      label: "Weather",
-      icon: "pi pi-sun",
-      url: "/weather",
-      id: "weather",
+      label: "Otros",
+      icon: "pi pi-other",
+      items: [
+        {
+          label: "Contactar",
+          icon: "pi pi-envelope",
+          url: "/contactar",
+          id: "contactar",
+        },
+        {
+          label: "Weather",
+          icon: "pi pi-sun",
+          url: "/weather",
+          id: "weather",
+        },
+      ],
     },
     {
       label: "Administrar",
