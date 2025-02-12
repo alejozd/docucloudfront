@@ -96,6 +96,7 @@ const SalesDashboard = () => {
                 style={{ fontSize: "2rem", color: "#4CAF50" }}
               ></i>
             }
+            description='<span class="highlight">50 nuevas</span> este mes'
           />
           <CardDashboard
             title="Ingresos"
