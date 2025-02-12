@@ -13,6 +13,7 @@ import SerialReportes from "./SerialReportes";
 import WorkTimeCalculator from "./WorkTimeCalculator";
 import RegistroSolicitudesPage from "./RegistroSolicitudesPage";
 import BatteryStatus from "./BatteryStatus";
+import SalesDashboard from "./SalesDashboard";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 // import "primereact/resources/themes/lara-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -47,6 +48,7 @@ function App() {
               element={<RegistroSolicitudesPage />}
             />
             <Route path="/BatteryStatus" element={<BatteryStatus />} />
+            <Route path="/SalesDashboard" element={<SalesDashboard />} />
           </Routes>
         </div>
       </div>
