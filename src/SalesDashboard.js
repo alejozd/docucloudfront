@@ -16,6 +16,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import CardDashboard from "./components/CardDashboard";
+
 const SalesDashboard = () => {
   const [selectedSegment, setSelectedSegment] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -61,16 +63,48 @@ const SalesDashboard = () => {
       </Card>
       {/* KPIs */}
       <Card className="p-4 mb-2">
-        <div className="grid grid-cols-4 gap-2">
-          <Card className="mx-auto max-w-xs" title="Total Facturas">
-            <h2>1,200</h2>
-          </Card>
-          <Card className="mx-auto max-w-xs" title="Ticket Promedio">
-            <h2>$2,350</h2>
-          </Card>
-          <Card className="mx-auto max-w-xs" title="Clientes Activos">
-            <h2>85</h2>
-          </Card>
+        <div className="flex gap-4 flex-wrap">
+          <CardDashboard
+            title="Cantidad Ventas"
+            value="200"
+            icon={
+              <i
+                className="pi pi-inbox"
+                style={{ fontSize: "2rem", color: "#4CAF50" }}
+              ></i>
+            }
+          />
+          <CardDashboard
+            title="Ingresos"
+            value="$500.000"
+            icon={
+              <i
+                className="pi pi-money-bill"
+                style={{ fontSize: "2rem", color: "#FFC107" }}
+              ></i>
+            }
+          />
+          <CardDashboard
+            title="Clientes Activos"
+            value="200"
+            icon={
+              <i
+                className="pi pi-users"
+                style={{ fontSize: "2rem", color: "#FF7043" }}
+              ></i>
+            }
+          />
+          <CardDashboard
+            title="Orders"
+            value="152"
+            icon={
+              <i
+                className="pi pi-shopping-cart"
+                style={{ fontSize: "2rem", color: "#42A5F5" }}
+              ></i>
+            }
+            description='<span class="highlight">24 new</span> since last visit'
+          />
         </div>
       </Card>
       {/* Tabla de Clientes */}
