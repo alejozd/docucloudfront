@@ -46,7 +46,7 @@ const SalesDashboard = () => {
   ];
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
   return (
-    <div className="p-6 space-y-6">
+    <div>
       <h2 className="mb-4">Dashboard de Ventas</h2>
       {/* Filtros */}
       <Card className="p-4 flex gap-4 mb-2">
@@ -61,14 +61,14 @@ const SalesDashboard = () => {
       </Card>
       {/* KPIs */}
       <Card className="p-4 mb-2">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card title="Total Facturas">
+        <div className="grid grid-cols-4 gap-2">
+          <Card className="mx-auto max-w-xs" title="Total Facturas">
             <h2>1,200</h2>
           </Card>
-          <Card title="Ticket Promedio">
+          <Card className="mx-auto max-w-xs" title="Ticket Promedio">
             <h2>$2,350</h2>
           </Card>
-          <Card title="Clientes Activos">
+          <Card className="mx-auto max-w-xs" title="Clientes Activos">
             <h2>85</h2>
           </Card>
         </div>
