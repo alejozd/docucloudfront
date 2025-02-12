@@ -1,7 +1,6 @@
 import React from "react";
 import { Menubar } from "primereact/menubar";
 import { Avatar } from "primereact/avatar";
-import { icon } from "@fortawesome/fontawesome-svg-core";
 
 const Navbar = () => {
   const items = [
