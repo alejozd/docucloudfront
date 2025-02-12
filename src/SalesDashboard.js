@@ -5,51 +5,73 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { Chart } from "primereact/chart"; // Importa el componente Chart de PrimeReact
 import CardDashboard from "./components/CardDashboard";
+import ChartDataLabels from "chartjs-plugin-datalabels"; // Importa el plugin para los labels
 
 const SalesDashboard = () => {
   const [selectedSegment, setSelectedSegment] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+
+  // Datos de ejemplo
   const segments = [
     { label: "Arquitecto", value: "Arquitecto" },
     { label: "Maestro", value: "Maestro" },
     { label: "Constructora", value: "Constructora" },
   ];
+
   const clients = [
     { id: 1, nombre: "Cliente A", compras: 10, ultimaCompra: "2024-02-01" },
     { id: 2, nombre: "Cliente B", compras: 15, ultimaCompra: "2024-01-15" },
   ];
+
   const salesData = [
     { segment: "Arquitecto", sales: 12000 },
     { segment: "Maestro", sales: 9000 },
     { segment: "Constructora", sales: 15000 },
   ];
+
+  const productsData = {
+    labels: ["Cemento", "Piso", "Sanitario", "Lavamanos"],
+    datasets: [
+      {
+        data: [40, 30, 20, 10],
+        backgroundColor: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"],
+        hoverBackgroundColor: ["#64B5F6", "#81C784", "#FFB74D", "#FFA07A"],
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top", // Posición de la leyenda
+      },
+      datalabels: {
+        display: true, // Habilitar labels
+        color: "#000", // Color del texto
+        font: {
+          size: 14, // Tamaño de la fuente
+        },
+        formatter: (value, context) => {
+          return context.chart.data.labels[context.dataIndex]; // Mostrar el label correspondiente
+        },
+      },
+    },
+  };
+
   const openSidebar = (client) => {
     setSelectedClient(client);
     setShowSidebar(true);
   };
-  const productsData = [
-    { name: "Cemento", value: 40 },
-    { name: "Piso", value: 30 },
-    { name: "Sanitario", value: 20 },
-    { name: "Lavamanos", value: 10 },
-  ];
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
   return (
     <div>
       <h2 className="mb-4">Dashboard de Ventas</h2>
+
       {/* Filtros */}
       <Card className="p-4 flex gap-4 mb-2">
         <Dropdown
@@ -61,9 +83,10 @@ const SalesDashboard = () => {
         />
         <Button label="Buscar" icon="pi pi-search" />
       </Card>
+
       {/* KPIs */}
       <Card className="p-4 mb-2">
-        <div className="flex gap-4 flex-wrap">
+        <div className="flex gap-4 w-full">
           <CardDashboard
             title="Cantidad Ventas"
             value="200"
@@ -107,6 +130,7 @@ const SalesDashboard = () => {
           />
         </div>
       </Card>
+
       {/* Tabla de Clientes */}
       <Card className="p-4 mb-2">
         <h3 className="mt-6">Clientes del Segmento</h3>
@@ -128,42 +152,43 @@ const SalesDashboard = () => {
           <Column field="ultimaCompra" header="Última Compra" sortable />
         </DataTable>
       </Card>
-      {/* Gráfica de Ventas por Segmento */}
-      <Card className="p-4 mb-2">
-        <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={salesData}>
-            <XAxis dataKey="segment" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="sales" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
-      {/* Gráfica de Productos Más Vendidos */}
-      <Card className="p-4 mb-2">
-        <h2 className="text-xl font-bold mb-4">Productos Más Vendidos</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={productsData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-            >
-              {productsData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </Card>
+
+      {/* Gráficos */}
+      <div className="flex gap-4 w-full">
+        {/* Gráfica de Ventas por Segmento */}
+        <Card className="p-4 mb-2 flex-1">
+          <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
+          <Chart
+            type="bar"
+            data={{
+              labels: salesData.map((item) => item.segment),
+              datasets: [
+                {
+                  label: "Ventas",
+                  data: salesData.map((item) => item.sales),
+                  backgroundColor: "#42A5F5",
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+            }}
+          />
+        </Card>
+
+        {/* Gráfica de Productos Más Vendidos */}
+        <Card className="p-4 mb-2 flex-1">
+          <h2 className="text-xl font-bold mb-4">Productos Más Vendidos</h2>
+          <Chart
+            type="pie"
+            data={productsData}
+            options={chartOptions}
+            plugins={[ChartDataLabels]} // Usa el plugin para los labels
+          />
+        </Card>
+      </div>
+
       {/* Sidebar con Detalle del Cliente */}
       <Sidebar
         visible={showSidebar}
@@ -181,4 +206,5 @@ const SalesDashboard = () => {
     </div>
   );
 };
+
 export default SalesDashboard;
