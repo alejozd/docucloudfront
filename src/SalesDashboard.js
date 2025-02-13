@@ -86,7 +86,7 @@ const SalesDashboard = () => {
 
       {/* KPIs */}
       <Card className="p-4 mb-2">
-        <div className="flex gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           <CardDashboard
             title="Cantidad Ventas"
             value="200"
@@ -155,7 +155,7 @@ const SalesDashboard = () => {
       </Card>
 
       {/* Gráficos */}
-      <div className="flex gap-4 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
         {/* Gráfica de Ventas por Segmento */}
         <Card className="p-4 mb-2 flex-1">
           <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
