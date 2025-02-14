@@ -4,7 +4,7 @@ import "./CardDashboard.css"; // Estilos personalizados
 
 const CardDashboard = ({ title, value, icon, description }) => {
   return (
-    <Card className="card-dashboard ">
+    <Card className="card-dashboard flex-1">
       <div className="grid-container">
         {/* Sección A: Título */}
         <div className="section-a">
