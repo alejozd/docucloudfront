@@ -8,6 +8,7 @@ import { Button } from "primereact/button";
 import { Chart } from "primereact/chart"; // Importa el componente Chart de PrimeReact
 import CardDashboard from "./components/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels"; // Importa el plugin para los labels
+import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
   const [selectedSegment, setSelectedSegment] = useState(null);
@@ -137,39 +138,45 @@ const SalesDashboard = () => {
       </Card>
 
       {/* Gráficos */}
-      <Card className="p-4 mb-2">
-        {/* Gráfica de Ventas por Segmento */}
-        <Card className="p-4 flex-1 mb-4">
-          <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
-          <Chart
-            type="bar"
-            data={{
-              labels: salesData.map((item) => item.segment),
-              datasets: [
-                {
-                  label: "Ventas",
-                  data: salesData.map((item) => item.sales),
-                  backgroundColor: "#42A5F5",
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-            }}
-          />
-        </Card>
+      <Card className="p-1 mb-2">
+        <div className="charts-container">
+          {/* Gráfica de Ventas por Segmento */}
+          <Card className="p-4 chart-card">
+            <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
+            <div className="chart-container">
+              <Chart
+                type="bar"
+                data={{
+                  labels: salesData.map((item) => item.segment),
+                  datasets: [
+                    {
+                      label: "Ventas",
+                      data: salesData.map((item) => item.sales),
+                      backgroundColor: "#42A5F5",
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                }}
+              />
+            </div>
+          </Card>
 
-        {/* Gráfica de Productos Más Vendidos */}
-        <Card className="p-4 flex-1 mb-4">
-          <h2 className="text-xl font-bold mb-4">Productos Más Vendidos</h2>
-          <Chart
-            type="pie"
-            data={productsData}
-            options={chartOptions}
-            plugins={[ChartDataLabels]} // Usa el plugin para los labels
-          />
-        </Card>
+          {/* Gráfica de Productos Más Vendidos */}
+          <Card className="p-4 chart-card">
+            <h2 className="text-xl font-bold mb-4">Productos Más Vendidos</h2>
+            <div className="chart-container">
+              <Chart
+                type="pie"
+                data={productsData}
+                options={chartOptions}
+                plugins={[ChartDataLabels]} // Usa el plugin para los labels
+              />
+            </div>
+          </Card>
+        </div>
       </Card>
 
       {/* Sidebar con Detalle del Cliente */}
