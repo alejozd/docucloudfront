@@ -86,55 +86,37 @@ const SalesDashboard = () => {
 
       {/* KPIs */}
       <Card className="p-4 mb-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <CardDashboard
             title="Cantidad Ventas"
             value="200"
-            icon={
-              <i
-                className="pi pi-inbox"
-                style={{ fontSize: "2rem", color: "#4CAF50" }}
-              ></i>
-            }
+            icon={<i className="pi pi-inbox text-green-500 text-2xl"></i>}
             description='<span class="highlight">50 nuevas</span> este mes'
           />
           <CardDashboard
             title="Ingresos"
             value="$500.000"
-            icon={
-              <i
-                className="pi pi-money-bill"
-                style={{ fontSize: "2rem", color: "#FFC107" }}
-              ></i>
-            }
+            icon={<i className="pi pi-money-bill text-yellow-500 text-2xl"></i>}
           />
           <CardDashboard
             title="Clientes Activos"
             value="200"
-            icon={
-              <i
-                className="pi pi-users"
-                style={{ fontSize: "2rem", color: "#FF7043" }}
-              ></i>
-            }
+            icon={<i className="pi pi-users text-orange-500 text-2xl"></i>}
           />
           <CardDashboard
             title="Orders"
             value="152"
             icon={
-              <i
-                className="pi pi-shopping-cart"
-                style={{ fontSize: "2rem", color: "#42A5F5" }}
-              ></i>
+              <i className="pi pi-shopping-cart text-blue-500 text-2xl"></i>
             }
-            description='<span class="highlight">24 new</span> since last visit'
+            description='<span class="highlight">24 new</span> desde la última visita'
           />
         </div>
       </Card>
 
       {/* Tabla de Clientes */}
-      <Card className="p-4 mb-2">
-        <h3 className="mt-6">Clientes del Segmento</h3>
+      <Card className="p-1 mb-4">
+        <h3 className="text-xl font-semibold">Clientes del Segmento</h3>
         <DataTable value={clients} paginator rows={5} className="mt-3">
           <Column
             field="nombre"
@@ -155,9 +137,9 @@ const SalesDashboard = () => {
       </Card>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+      <Card className="p-4 mb-2">
         {/* Gráfica de Ventas por Segmento */}
-        <Card className="p-4 mb-2 flex-1">
+        <Card className="p-4 flex-1 mb-4">
           <h2 className="text-xl font-bold mb-4">Ventas por Segmento</h2>
           <Chart
             type="bar"
@@ -179,7 +161,7 @@ const SalesDashboard = () => {
         </Card>
 
         {/* Gráfica de Productos Más Vendidos */}
-        <Card className="p-4 mb-2 flex-1">
+        <Card className="p-4 flex-1 mb-4">
           <h2 className="text-xl font-bold mb-4">Productos Más Vendidos</h2>
           <Chart
             type="pie"
@@ -188,7 +170,7 @@ const SalesDashboard = () => {
             plugins={[ChartDataLabels]} // Usa el plugin para los labels
           />
         </Card>
-      </div>
+      </Card>
 
       {/* Sidebar con Detalle del Cliente */}
       <Sidebar
