@@ -58,7 +58,8 @@ const SalesDashboard = () => {
           size: 14, // Tamaño de la fuente
         },
         formatter: (value, context) => {
-          return context.chart.data.labels[context.dataIndex]; // Mostrar el label correspondiente
+          const label = context.chart.data.labels[context.dataIndex]; // Nombre del producto
+          return `${value}`; // Combina el nombre y el valor
         },
       },
     },
