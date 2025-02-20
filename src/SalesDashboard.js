@@ -12,9 +12,24 @@ const SalesDashboard = () => {
 
   // Datos de ejemplo para los KPIs
   const kpis = [
-    { title: "Ventas Totales", value: "$10,000" },
-    { title: "Clientes Activos", value: "150" },
-    { title: "Pedidos Pendientes", value: "25" },
+    {
+      title: "Ventas Totales",
+      value: "$10,000",
+      icon: "pi-dollar",
+      iconBgColor: "#4CAF50",
+    },
+    {
+      title: "Clientes Activos",
+      value: "150",
+      icon: "pi-users",
+      iconBgColor: "#FF9800",
+    },
+    {
+      title: "Pedidos Pendientes",
+      value: "25",
+      icon: "pi-shopping-cart",
+      iconBgColor: "#F44336",
+    },
   ];
 
   // Datos de ejemplo para el DataTable
@@ -69,8 +84,17 @@ const SalesDashboard = () => {
       {/* Sección de KPIs */}
       <div className="section kpi-section">
         {kpis.map((kpi, index) => (
-          <Card key={index} title={kpi.title} className="kpi-card">
-            <h2>{kpi.value}</h2>
+          <Card key={index} className="kpi-card">
+            <div className="kpi-header">
+              <h3 className="kpi-title">{kpi.title}</h3>
+              <div
+                className="kpi-icon"
+                style={{ backgroundColor: kpi.iconBgColor }}
+              >
+                <i className={`pi ${kpi.icon}`} />
+              </div>
+            </div>
+            <h2 className="kpi-value">{kpi.value}</h2>
           </Card>
         ))}
       </div>
