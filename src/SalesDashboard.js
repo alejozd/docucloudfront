@@ -15,23 +15,22 @@ const SalesDashboard = () => {
   const pieChartRef = useRef(null);
 
   // Estado para el segmento seleccionado
-  const [selectedSegment, setSelectedSegment] = useState(segments[0]); // Por defecto, selecciona el primer segmento
+  const [selectedSegment, setSelectedSegment] = useState(segments[0] || null);
+  console.log("Estado inicial de selectedSegment:", selectedSegment);
 
   // Filtrar los productos del segmento seleccionado y obtener el Top 6
   const topProducts = useMemo(() => {
     if (!selectedSegment || !productsData[selectedSegment.value]) return [];
-    const products = productsData[selectedSegment.value]
+    return productsData[selectedSegment.value]
       .slice(0, 6)
       .map((item) => item.product);
-    return products;
   }, [selectedSegment]);
 
   const topSales = useMemo(() => {
     if (!selectedSegment || !productsData[selectedSegment.value]) return [];
-    const sales = productsData[selectedSegment.value]
+    return productsData[selectedSegment.value]
       .slice(0, 6)
       .map((item) => item.sales);
-    return sales;
   }, [selectedSegment]);
 
   // Datos para el gráfico de pastel
@@ -142,6 +141,10 @@ const SalesDashboard = () => {
     []
   );
 
+  useEffect(() => {
+    console.log("Estado actualizado de selectedSegment:", selectedSegment);
+  }, [selectedSegment]);
+
   // Efecto para manejar el redimensionamiento de la ventana
   useEffect(() => {
     const handleResize = () => {
@@ -195,10 +198,15 @@ const SalesDashboard = () => {
           <Card title="Gráfico de Pastel">
             <div className="segment-dropdown">
               <Dropdown
-                value={selectedSegment}
+                value={selectedSegment.value}
                 options={segments}
                 onChange={(e) => {
+                  console.log(
+                    "Valor seleccionado en el evento (e.value):",
+                    e.value
+                  );
                   const selected = segments.find((s) => s.value === e.value);
+                  console.log("Objeto encontrado en segments:", selected);
                   setSelectedSegment(selected || null);
                 }}
                 optionLabel="label"
@@ -207,6 +215,7 @@ const SalesDashboard = () => {
               />
             </div>
             <Chart
+              ref={pieChartRef}
               type="pie"
               data={pieChartData}
               options={pieChartOptions}
