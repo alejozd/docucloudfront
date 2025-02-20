@@ -3,6 +3,7 @@ import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import CardDashboard from "./components/CardDashboard";
 import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
@@ -84,18 +85,7 @@ const SalesDashboard = () => {
       {/* Sección de KPIs */}
       <div className="section kpi-section">
         {kpis.map((kpi, index) => (
-          <Card key={index} className="kpi-card">
-            <div className="kpi-header">
-              <h3 className="kpi-title">{kpi.title}</h3>
-              <div
-                className="kpi-icon"
-                style={{ backgroundColor: kpi.iconBgColor }}
-              >
-                <i className={`pi ${kpi.icon}`} />
-              </div>
-            </div>
-            <h2 className="kpi-value">{kpi.value}</h2>
-          </Card>
+          <CardDashboard key={index} {...kpi} />
         ))}
       </div>
 
