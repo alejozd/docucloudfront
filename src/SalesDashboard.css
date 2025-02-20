@@ -13,40 +13,6 @@
   flex-wrap: wrap; /* Permite que las tarjetas se ajusten en pantallas pequeñas */
 }
 
-.kpi-card {
-  flex: 1; /* Las tarjetas ocupan todo el espacio disponible */
-  min-width: 200px; /* Ancho mínimo para evitar que las tarjetas se hagan demasiado pequeñas */
-}
-
-.kpi-header {
-  display: flex;
-  justify-content: space-between; /* Alinea el título a la izquierda y el ícono a la derecha */
-  align-items: center; /* Centra verticalmente el título y el ícono */
-  margin-bottom: 10px; /* Espacio entre el encabezado y el valor */
-}
-
-.kpi-title {
-  margin: 0; /* Elimina el margen predeterminado del título */
-  font-size: 1rem; /* Tamaño de fuente para el título */
-}
-
-.kpi-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%; /* Hace que el fondo sea circular */
-  color: white; /* Color del ícono */
-  font-size: 1rem; /* Tamaño del ícono */
-}
-
-.kpi-value {
-  margin: 0; /* Elimina el margen predeterminado del valor */
-  font-size: 1.5rem; /* Tamaño de fuente para el valor */
-  text-align: center; /* Alinea el valor a la izquierda */
-}
-
 .datatable-section {
   width: 100%;
 }
