@@ -1,24 +1,42 @@
-.charts-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  @media (min-width: 768px) {
-    .charts-container {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  
-  .chart-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 0;
-  }
-  
-  .chart-container {
-    width: 100%;
-    height: 100%;
-  }
-  
+/* Estilos generales */
+.sales-dashboard {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.kpi-section {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Permite que las tarjetas se ajusten en pantallas pequeñas */
+}
+
+.kpi-card {
+  flex: 1; /* Las tarjetas ocupan todo el espacio disponible */
+  min-width: 200px; /* Ancho mínimo para evitar que las tarjetas se hagan demasiado pequeñas */
+}
+
+.datatable-section {
+  width: 100%;
+}
+
+.charts-section {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Permite que los gráficos se apilen en pantallas pequeñas */
+}
+
+.chart-container {
+  flex: 1; /* Cada contenedor ocupa la mitad del ancho en pantallas grandes */
+  min-width: 300px; /* Ancho mínimo para evitar que los gráficos se hagan demasiado pequeños */
+  display: flex; /* Usamos Flexbox para igualar las alturas */
+  flex-direction: column; /* Asegura que el contenido esté en columna */
+}
+
+.chart-container .p-card {
+  flex: 1; /* Hace que las tarjetas ocupen toda la altura disponible */
+  display: flex;
+  flex-direction: column;
+}
