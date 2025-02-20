@@ -106,3 +106,14 @@ export const products = [
   { id: 2, name: "Lavamanos", quantity: 5, price: "$150" },
   { id: 3, name: "Grifería Monomando", quantity: 8, price: "$80" },
 ];
+
+// Datos de ejemplo para ventas totales por segmento (gráfico de barras)
+export const segmentSales = {
+  persona_natural: 285, // Total de ventas para Persona Natural
+  persona_juridica: 136, // Total de ventas para Persona Jurídica
+  constructora: 300, // Total de ventas para Constructora
+  distribuidor_deposito: 240, // Total de ventas para Distribuidor/Depósito
+  maestro_contratista: 180, // Total de ventas para Maestro/Contratista
+  arq_disenador: 140, // Total de ventas para Arq/Diseñador
+  consorcio: 100, // Total de ventas para Consorcio
+};
