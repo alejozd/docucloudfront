@@ -3,8 +3,9 @@ import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import CardDashboard from "./components/CardDashboard";
 import { Dropdown } from "primereact/dropdown";
+import CardDashboard from "./components/CardDashboard";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
@@ -120,6 +121,27 @@ const SalesDashboard = () => {
     ],
   };
 
+  // Opciones del gráfico de pastel
+  const pieChartOptions = {
+    plugins: {
+      tooltip: {
+        enabled: true, // Habilita el tooltip al pasar el mouse
+      },
+      datalabels: {
+        formatter: (value, context) => {
+          return value; // Muestra el valor dentro del segmento
+        },
+        color: "#fff", // Color del texto
+        font: {
+          size: 14, // Tamaño del texto
+          weight: "bold", // Negrita
+        },
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+  };
+
   // Efecto para manejar el redimensionamiento de la ventana
   useEffect(() => {
     const handleResize = () => {
@@ -185,7 +207,8 @@ const SalesDashboard = () => {
             <Chart
               type="pie"
               data={pieChartData}
-              options={{ maintainAspectRatio: false }}
+              options={pieChartOptions}
+              plugins={[ChartDataLabels]}
             />
           </Card>
         </div>
