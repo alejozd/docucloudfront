@@ -48,10 +48,50 @@ const SalesDashboard = () => {
     datasets: [
       {
         label: "Ventas",
-        backgroundColor: "#42A5F5",
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
         data: [65, 59, 80, 81],
       },
     ],
+  };
+
+  // Opciones del gráfico de barras
+  const barChartOptions = {
+    plugins: {
+      tooltip: {
+        enabled: true, // Habilita el tooltip al pasar el mouse
+      },
+      datalabels: {
+        anchor: "end", // Posición del texto (arriba de la barra)
+        align: "top", // Alineación del texto
+        formatter: (value) => {
+          return value; // Muestra el valor directamente
+        },
+        color: "#000", // Color del texto
+        font: {
+          size: 14, // Tamaño del texto
+          weight: "bold", // Negrita
+        },
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    aspectRatio: 0.8,
+    scales: {
+      x: {
+        grid: {
+          display: false, // Oculta las líneas de la cuadrícula en el eje X
+        },
+      },
+      y: {
+        ticks: {
+          // stepSize: 5, // Intervalo de 5 en 5
+          color: "#000", // Color de los números
+        },
+        grid: {
+          drawBorder: false,
+        },
+      },
+    },
   };
 
   // Datos de ejemplo para los segmentos
@@ -188,7 +228,9 @@ const SalesDashboard = () => {
               ref={barChartRef}
               type="bar"
               data={barChartData}
-              options={{ maintainAspectRatio: false }}
+              // options={{ maintainAspectRatio: false }}
+              options={barChartOptions}
+              plugins={[ChartDataLabels]}
             />
           </Card>
         </div>
