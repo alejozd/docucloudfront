@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
@@ -43,56 +43,62 @@ const SalesDashboard = () => {
   ];
 
   // Datos de ejemplo para el gráfico de barras
-  const barChartData = {
-    labels: ["Enero", "Febrero", "Marzo", "Abril"],
-    datasets: [
-      {
-        label: "Ventas",
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
-        data: [65, 59, 80, 81],
-      },
-    ],
-  };
+  const barChartData = useMemo(
+    () => ({
+      labels: ["Enero", "Febrero", "Marzo", "Abril"],
+      datasets: [
+        {
+          label: "Ventas",
+          backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+          data: [65, 59, 80, 81],
+        },
+      ],
+    }),
+    []
+  );
 
   // Opciones del gráfico de barras
-  const barChartOptions = {
-    plugins: {
-      tooltip: {
-        enabled: true, // Habilita el tooltip al pasar el mouse
-      },
-      datalabels: {
-        anchor: "end", // Posición del texto (arriba de la barra)
-        align: "top", // Alineación del texto
-        formatter: (value) => {
-          return value; // Muestra el valor directamente
+  const barChartOptions = useMemo(
+    () => ({
+      plugins: {
+        tooltip: {
+          enabled: true, // Habilita el tooltip al pasar el mouse
         },
-        color: "#000", // Color del texto
-        font: {
-          size: 14, // Tamaño del texto
-          weight: "bold", // Negrita
-        },
-      },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-    aspectRatio: 0.8,
-    scales: {
-      x: {
-        grid: {
-          display: false, // Oculta las líneas de la cuadrícula en el eje X
+        datalabels: {
+          anchor: "end", // Posición del texto (arriba de la barra)
+          align: "top", // Alineación del texto
+          formatter: (value) => {
+            return value; // Muestra el valor directamente
+          },
+          color: "#000", // Color del texto
+          font: {
+            size: 14, // Tamaño del texto
+            weight: "bold", // Negrita
+          },
         },
       },
-      y: {
-        ticks: {
-          // stepSize: 5, // Intervalo de 5 en 5
-          color: "#000", // Color de los números
+      responsive: true,
+      maintainAspectRatio: false,
+      aspectRatio: 0.8,
+      scales: {
+        x: {
+          grid: {
+            display: false, // Oculta las líneas de la cuadrícula en el eje X
+          },
         },
-        grid: {
-          drawBorder: false,
+        y: {
+          ticks: {
+            stepSize: 5, // Intervalo de 5 en 5
+            color: "#000", // Color de los números
+          },
+          grid: {
+            drawBorder: false,
+          },
         },
       },
-    },
-  };
+    }),
+    []
+  );
 
   // Datos de ejemplo para los segmentos
   const segments = [
@@ -136,51 +142,66 @@ const SalesDashboard = () => {
   const [selectedSegment, setSelectedSegment] = useState(segments[0]); // Por defecto, selecciona "Electrónica"
 
   // Filtrar los productos del segmento seleccionado y obtener el Top 6
-  const topProducts = productsData[selectedSegment.code]
-    .slice(0, 6) // Tomar los primeros 6 productos
-    .map((item) => item.product); // Extraer los nombres de los productos
-  const topSales = productsData[selectedSegment.code]
-    .slice(0, 6) // Tomar los primeros 6 productos
-    .map((item) => item.sales); // Extraer las ventas
+  const topProducts = useMemo(
+    () =>
+      productsData[selectedSegment.code]
+        .slice(0, 6) // Tomar los primeros 6 productos
+        .map((item) => item.product), // Extraer los nombres de los productos
+    [selectedSegment]
+  );
+
+  const topSales = useMemo(
+    () =>
+      productsData[selectedSegment.code]
+        .slice(0, 6) // Tomar los primeros 6 productos
+        .map((item) => item.sales), // Extraer las ventas
+    [selectedSegment]
+  );
 
   // Datos para el gráfico de pastel
-  const pieChartData = {
-    labels: topProducts,
-    datasets: [
-      {
-        data: topSales,
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-        ],
-      },
-    ],
-  };
+  const pieChartData = useMemo(
+    () => ({
+      labels: topProducts,
+      datasets: [
+        {
+          data: topSales,
+          backgroundColor: [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4BC0C0",
+            "#9966FF",
+            "#FF9F40",
+          ],
+        },
+      ],
+    }),
+    [topProducts, topSales]
+  );
 
   // Opciones del gráfico de pastel
-  const pieChartOptions = {
-    plugins: {
-      tooltip: {
-        enabled: true, // Habilita el tooltip al pasar el mouse
-      },
-      datalabels: {
-        formatter: (value, context) => {
-          return value; // Muestra el valor dentro del segmento
+  const pieChartOptions = useMemo(
+    () => ({
+      plugins: {
+        tooltip: {
+          enabled: true, // Habilita el tooltip al pasar el mouse
         },
-        color: "#fff", // Color del texto
-        font: {
-          size: 14, // Tamaño del texto
-          weight: "bold", // Negrita
+        datalabels: {
+          formatter: (value, context) => {
+            return value; // Muestra el valor dentro del segmento
+          },
+          color: "#fff", // Color del texto
+          font: {
+            size: 14, // Tamaño del texto
+            weight: "bold", // Negrita
+          },
         },
       },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-  };
+      responsive: true,
+      maintainAspectRatio: false,
+    }),
+    []
+  );
 
   // Efecto para manejar el redimensionamiento de la ventana
   useEffect(() => {
@@ -192,9 +213,7 @@ const SalesDashboard = () => {
         pieChartRef.current.chart.resize();
       }
     };
-
     window.addEventListener("resize", handleResize);
-
     // Limpieza del listener cuando el componente se desmonta
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -223,19 +242,18 @@ const SalesDashboard = () => {
       {/* Sección de Gráficos */}
       <div className="section charts-section">
         <div className="chart-container">
-          <Card title="Gráfico de Barras">
+          <Card title="Ventas por Segmento">
             <Chart
               ref={barChartRef}
               type="bar"
               data={barChartData}
-              // options={{ maintainAspectRatio: false }}
               options={barChartOptions}
               plugins={[ChartDataLabels]}
             />
           </Card>
         </div>
         <div className="chart-container">
-          <Card title="Gráfico de Pastel">
+          <Card title="Top de ventas de productos por segmento">
             <div className="segment-dropdown">
               <Dropdown
                 value={selectedSegment}
