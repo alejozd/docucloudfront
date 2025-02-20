@@ -6,7 +6,13 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import CardDashboard from "./components/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { segments, productsData, kpis, products } from "./mockData"; // Importar datos ficticios
+import {
+  segments,
+  productsData,
+  segmentSales,
+  kpis,
+  products,
+} from "./mockData"; // Importar datos ficticios
 import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
@@ -84,19 +90,29 @@ const SalesDashboard = () => {
   );
 
   // Datos de ejemplo para el gráfico de barras
-  const barChartData = useMemo(
-    () => ({
-      labels: ["Enero", "Febrero", "Marzo", "Abril"],
+  const barChartData = useMemo(() => {
+    const labels = segments.map((segment) => segment.label); // Nombres de los segmentos
+    const data = segments.map((segment) => segmentSales[segment.value]); // Ventas totales
+
+    return {
+      labels: labels, // Etiquetas en el eje X (nombres de los segmentos)
       datasets: [
         {
-          label: "Ventas",
-          backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
-          data: [65, 59, 80, 81],
+          label: "Ventas Totales por Segmento",
+          backgroundColor: [
+            "#FF6384", // Rojo
+            "#36A2EB", // Azul
+            "#FFCE56", // Amarillo
+            "#4BC0C0", // Verde claro
+            "#9966FF", // Morado
+            "#FF9F40", // Naranja
+            "#CCCCCC", // Gris
+          ],
+          data: data, // Valores totales de ventas
         },
       ],
-    }),
-    []
-  );
+    };
+  }, []);
 
   // Opciones del gráfico de barras
   const barChartOptions = useMemo(
@@ -107,10 +123,8 @@ const SalesDashboard = () => {
         },
         datalabels: {
           anchor: "end", // Posición del texto (arriba de la barra)
-          align: "top", // Alineación del texto
-          formatter: (value) => {
-            return value; // Muestra el valor directamente
-          },
+          align: "start", // Alineación del texto
+          formatter: (value) => value, // Muestra el valor directamente
           color: "#000", // Color del texto
           font: {
             size: 14, // Tamaño del texto
@@ -129,7 +143,7 @@ const SalesDashboard = () => {
         },
         y: {
           ticks: {
-            stepSize: 5, // Intervalo de 5 en 5
+            stepSize: 50, // Intervalo de 50 en 50
             color: "#000", // Color de los números
           },
           grid: {
