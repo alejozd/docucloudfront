@@ -35,3 +35,11 @@
   display: flex;
   flex-direction: column;
 }
+
+.segment-dropdown {
+  margin-bottom: 15px;
+}
+
+.segment-dropdown .p-dropdown {
+  width: 100%;
+}

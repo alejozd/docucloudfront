@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CardDashboard from "./components/CardDashboard";
+import { Dropdown } from "primereact/dropdown";
 import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
@@ -52,13 +53,69 @@ const SalesDashboard = () => {
     ],
   };
 
-  // Datos de ejemplo para el gráfico de pastel
+  // Datos de ejemplo para los segmentos
+  const segments = [
+    { name: "Electrónica", code: "electronics" },
+    { name: "Ropa", code: "clothing" },
+    { name: "Hogar", code: "home" },
+  ];
+
+  // Datos de ejemplo para los productos (simulando ventas por segmento)
+  const productsData = {
+    electronics: [
+      { product: "Laptop", sales: 150 },
+      { product: "Smartphone", sales: 120 },
+      { product: "Tablet", sales: 90 },
+      { product: "Headphones", sales: 70 },
+      { product: "Smartwatch", sales: 50 },
+      { product: "Camera", sales: 30 },
+      { product: "Printer", sales: 20 },
+    ],
+    clothing: [
+      { product: "Jeans", sales: 200 },
+      { product: "T-Shirt", sales: 180 },
+      { product: "Jacket", sales: 150 },
+      { product: "Shoes", sales: 120 },
+      { product: "Hat", sales: 80 },
+      { product: "Socks", sales: 50 },
+      { product: "Belt", sales: 30 },
+    ],
+    home: [
+      { product: "Sofa", sales: 100 },
+      { product: "Bed", sales: 90 },
+      { product: "Table", sales: 80 },
+      { product: "Chair", sales: 70 },
+      { product: "Lamp", sales: 60 },
+      { product: "Curtains", sales: 50 },
+      { product: "Rug", sales: 40 },
+    ],
+  };
+
+  // Estado para el segmento seleccionado
+  const [selectedSegment, setSelectedSegment] = useState(segments[0]); // Por defecto, selecciona "Electrónica"
+
+  // Filtrar los productos del segmento seleccionado y obtener el Top 6
+  const topProducts = productsData[selectedSegment.code]
+    .slice(0, 6) // Tomar los primeros 6 productos
+    .map((item) => item.product); // Extraer los nombres de los productos
+  const topSales = productsData[selectedSegment.code]
+    .slice(0, 6) // Tomar los primeros 6 productos
+    .map((item) => item.sales); // Extraer las ventas
+
+  // Datos para el gráfico de pastel
   const pieChartData = {
-    labels: ["Ventas Online", "Ventas en Tienda"],
+    labels: topProducts,
     datasets: [
       {
-        data: [300, 50],
-        backgroundColor: ["#FFA726", "#66BB6A"],
+        data: topSales,
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+        ],
       },
     ],
   };
@@ -115,8 +172,17 @@ const SalesDashboard = () => {
         </div>
         <div className="chart-container">
           <Card title="Gráfico de Pastel">
+            <div className="segment-dropdown">
+              <Dropdown
+                value={selectedSegment}
+                options={segments}
+                onChange={(e) => setSelectedSegment(e.value)}
+                optionLabel="name"
+                placeholder="Selecciona un segmento"
+                style={{ width: "100%", marginBottom: "10px" }}
+              />
+            </div>
             <Chart
-              ref={pieChartRef}
               type="pie"
               data={pieChartData}
               options={{ maintainAspectRatio: false }}
