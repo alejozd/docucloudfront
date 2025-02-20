@@ -1,31 +1,17 @@
 import React from "react";
 import { Card } from "primereact/card";
-import "./CardDashboard.css"; // Estilos personalizados
+import "./CardDashboard.css"; // Archivo CSS personalizado
 
-const CardDashboard = ({ title, value, icon, description }) => {
+const CardDashboard = ({ title, value, icon, iconBgColor }) => {
   return (
-    <Card className="card-dashboard flex-1">
-      <div className="grid-container">
-        {/* Sección A: Título */}
-        <div className="section-a">
-          <h3>{title}</h3>
-        </div>
-
-        {/* Sección B: Ícono */}
-        <div className="section-c">
-          <div className="icon-container">{icon}</div>
-        </div>
-
-        {/* Sección C: Valor */}
-        <div className="section-b">
-          <h1>{value}</h1>
-        </div>
-
-        {/* Sección D: Descripción */}
-        <div className="section-d">
-          <p dangerouslySetInnerHTML={{ __html: description }}></p>
+    <Card className="card-dashboard">
+      <div className="card-header">
+        <h3 className="card-title">{title}</h3>
+        <div className="card-icon" style={{ backgroundColor: iconBgColor }}>
+          <i className={`pi ${icon}`} />
         </div>
       </div>
+      <h2 className="card-value">{value}</h2>
     </Card>
   );
 };

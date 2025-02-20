@@ -1,79 +1,35 @@
-/* CardDashboard.css */
+/* Estilos generales */
 .card-dashboard {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;  
+  flex: 1;
+  padding: 15px; /* Espaciado interno */
+  min-width: 200px; /* Ancho mínimo para evitar que las tarjetas se hagan demasiado pequeñas */
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 10px;
-}
-
-.section-a {
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
-}
-
-.section-b {
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-}
-
-.section-c {
-  grid-column: 2 / 3;
-  grid-row: 1 / 2;
+.card-header {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  justify-content: space-between; /* Alinea el título a la izquierda y el ícono a la derecha */
+  align-items: center; /* Centra verticalmente el título y el ícono */
+  margin-bottom: 10px; /* Espacio entre el encabezado y el valor */
 }
 
-.section-d {
-  grid-column: 1 / 3;
-  grid-row: 3 / 4;
+.card-title {
+  margin: 0; /* Elimina el margen predeterminado del título */
+  font-size: 1rem; /* Tamaño de fuente para el título */
 }
 
-.section-a h3 {
-  font-size: 1.2rem;
-  color: #333;
-  margin: 0;
-}
-
-.section-b h1 {
-  font-size: 2.5rem;
-  color: #333;
-  margin: 0;
-}
-
-.section-d p {
-  font-size: 1.2rem;
-  color: #666;
-  margin: 0;
-}
-
-/* Estilo para el texto resaltado */
-.highlight {
-  color: rgb(53, 202, 53); /* Color verde */
-  font-weight: bold; /* Opcional: Texto en negrita */
-}
-
-/* Estilo para el contenedor del ícono */
-.icon-container {
-  background: #a4cef1; /* Color de fondo */  
-  border-radius: 50%; /* Forma circular */
-  width: 40px; /* Tamaño del contenedor */
-  height: 40px; /* Tamaño del contenedor */
+.card-icon {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%; /* Hace que el fondo sea circular */
+  color: white; /* Color del ícono */
+  font-size: 1rem; /* Tamaño del ícono */
 }
 
-/* Estilo para el ícono dentro del contenedor */
-.icon-container i {
-  color: white; /* Color del ícono */
-  font-size: 1.5rem; /* Tamaño del ícono */
+.card-value {
+  margin: 0; /* Elimina el margen predeterminado del valor */
+  font-size: 1.5rem; /* Tamaño de fuente para el valor */
+  text-align: left; /* Alinea el valor a la izquierda */
 }
