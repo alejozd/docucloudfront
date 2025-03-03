@@ -25,28 +25,28 @@ import "primeflex/primeflex.css";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Verificar si hay un token JWT almacenado en localStorage
-    const storedToken = localStorage.getItem("jwtToken");
+    // Verificar si hay un token JWT almacenado en sessionStorage
+    const storedToken = sessionStorage.getItem("jwtToken");
     return !!storedToken; // Convertir a booleano
   });
 
   const [jwtToken, setJwtToken] = useState(() => {
-    // Obtener el token JWT almacenado en localStorage
-    return localStorage.getItem("jwtToken") || "";
+    // Obtener el token JWT almacenado en sessionStorage
+    return sessionStorage.getItem("jwtToken") || "";
   });
 
   // Función para manejar la autenticación
   const handleAuthenticate = (token) => {
     setIsAuthenticated(true);
     setJwtToken(token);
-    localStorage.setItem("jwtToken", token); // Almacenar el token en localStorage
+    sessionStorage.setItem("jwtToken", token); // Almacenar el token en sessionStorage
   };
 
   // Función para cerrar sesión
   const handleLogout = () => {
     setIsAuthenticated(false);
     setJwtToken("");
-    localStorage.removeItem("jwtToken"); // Eliminar el token del almacenamiento
+    sessionStorage.removeItem("jwtToken"); // Eliminar el token del almacenamiento
   };
 
   return (

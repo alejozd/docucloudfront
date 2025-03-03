@@ -30,7 +30,7 @@ const useAuthentication = (toast) => {
           const token = response.data.token;
           setJwtToken(response.data.token);
           setIsAuthenticated(true);
-          localStorage.setItem("jwtToken", token); // Guarda el token en localStorage
+          sessionStorage.setItem("jwtToken", token); // Guarda el token en sessionStorage
           setError(null);
           toast.current.show({
             severity: "success",
