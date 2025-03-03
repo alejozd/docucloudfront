@@ -61,8 +61,52 @@ const useAuthentication = (toast) => {
   return { isAuthenticated, jwtToken, error, authenticate };
 };
 
-// Custom hook for generating report keys
-const useReportKey = (jwtToken, toast) => {
+// Authentication component
+const Authentication = ({ onAuthenticate, error }) => {
+  const [password, setPassword] = useState("");
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      onAuthenticate(password);
+    }
+  };
+
+  useEffect(() => {
+    const passwordInput = document.querySelector('input[type="password"]');
+    if (passwordInput) {
+      passwordInput.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      if (passwordInput) {
+        passwordInput.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [onAuthenticate]);
+
+  return (
+    <div>
+      <h2>Protección con Contraseña</h2>
+      <p>Por favor, ingresa la contraseña para acceder:</p>
+      <Password
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        toggleMask
+        placeholder="Contraseña"
+        style={{ padding: "10px" }}
+      />
+      <Button
+        label="Autenticar"
+        onClick={() => onAuthenticate(password)}
+        className="p-button-raised p-button-primary"
+      />
+      {error && <p>{error}</p>}
+    </div>
+  );
+};
+
+// Report Key Generation component
+const ReportKeyGeneration = ({ jwtToken, toast }) => {
   const [serial, setSerial] = useState("");
   const [responseData, setResponseData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -135,118 +179,32 @@ const useReportKey = (jwtToken, toast) => {
     }
   };
 
-  return {
-    serial,
-    setSerial,
-    responseData,
-    loading,
-    error,
-    copySuccess,
-    generateKey,
-    copyKey,
-  };
-};
-
-// Authentication component
-const Authentication = ({ onAuthenticate, error }) => {
-  const [password, setPassword] = useState("");
-  const weakLabel = "Contraseña débil";
-  const mediumLabel = "Contraseña media";
-  const strongLabel = "Contraseña fuerte";
-  const promptLabel = "Fortaleza de la contraseña";
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Enter") {
-        onAuthenticate(password);
-      }
-    };
-
-    const passwordInput = document.querySelector('input[type="password"]');
-    if (passwordInput) {
-      passwordInput.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      if (passwordInput) {
-        passwordInput.removeEventListener("keydown", handleKeyDown);
-      }
-    };
-  }, [password, onAuthenticate]);
-
-  return (
-    <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      <h1>Protección con Contraseña</h1>
-      <p>Por favor, ingresa la contraseña para acceder:</p>
-      <Password
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        toggleMask
-        placeholder="Contraseña"
-        weakLabel={weakLabel}
-        mediumLabel={mediumLabel}
-        strongLabel={strongLabel}
-        promptLabel={promptLabel}
-        style={{ padding: "10px" }}
-      />
-      <Button
-        label="Acceder"
-        icon="pi pi-lock"
-        onClick={() => onAuthenticate(password)}
-        className="p-button-raised p-button-primary"
-      />
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
-    </div>
-  );
-};
-
-// Report Key Generation component
-const ReportKeyGeneration = ({ jwtToken, toast }) => {
-  const {
-    serial,
-    setSerial,
-    responseData,
-    loading,
-    error,
-    copySuccess,
-    generateKey,
-    copyKey,
-  } = useReportKey(jwtToken, toast);
-
   return (
     <div>
-      <h1>Generar Clave de Reporte</h1>
-      <div>
-        <label
-          htmlFor="serial"
-          style={{ display: "block", marginBottom: "8px" }}
-        >
-          Serial:
-        </label>
-        <textarea
-          id="serial"
-          rows="4"
-          value={serial}
-          onChange={(e) => setSerial(e.target.value)}
-          placeholder="Ingresa el serial aquí..."
-          style={{
-            width: "100%",
-            marginBottom: "12px",
-            padding: "8px",
-            fontSize: "16px",
-          }}
-        />
-        <Button
-          label={loading ? "Generando..." : "Generar Clave"}
-          icon={loading ? "pi pi-spin pi-spinner" : "pi pi-key"}
-          onClick={generateKey}
-          disabled={loading}
-          className="p-button-raised p-button-primary"
-          severity="success"
-        />
-      </div>
+      <h2>Generar Clave de Reporte</h2>
+      <textarea
+        id="serial"
+        rows="4"
+        value={serial}
+        onChange={(e) => setSerial(e.target.value)}
+        placeholder="Ingresa el serial aquí..."
+        style={{
+          width: "100%",
+          height: "100px",
+          marginBottom: "12px",
+          padding: "8px",
+          fontSize: "16px",
+          resize: "vertical",
+        }}
+      />
+      <Button
+        label={loading ? "Generando..." : "Generar Clave"}
+        icon={loading ? "pi pi-spin pi-spinner" : "pi pi-key"}
+        onClick={generateKey}
+        disabled={loading}
+        className="p-button-raised p-button-primary"
+        severity="success"
+      />
       {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
       {responseData && (
         <div
@@ -301,6 +259,7 @@ const ReportKeyGeneration = ({ jwtToken, toast }) => {
           <p>
             <strong>Clave:</strong> {responseData.clave}
           </p>
+          {copySuccess && <p>{copySuccess}</p>}
         </div>
       )}
     </div>
@@ -315,12 +274,12 @@ const SerialReportes = () => {
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
-      <Toast ref={toast} />
       {!isAuthenticated ? (
         <Authentication onAuthenticate={authenticate} error={error} />
       ) : (
         <ReportKeyGeneration jwtToken={jwtToken} toast={toast} />
       )}
+      <Toast ref={toast} />
     </div>
   );
 };

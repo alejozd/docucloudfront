@@ -13,9 +13,40 @@ const Navbar = () => {
     {
       label: "Alejo",
       icon: "pi pi-key",
-      url: "/SerialReportes",
-      id: "SerialReportes",
+      items: [
+        {
+          label: "Serial Reportes",
+          icon: "pi pi-address-book",
+          url: "/SerialReportes",
+          id: "SerialReportes",
+        },
+        {
+          label: "Medios",
+          icon: "pi pi-folder",
+          items: [
+            {
+              label: "Clientes Medios",
+              icon: "pi pi-users",
+              url: "/clientes-medios",
+              id: "clientes-medios",
+            },
+            {
+              label: "Seriales ERP",
+              icon: "pi pi-key",
+              url: "/seriales-erp",
+              id: "seriales-erp",
+            },
+            {
+              label: "Claves Generadas",
+              icon: "pi pi-lock",
+              url: "/claves-generadas",
+              id: "claves-generadas",
+            },
+          ],
+        },
+      ],
     },
+
     {
       label: "Utilidades",
       icon: "pi pi-cog",

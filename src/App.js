@@ -1,7 +1,7 @@
 import "./App.css";
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./Navbar"; // Importa tu componente Navbark
+import Navbar from "./Navbar"; // Importa tu componente Navbar
 import Home from "./Home"; // Importa tu componente Home
 import Clientes from "./Clientes"; // Importa tu componente Clientes
 import Contactos from "./Contactos"; // Importa tu componente Contacto
@@ -14,21 +14,35 @@ import WorkTimeCalculator from "./WorkTimeCalculator";
 import RegistroSolicitudesPage from "./RegistroSolicitudesPage";
 import BatteryStatus from "./BatteryStatus";
 import SalesDashboard from "./SalesDashboard";
+import ProtectedRoute from "./ProtectedRoute"; // Importa el componente ProtectedRoute
+import ClientesMedios from "./ClientesMedios"; // Importa tu componente ClientesMedios
+import SerialesERP from "./SerialesERP"; // Importa tu componente SerialesERP
+import ClavesGeneradas from "./ClavesGeneradas"; // Importa tu componente ClavesGeneradas
 import "primereact/resources/themes/lara-light-blue/theme.css";
-// import "primereact/resources/themes/lara-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
-import "primereact/resources/primereact.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [jwtToken, setJwtToken] = useState("");
+
+  // Función para manejar la autenticación
+  const handleAuthenticate = (token) => {
+    setIsAuthenticated(true);
+    setJwtToken(token);
+  };
+
   return (
     <Router>
       <div className="App">
         <Navbar />
         <div className="content">
           <Routes>
-            <Route exact path="/" element={<Home />} />
+            {/* Ruta pública */}
+            <Route path="/" element={<Home />} />
+
+            {/* Rutas públicas adicionales */}
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/productos" element={<Productos />} />
             <Route path="/contactos" element={<Contactos />} />
@@ -38,7 +52,6 @@ function App() {
               path="/AsociarClienteContacto"
               element={<AsociarClienteContacto />}
             />
-            <Route path="/SerialReportes" element={<SerialReportes />} />
             <Route
               path="/WorkTimeCalculator"
               element={<WorkTimeCalculator />}
@@ -49,6 +62,43 @@ function App() {
             />
             <Route path="/BatteryStatus" element={<BatteryStatus />} />
             <Route path="/SalesDashboard" element={<SalesDashboard />} />
+
+            {/* Ruta de autenticación */}
+            <Route
+              path="/SerialReportes"
+              element={
+                <SerialReportes
+                  onAuthenticate={handleAuthenticate}
+                  isAuthenticated={isAuthenticated}
+                />
+              }
+            />
+
+            {/* Rutas protegidas */}
+            <Route
+              path="/clientes-medios"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <ClientesMedios jwtToken={jwtToken} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seriales-erp"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <SerialesERP jwtToken={jwtToken} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/claves-generadas"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <ClavesGeneradas jwtToken={jwtToken} />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </div>
