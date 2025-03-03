@@ -27,8 +27,10 @@ const useAuthentication = (toast) => {
           password,
         });
         if (response.data && response.data.token) {
+          const token = response.data.token;
           setJwtToken(response.data.token);
           setIsAuthenticated(true);
+          localStorage.setItem("jwtToken", token); // Guarda el token en localStorage
           setError(null);
           toast.current.show({
             severity: "success",
