@@ -7,11 +7,20 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import { InputSwitch } from "primereact/inputswitch";
 import { Toast } from "primereact/toast";
 
 const ClientesMedios = ({ jwtToken }) => {
   const [clientes, setClientes] = useState([]);
-  const [cliente, setCliente] = useState({ id: null, nombre: "" });
+  const [cliente, setCliente] = useState({
+    id: null,
+    nombre_completo: "",
+    email: "",
+    telefono: "",
+    empresa: "",
+    direccion: "",
+    activo: true,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -52,7 +61,15 @@ const ClientesMedios = ({ jwtToken }) => {
       setCliente(clienteSeleccionado);
       setIsEditMode(true);
     } else {
-      setCliente({ id: null, nombre: "" });
+      setCliente({
+        id: null,
+        nombre_completo: "",
+        email: "",
+        telefono: "",
+        empresa: "",
+        direccion: "",
+        activo: true,
+      });
       setIsEditMode(false);
     }
     setShowDialog(true);
@@ -61,13 +78,25 @@ const ClientesMedios = ({ jwtToken }) => {
   // Función para cerrar el diálogo
   const closeDialog = () => {
     setShowDialog(false);
-    setCliente({ id: null, nombre: "" });
+    setCliente({
+      id: null,
+      nombre_completo: "",
+      email: "",
+      telefono: "",
+      empresa: "",
+      direccion: "",
+      activo: true,
+    });
   };
 
   // Función para crear o actualizar un cliente
   const saveCliente = async () => {
-    if (!cliente.nombre.trim()) {
-      setError("Por favor ingresa un nombre de cliente válido.");
+    if (
+      !cliente.nombre_completo.trim() ||
+      !cliente.email.trim() ||
+      !cliente.telefono.trim()
+    ) {
+      setError("Por favor ingresa todos los campos obligatorios.");
       return;
     }
 
@@ -160,17 +189,97 @@ const ClientesMedios = ({ jwtToken }) => {
       >
         <div style={{ marginBottom: "12px" }}>
           <label
-            htmlFor="nombre"
+            htmlFor="nombre_completo"
             style={{ display: "block", marginBottom: "6px" }}
           >
-            Nombre del Cliente:
+            Nombre Completo:
           </label>
           <InputText
-            id="nombre"
-            value={cliente.nombre}
-            onChange={(e) => setCliente({ ...cliente, nombre: e.target.value })}
-            placeholder="Nombre del cliente"
+            id="nombre_completo"
+            value={cliente.nombre_completo}
+            onChange={(e) =>
+              setCliente({ ...cliente, nombre_completo: e.target.value })
+            }
+            placeholder="Nombre completo del cliente"
             style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="email"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Email:
+          </label>
+          <InputText
+            id="email"
+            value={cliente.email}
+            onChange={(e) => setCliente({ ...cliente, email: e.target.value })}
+            placeholder="Email del cliente"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="telefono"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Teléfono:
+          </label>
+          <InputText
+            id="telefono"
+            value={cliente.telefono}
+            onChange={(e) =>
+              setCliente({ ...cliente, telefono: e.target.value })
+            }
+            placeholder="Teléfono del cliente"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="empresa"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Empresa:
+          </label>
+          <InputText
+            id="empresa"
+            value={cliente.empresa}
+            onChange={(e) =>
+              setCliente({ ...cliente, empresa: e.target.value })
+            }
+            placeholder="Empresa del cliente"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="direccion"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Dirección:
+          </label>
+          <InputText
+            id="direccion"
+            value={cliente.direccion}
+            onChange={(e) =>
+              setCliente({ ...cliente, direccion: e.target.value })
+            }
+            placeholder="Dirección del cliente"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="activo"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Activo:
+          </label>
+          <InputSwitch
+            checked={cliente.activo}
+            onChange={(e) => setCliente({ ...cliente, activo: e.value })}
           />
         </div>
         <Button
@@ -200,7 +309,17 @@ const ClientesMedios = ({ jwtToken }) => {
         <Column
           field="nombre_completo"
           header="Nombre"
-          style={{ width: "70%" }}
+          style={{ width: "20%" }}
+        />
+        <Column field="email" header="Email" style={{ width: "20%" }} />
+        <Column field="telefono" header="Teléfono" style={{ width: "15%" }} />
+        <Column field="empresa" header="Empresa" style={{ width: "15%" }} />
+        <Column field="direccion" header="Dirección" style={{ width: "20%" }} />
+        <Column
+          field="activo"
+          header="Activo"
+          body={(rowData) => (rowData.activo ? "Sí" : "No")}
+          style={{ width: "10%" }}
         />
         <Column
           header="Acciones"
@@ -218,7 +337,7 @@ const ClientesMedios = ({ jwtToken }) => {
               />
             </div>
           )}
-          style={{ width: "20%" }}
+          style={{ width: "10%" }}
         />
       </DataTable>
     );
