@@ -24,19 +24,35 @@ import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [jwtToken, setJwtToken] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Verificar si hay un token JWT almacenado en localStorage
+    const storedToken = localStorage.getItem("jwtToken");
+    return !!storedToken; // Convertir a booleano
+  });
+
+  const [jwtToken, setJwtToken] = useState(() => {
+    // Obtener el token JWT almacenado en localStorage
+    return localStorage.getItem("jwtToken") || "";
+  });
 
   // Función para manejar la autenticación
   const handleAuthenticate = (token) => {
     setIsAuthenticated(true);
     setJwtToken(token);
+    localStorage.setItem("jwtToken", token); // Almacenar el token en localStorage
+  };
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setJwtToken("");
+    localStorage.removeItem("jwtToken"); // Eliminar el token del almacenamiento
   };
 
   return (
     <Router>
       <div className="App">
-        <Navbar />
+        <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
         <div className="content">
           <Routes>
             {/* Ruta pública */}
