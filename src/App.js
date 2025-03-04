@@ -36,12 +36,21 @@ const getTokenExpiration = (token) => {
 };
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const storedToken = sessionStorage.getItem("jwtToken");
+    return !!storedToken;
+  });
+
   const [jwtToken, setJwtToken] = useState(
     () => sessionStorage.getItem("jwtToken") || ""
   );
 
   useEffect(() => {
-    if (!jwtToken) return;
+    if (!jwtToken) {
+      console.warn("No se encontró ningún token JWT en sessionStorage.");
+    } else {
+      console.log("Token JWT cargado correctamente:");
+    }
 
     const expirationTime = getTokenExpiration(jwtToken);
     if (!expirationTime) return;
@@ -58,11 +67,13 @@ function App() {
   }, [jwtToken]);
 
   const handleAuthenticate = (token) => {
+    setIsAuthenticated(true);
     setJwtToken(token);
     sessionStorage.setItem("jwtToken", token);
   };
 
   const handleLogout = () => {
+    setIsAuthenticated(false);
     setJwtToken("");
     sessionStorage.removeItem("jwtToken");
     alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
@@ -98,24 +109,28 @@ function App() {
             {/* Ruta de autenticación */}
             <Route
               path="/login"
-              element={<Login onAuthenticate={handleAuthenticate} />}
+              element={<Login onLogin={handleAuthenticate} />}
             />
 
             {/* Rutas protegidas */}
-            {/* <Route
-              path="/serial-reportes"
+            <Route
+              path="/SerialReportes"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
                   <SerialReportes />
                 </ProtectedRoute>
               }
-            /> */}
-            <Route path="/serial-reportes" element={<SerialReportes />} />
-
+            />
             <Route
               path="/clientes-medios"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
                   <ClientesMedios />
                 </ProtectedRoute>
               }
@@ -123,7 +138,10 @@ function App() {
             <Route
               path="/seriales-erp"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
                   <SerialesERP />
                 </ProtectedRoute>
               }
@@ -131,7 +149,10 @@ function App() {
             <Route
               path="/claves-generadas"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
                   <ClavesGeneradas />
                 </ProtectedRoute>
               }
