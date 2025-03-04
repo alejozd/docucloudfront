@@ -1,64 +1,80 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./Navbar"; // Importa tu componente Navbar
-import Home from "./Home"; // Importa tu componente Home
-import Clientes from "./Clientes"; // Importa tu componente Clientes
-import Contactos from "./Contactos"; // Importa tu componente Contacto
-import Productos from "./Productos"; // Importa tu componente Productos
+import Navbar from "./Navbar";
+import Home from "./Home";
+import Clientes from "./Clientes";
+import Contactos from "./Contactos";
+import Productos from "./Productos";
 import Contactar from "./Contactar";
-import Weather from "./Weather"; // Importa tu componente Weather
+import Weather from "./Weather";
 import AsociarClienteContacto from "./AsociarClienteContacto";
 import SerialReportes from "./SerialReportes";
 import WorkTimeCalculator from "./WorkTimeCalculator";
 import RegistroSolicitudesPage from "./RegistroSolicitudesPage";
 import BatteryStatus from "./BatteryStatus";
 import SalesDashboard from "./SalesDashboard";
-import ProtectedRoute from "./ProtectedRoute"; // Importa el componente ProtectedRoute
-import ClientesMedios from "./ClientesMedios"; // Importa tu componente ClientesMedios
-import SerialesERP from "./SerialesERP"; // Importa tu componente SerialesERP
-import ClavesGeneradas from "./ClavesGeneradas"; // Importa tu componente ClavesGeneradas
+import ProtectedRoute from "./ProtectedRoute";
+import ClientesMedios from "./ClientesMedios";
+import SerialesERP from "./SerialesERP";
+import ClavesGeneradas from "./ClavesGeneradas";
+import Login from "./Login"; // Nuevo componente de autenticación
+
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
+// Función para obtener la fecha de expiración del token JWT
+const getTokenExpiration = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1])); // Decodifica el payload
+    return payload.exp ? payload.exp * 1000 : null; // Convierte a milisegundos
+  } catch (error) {
+    return null;
+  }
+};
+
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Verificar si hay un token JWT almacenado en sessionStorage
-    const storedToken = sessionStorage.getItem("jwtToken");
-    return !!storedToken; // Convertir a booleano
-  });
+  const [jwtToken, setJwtToken] = useState(
+    () => sessionStorage.getItem("jwtToken") || ""
+  );
 
-  const [jwtToken, setJwtToken] = useState(() => {
-    // Obtener el token JWT almacenado en sessionStorage
-    return sessionStorage.getItem("jwtToken") || "";
-  });
+  useEffect(() => {
+    if (!jwtToken) return;
 
-  // Función para manejar la autenticación
+    const expirationTime = getTokenExpiration(jwtToken);
+    if (!expirationTime) return;
+
+    const currentTime = Date.now();
+    const timeUntilLogout = expirationTime - currentTime;
+
+    if (timeUntilLogout > 0) {
+      const logoutTimer = setTimeout(() => handleLogout(), timeUntilLogout);
+      return () => clearTimeout(logoutTimer); // Limpia el timeout si el componente se desmonta
+    } else {
+      handleLogout();
+    }
+  }, [jwtToken]);
+
   const handleAuthenticate = (token) => {
-    setIsAuthenticated(true);
     setJwtToken(token);
-    sessionStorage.setItem("jwtToken", token); // Almacenar el token en sessionStorage
+    sessionStorage.setItem("jwtToken", token);
   };
 
-  // Función para cerrar sesión
   const handleLogout = () => {
-    setIsAuthenticated(false);
     setJwtToken("");
-    sessionStorage.removeItem("jwtToken"); // Eliminar el token del almacenamiento
+    sessionStorage.removeItem("jwtToken");
+    alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
   };
 
   return (
     <Router>
       <div className="App">
-        <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+        <Navbar onLogout={handleLogout} />
         <div className="content">
           <Routes>
-            {/* Ruta pública */}
             <Route path="/" element={<Home />} />
-
-            {/* Rutas públicas adicionales */}
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/productos" element={<Productos />} />
             <Route path="/contactos" element={<Contactos />} />
@@ -81,37 +97,42 @@ function App() {
 
             {/* Ruta de autenticación */}
             <Route
-              path="/SerialReportes"
-              element={
-                <SerialReportes
-                  onAuthenticate={handleAuthenticate}
-                  isAuthenticated={isAuthenticated}
-                />
-              }
+              path="/login"
+              element={<Login onAuthenticate={handleAuthenticate} />}
             />
 
             {/* Rutas protegidas */}
+            {/* <Route
+              path="/serial-reportes"
+              element={
+                <ProtectedRoute>
+                  <SerialReportes />
+                </ProtectedRoute>
+              }
+            /> */}
+            <Route path="/serial-reportes" element={<SerialReportes />} />
+
             <Route
               path="/clientes-medios"
               element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <ClientesMedios jwtToken={jwtToken} />
+                <ProtectedRoute>
+                  <ClientesMedios />
                 </ProtectedRoute>
               }
             />
             <Route
               path="/seriales-erp"
               element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <SerialesERP jwtToken={jwtToken} />
+                <ProtectedRoute>
+                  <SerialesERP />
                 </ProtectedRoute>
               }
             />
             <Route
               path="/claves-generadas"
               element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <ClavesGeneradas jwtToken={jwtToken} />
+                <ProtectedRoute>
+                  <ClavesGeneradas />
                 </ProtectedRoute>
               }
             />
