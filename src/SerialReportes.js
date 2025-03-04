@@ -13,6 +13,8 @@ const SerialesReportes = () => {
   const [serial, setSerial] = useState("");
   const [responseData, setResponseData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(null);
+  const [error, setError] = useState(null);
   const toast = useRef(null);
 
   const authenticate = async () => {
@@ -59,6 +61,7 @@ const SerialesReportes = () => {
 
   const generateKey = async () => {
     if (!serial.trim()) {
+      setError("Por favor ingresa un serial válido.");
       toast.current.show({
         severity: "warn",
         summary: "Advertencia",
@@ -68,6 +71,7 @@ const SerialesReportes = () => {
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       const response = await axios.post(
         `${Config.apiUrl}/api/generateReportKey`,
@@ -83,6 +87,7 @@ const SerialesReportes = () => {
       });
     } catch (err) {
       console.error(err);
+      setError("Error al generar la clave. Verifica el serial o la conexión.");
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -91,6 +96,31 @@ const SerialesReportes = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyKey = () => {
+    if (responseData?.clave) {
+      navigator.clipboard
+        .writeText(responseData.clave)
+        .then(() => {
+          setCopySuccess("Clave copiada al portapapeles");
+          toast.current.show({
+            severity: "success",
+            summary: "Éxito",
+            detail: "Clave copiada al portapapeles",
+            life: 3000,
+          });
+        })
+        .catch(() => {
+          setCopySuccess("Error al copiar la clave");
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Error al copiar la clave",
+            life: 3000,
+          });
+        });
     }
   };
 
@@ -117,20 +147,88 @@ const SerialesReportes = () => {
         <div>
           <h2>Generar Clave de Reporte</h2>
           <textarea
+            id="serial"
+            rows="4"
             value={serial}
             onChange={(e) => setSerial(e.target.value)}
             placeholder="Ingresa el serial aquí..."
+            style={{
+              width: "100%",
+              height: "100px",
+              marginBottom: "12px",
+              padding: "8px",
+              fontSize: "16px",
+              resize: "vertical",
+            }}
           />
           <Button
             label={loading ? "Generando..." : "Generar Clave"}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-key"}
             onClick={generateKey}
             disabled={loading}
-            className="p-button-success"
+            severity="success"
           />
+          {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
           {responseData && (
-            <p>
-              <strong>Clave:</strong> {responseData.clave}
-            </p>
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "10px",
+                border: "1px solid #ccc",
+              }}
+            >
+              <h3>Datos Generados:</h3>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <input
+                  id="clave"
+                  type="text"
+                  value={responseData.clave}
+                  readOnly
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                    fontSize: "16px",
+                    backgroundColor: "#f9f9f9",
+                    border: "1px solid #ccc",
+                    width: "100%",
+                  }}
+                />
+                <Button
+                  label="Copiar"
+                  icon="pi pi-copy"
+                  onClick={copyKey}
+                  className="p-button-outlined p-button-secondary"
+                  severity="warning"
+                />
+              </div>
+              {copySuccess && (
+                <p style={{ color: "green", marginTop: "8px" }}>
+                  {copySuccess}
+                </p>
+              )}
+              <p>
+                <strong>Procesador ID:</strong> {responseData.procesadorId}
+              </p>
+              <p>
+                <strong>Hard Drive Serial:</strong>{" "}
+                {responseData.hardDriveSerial}
+              </p>
+              <p>
+                <strong>Nombre del Sistema:</strong> {responseData.systemName}
+              </p>
+              <p>
+                <strong>Letra del Módulo:</strong> {responseData.letraModulo}
+              </p>
+              <p>
+                <strong>Módulo:</strong> {responseData.modulo}
+              </p>
+              <p>
+                <strong>Clave:</strong> {responseData.clave}
+              </p>
+              {copySuccess && <p>{copySuccess}</p>}
+            </div>
           )}
         </div>
       )}
