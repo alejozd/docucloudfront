@@ -6,6 +6,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 
@@ -15,6 +16,8 @@ const SerialesERP = ({ jwtToken }) => {
     id: null,
     serial_erp: "",
     ano_medios: "",
+    cliente_id: "",
+    activo: true,
   });
   const [showDialog, setShowDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -53,10 +56,19 @@ const SerialesERP = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (serialSeleccionado = null) => {
     if (serialSeleccionado) {
-      setSerial(serialSeleccionado);
+      setSerial({
+        ...serialSeleccionado,
+        activo: serialSeleccionado.activo || true, // Asegura el valor booleano
+      });
       setIsEditMode(true);
     } else {
-      setSerial({ id: null, serial_erp: "", ano_medios: "" });
+      setSerial({
+        id: null,
+        serial_erp: "",
+        ano_medios: "",
+        cliente_id: "",
+        activo: true,
+      });
       setIsEditMode(false);
     }
     setShowDialog(true);
@@ -70,7 +82,11 @@ const SerialesERP = ({ jwtToken }) => {
 
   // Función para guardar un serial ERP
   const saveSerial = async () => {
-    if (!serial.serial_erp.trim() || !serial.ano_medios.trim()) {
+    if (
+      !serial.serial_erp.trim() ||
+      !serial.ano_medios.trim() ||
+      !serial.cliente_id.trim()
+    ) {
       setError("Por favor ingresa todos los campos.");
       return;
     }
@@ -196,6 +212,37 @@ const SerialesERP = ({ jwtToken }) => {
             style={{ width: "100%" }}
           />
         </div>
+        {/* Campo cliente_id */}
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="cliente_id"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Cliente ID:
+          </label>
+          <InputText
+            id="cliente_id"
+            value={serial.cliente_id || ""}
+            onChange={(e) =>
+              setSerial({ ...serial, cliente_id: e.target.value })
+            }
+            placeholder="ID del cliente"
+            style={{ width: "100%" }}
+          />
+        </div>
+        {/* Campo activo */}
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="activo"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Activo:
+          </label>
+          <InputSwitch
+            checked={serial.activo}
+            onChange={(e) => setSerial({ ...serial, activo: e.value })}
+          />
+        </div>
         <Button
           label="Guardar"
           onClick={saveSerial}
@@ -217,7 +264,6 @@ const SerialesERP = ({ jwtToken }) => {
         rows={10}
         rowsPerPageOptions={[5, 10, 20]}
         emptyMessage="No se encontraron seriales ERP."
-        responsiveLayout="scroll"
         style={{ marginTop: "20px" }}
       >
         <Column field="id" header="ID" style={{ width: "10%" }} />
@@ -230,6 +276,17 @@ const SerialesERP = ({ jwtToken }) => {
           field="ano_medios"
           header="Año Medios"
           style={{ width: "30%" }}
+        />
+        <Column
+          field="cliente_id"
+          header="Cliente ID"
+          style={{ width: "20%" }}
+        />
+        <Column
+          field="activo"
+          header="Activo"
+          body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
+          style={{ width: "15%" }}
         />
         <Column
           header="Acciones"
