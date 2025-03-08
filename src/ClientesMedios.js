@@ -297,50 +297,45 @@ const ClientesMedios = ({ jwtToken }) => {
   // Renderizar el DataTable
   const renderDataTable = () => {
     return (
-      <DataTable
-        value={clientes}
-        loading={loading}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No se encontraron clientes."
-        style={{ marginTop: "20px" }}
-      >
-        <Column field="id" header="ID" style={{ width: "10%" }} />
-        <Column
-          field="nombre_completo"
-          header="Nombre"
-          style={{ width: "20%" }}
-        />
-        <Column field="email" header="Email" style={{ width: "20%" }} />
-        <Column field="telefono" header="Teléfono" style={{ width: "15%" }} />
-        <Column field="empresa" header="Empresa" style={{ width: "15%" }} />
-        <Column field="direccion" header="Dirección" style={{ width: "20%" }} />
-        <Column
-          field="activo"
-          header="Activo"
-          body={(rowData) => (rowData.activo ? "Sí" : "No")}
-          style={{ width: "10%" }}
-        />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button
-                icon="pi pi-pencil"
-                className="p-button-rounded p-button-warning"
-                onClick={() => openDialog(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                className="p-button-rounded p-button-danger"
-                onClick={() => deleteCliente(rowData.id)}
-              />
-            </div>
-          )}
-          style={{ width: "10%" }}
-        />
-      </DataTable>
+      <div className="card">
+        <DataTable
+          value={clientes}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No se encontraron clientes."
+        >
+          <Column field="id" header="ID" />
+          <Column field="nombre_completo" header="Nombre" />
+          <Column field="email" header="Email" />
+          <Column field="telefono" header="Teléfono" />
+          <Column field="empresa" header="Empresa" />
+          <Column field="direccion" header="Dirección" />
+          <Column
+            field="activo"
+            header="Activo"
+            body={(rowData) => (rowData.activo ? "Sí" : "No")}
+          />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-rounded p-button-warning"
+                  onClick={() => openDialog(rowData)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-rounded p-button-danger"
+                  onClick={() => deleteCliente(rowData.id)}
+                />
+              </div>
+            )}
+          />
+        </DataTable>
+      </div>
     );
   };
 
