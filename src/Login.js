@@ -85,6 +85,7 @@ const Login = ({ onLogin }) => {
             weakLabel="Muy simple"
             mediumLabel="Complejidad promedio"
             strongLabel="Complejidad alta"
+            feedback={false}
           />
         </div>
         <div>
