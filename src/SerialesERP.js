@@ -1,5 +1,5 @@
 // SerialesERP.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Config from "./Config";
 import { DataTable } from "primereact/datatable";
@@ -7,6 +7,7 @@ import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
+import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 
@@ -23,15 +24,11 @@ const SerialesERP = ({ jwtToken }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [clientes, setClientes] = useState([]);
   const toast = React.useRef(null);
 
-  // Cargar seriales al iniciar el componente
-  useEffect(() => {
-    fetchSeriales();
-  }, []);
-
   // Función para cargar seriales desde el backend
-  const fetchSeriales = async () => {
+  const fetchSeriales = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -51,7 +48,31 @@ const SerialesERP = ({ jwtToken }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jwtToken]);
+
+  // Función para cargar clientes desde el backend
+  const fetchClientes = useCallback(async () => {
+    try {
+      const response = await axios.get(`${Config.apiUrl}/api/clientes-medios`, {
+        headers: { Authorization: `Bearer ${jwtToken}` },
+      });
+      setClientes(response.data);
+    } catch (err) {
+      console.error("Error al cargar los clientes:", err.message);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Error al cargar los clientes",
+        life: 3000,
+      });
+    }
+  }, [jwtToken]);
+
+  // Cargar seriales y clientes al iniciar el componente
+  useEffect(() => {
+    fetchSeriales();
+    fetchClientes();
+  }, [fetchSeriales, fetchClientes]); // Las funciones están memoizadas con useCallback
 
   // Función para abrir el diálogo de creación/edición
   const openDialog = (serialSeleccionado = null) => {
@@ -218,15 +239,16 @@ const SerialesERP = ({ jwtToken }) => {
             htmlFor="cliente_id"
             style={{ display: "block", marginBottom: "6px" }}
           >
-            Cliente ID:
+            Cliente:
           </label>
-          <InputText
+          <Dropdown
             id="cliente_id"
-            value={serial.cliente_id || ""}
-            onChange={(e) =>
-              setSerial({ ...serial, cliente_id: e.target.value })
-            }
-            placeholder="ID del cliente"
+            value={serial.cliente_id}
+            options={clientes}
+            onChange={(e) => setSerial({ ...serial, cliente_id: e.value })}
+            optionLabel="nombre_completo" // Mostrar el nombre completo del cliente
+            optionValue="id" // Guardar el ID del cliente en el estado
+            placeholder="Selecciona un cliente"
             style={{ width: "100%" }}
           />
         </div>

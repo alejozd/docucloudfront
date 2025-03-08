@@ -1,5 +1,5 @@
 // ClavesGeneradas.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Config from "./Config";
 import { DataTable } from "primereact/datatable";
@@ -14,7 +14,7 @@ const ClavesGeneradas = ({ jwtToken }) => {
   const toast = React.useRef(null);
 
   // Función para cargar las claves generadas desde el backend
-  const fetchClaves = async () => {
+  const fetchClaves = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -37,12 +37,12 @@ const ClavesGeneradas = ({ jwtToken }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jwtToken]); // Agregar jwtToken como dependencia
 
   // Cargar las claves al iniciar el componente
   useEffect(() => {
     fetchClaves();
-  }, [jwtToken]);
+  }, [fetchClaves]); // Ahora fetchClaves está memoizada y se incluye como dependencia
 
   // Renderizar el DataTable
   const renderDataTable = () => {
