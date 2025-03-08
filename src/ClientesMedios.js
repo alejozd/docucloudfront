@@ -119,6 +119,7 @@ const ClientesMedios = ({ jwtToken }) => {
         });
       } else {
         // Crear nuevo cliente
+        console.log("cliente", cliente);
         await axios.post(`${Config.apiUrl}/api/clientes-medios`, cliente, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
