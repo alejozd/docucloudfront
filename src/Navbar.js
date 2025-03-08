@@ -42,6 +42,12 @@ const Navbar = () => {
               url: "/claves-generadas",
               id: "claves-generadas",
             },
+            {
+              label: "Generar Clave",
+              icon: "pi pi-key",
+              url: "/generar-clave",
+              id: "generar-clave",
+            },
           ],
         },
       ],
