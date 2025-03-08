@@ -283,6 +283,11 @@ const SerialesERP = ({ jwtToken }) => {
           style={{ width: "20%" }}
         />
         <Column
+          field="nombre_completo"
+          header="Cliente"
+          body={(rowData) => <span>{rowData.cliente.nombre_completo}</span>}
+        />
+        <Column
           field="activo"
           header="Activo"
           body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}

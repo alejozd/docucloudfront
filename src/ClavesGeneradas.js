@@ -57,6 +57,11 @@ const ClavesGeneradas = ({ jwtToken }) => {
         style={{ marginTop: "20px" }}
       >
         <Column field="id" header="ID" style={{ width: "10%" }} />
+        <Column
+          field="serial_erp"
+          header="Serial ERP"
+          body={(rowData) => rowData.serial?.serial_erp || "N/A"}
+        />
         <Column field="mac_servidor" header="MAC" />
         <Column
           field="clave_generada"
