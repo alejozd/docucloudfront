@@ -54,24 +54,18 @@ const ClavesGeneradas = ({ jwtToken }) => {
         rows={10}
         rowsPerPageOptions={[5, 10, 20]}
         emptyMessage="No se encontraron claves generadas."
-        style={{ marginTop: "20px" }}
       >
-        <Column field="id" header="ID" style={{ width: "10%" }} />
+        <Column field="id" header="ID" />
         <Column
           field="serial_erp"
           header="Serial ERP"
           body={(rowData) => rowData.serial?.serial_erp || "N/A"}
         />
         <Column field="mac_servidor" header="MAC" />
-        <Column
-          field="clave_generada"
-          header="Clave"
-          style={{ width: "60%" }}
-        />
+        <Column field="clave_generada" header="Clave" />
         <Column
           field="generado_en"
           header="Fecha de Generación"
-          style={{ width: "40%" }}
           body={(rowData) => new Date(rowData.generado_en).toLocaleString()}
         />
       </DataTable>
