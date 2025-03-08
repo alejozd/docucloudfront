@@ -62,6 +62,7 @@ const ClavesGeneradas = ({ jwtToken }) => {
           body={(rowData) => rowData.serial?.serial_erp || "N/A"}
         />
         <Column field="mac_servidor" header="MAC" />
+        <Column field="iporigen" header="IP-Origen" />
         <Column field="clave_generada" header="Clave" />
         <Column
           field="generado_en"
