@@ -264,24 +264,12 @@ const SerialesERP = ({ jwtToken }) => {
         rows={10}
         rowsPerPageOptions={[5, 10, 20]}
         emptyMessage="No se encontraron seriales ERP."
-        style={{ marginTop: "20px" }}
+        // style={{ marginTop: "20px" }}
       >
-        <Column field="id" header="ID" style={{ width: "10%" }} />
-        <Column
-          field="serial_erp"
-          header="Serial ERP"
-          style={{ width: "50%" }}
-        />
-        <Column
-          field="ano_medios"
-          header="Año Medios"
-          style={{ width: "30%" }}
-        />
-        <Column
-          field="cliente_id"
-          header="Cliente ID"
-          style={{ width: "20%" }}
-        />
+        <Column field="id" header="ID" />
+        <Column field="serial_erp" header="Serial ERP" />
+        <Column field="ano_medios" header="Año" />
+        <Column field="cliente_id" header="Cliente ID" hidden={true} />
         <Column
           field="nombre_completo"
           header="Cliente"
@@ -291,7 +279,6 @@ const SerialesERP = ({ jwtToken }) => {
           field="activo"
           header="Activo"
           body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
-          style={{ width: "15%" }}
         />
         <Column
           header="Acciones"
@@ -309,7 +296,6 @@ const SerialesERP = ({ jwtToken }) => {
               />
             </div>
           )}
-          style={{ width: "20%" }}
         />
       </DataTable>
     );
