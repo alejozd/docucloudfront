@@ -308,7 +308,7 @@ const ClientesMedios = ({ jwtToken }) => {
           stripedRows
         >
           <Column field="id" header="ID" />
-          <Column field="nombre_completo" header="Nombre" />
+          <Column field="nombre_completo" header="Nombre" sortable />
           <Column field="email" header="Email" />
           <Column field="telefono" header="Teléfono" />
           <Column field="empresa" header="Empresa" />
@@ -326,6 +326,7 @@ const ClientesMedios = ({ jwtToken }) => {
                 {rowData.activo ? "Sí" : "No"}
               </span>
             )}
+            sortable
           />
           <Column
             header="Acciones"
@@ -333,13 +334,19 @@ const ClientesMedios = ({ jwtToken }) => {
               <div style={{ display: "flex", gap: "8px" }}>
                 <Button
                   icon="pi pi-pencil"
-                  className="p-button-rounded p-button-warning"
+                  rounded
+                  text
+                  severity="info"
                   onClick={() => openDialog(rowData)}
+                  size="small"
                 />
                 <Button
                   icon="pi pi-trash"
-                  className="p-button-rounded p-button-danger"
+                  rounded
+                  text
+                  severity="danger"
                   onClick={() => deleteCliente(rowData.id)}
+                  size="small"
                 />
               </div>
             )}

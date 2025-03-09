@@ -291,13 +291,14 @@ const SerialesERP = ({ jwtToken }) => {
           stripedRows
         >
           <Column field="id" header="ID" />
-          <Column field="serial_erp" header="Serial ERP" />
+          <Column field="serial_erp" header="Serial ERP" sortable />
           <Column field="ano_medios" header="Año" />
           <Column field="cliente_id" header="Cliente ID" hidden={true} />
           <Column
             field="nombre_completo"
             header="Cliente"
             body={(rowData) => <span>{rowData.cliente.nombre_completo}</span>}
+            sortable
           />
           <Column
             field="activo"
@@ -312,6 +313,7 @@ const SerialesERP = ({ jwtToken }) => {
                 {rowData.activo ? "Sí" : "No"}
               </span>
             )}
+            sortable
           />
           <Column
             header="Acciones"

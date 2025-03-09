@@ -78,6 +78,7 @@ const ClavesGeneradas = ({ jwtToken }) => {
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron claves generadas."
+          stripedRows
           globalFilter={globalFilter} // Vincular el filtro global
           sortOrder={-1}
           sortField="generado_en"
