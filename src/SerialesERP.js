@@ -280,63 +280,67 @@ const SerialesERP = ({ jwtToken }) => {
   // Renderizar el DataTable
   const renderDataTable = () => {
     return (
-      <DataTable
-        value={seriales}
-        loading={loading}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No se encontraron seriales ERP."
-        // style={{ marginTop: "20px" }}
-      >
-        <Column field="id" header="ID" />
-        <Column field="serial_erp" header="Serial ERP" />
-        <Column field="ano_medios" header="Año" />
-        <Column field="cliente_id" header="Cliente ID" hidden={true} />
-        <Column
-          field="nombre_completo"
-          header="Cliente"
-          body={(rowData) => <span>{rowData.cliente.nombre_completo}</span>}
-        />
-        <Column
-          field="activo"
-          header="Activo"
-          body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
-        />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button
-                icon="pi pi-pencil"
-                className="p-button-rounded p-button-warning"
-                onClick={() => openDialog(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                className="p-button-rounded p-button-danger"
-                onClick={() => deleteSerial(rowData.id)}
-              />
-            </div>
-          )}
-        />
-      </DataTable>
+      <div className="card">
+        <DataTable
+          value={seriales}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No se encontraron seriales ERP."
+        >
+          <Column field="id" header="ID" />
+          <Column field="serial_erp" header="Serial ERP" />
+          <Column field="ano_medios" header="Año" />
+          <Column field="cliente_id" header="Cliente ID" hidden={true} />
+          <Column
+            field="nombre_completo"
+            header="Cliente"
+            body={(rowData) => <span>{rowData.cliente.nombre_completo}</span>}
+          />
+          <Column
+            field="activo"
+            header="Activo"
+            body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
+          />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-rounded p-button-warning"
+                  onClick={() => openDialog(rowData)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-rounded p-button-danger"
+                  onClick={() => deleteSerial(rowData.id)}
+                />
+              </div>
+            )}
+          />
+        </DataTable>
+      </div>
     );
   };
 
   return (
     <div>
-      <h2>Seriales ERP</h2>
-      <Button
-        label="Agregar Serial ERP"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
-      />
+      <div className="card">
+        <h2>Seriales ERP</h2>
+        <Button
+          label="Agregar Serial ERP"
+          icon="pi pi-plus"
+          onClick={() => openDialog()}
+          className="p-button-raised p-button-success"
+          style={{ marginBottom: "20px" }}
+        />
+        {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+      </div>
       {renderDataTable()}
       {renderDialog()}
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+
       <Toast ref={toast} />
     </div>
   );
