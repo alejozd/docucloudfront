@@ -106,7 +106,7 @@ const SerialesERP = ({ jwtToken }) => {
     if (
       !serial.serial_erp.trim() ||
       !serial.ano_medios.trim() ||
-      !serial.cliente_id.trim()
+      !serial.cliente_id
     ) {
       setError("Por favor ingresa todos los campos.");
       return;
@@ -131,6 +131,7 @@ const SerialesERP = ({ jwtToken }) => {
         });
       } else {
         // Crear nuevo serial ERP
+        console.log("Serial a guardar:", serial);
         await axios.post(`${Config.apiUrl}/api/seriales-erp`, serial, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
