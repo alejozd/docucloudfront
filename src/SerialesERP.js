@@ -288,6 +288,7 @@ const SerialesERP = ({ jwtToken }) => {
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron seriales ERP."
+          stripedRows
         >
           <Column field="id" header="ID" />
           <Column field="serial_erp" header="Serial ERP" />
@@ -301,7 +302,16 @@ const SerialesERP = ({ jwtToken }) => {
           <Column
             field="activo"
             header="Activo"
-            body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
+            body={(rowData) => (
+              <span
+                style={{
+                  color: rowData.activo ? "#28a745" : "#dc3545", // Verde para activo, rojo para inactivo
+                  fontWeight: "bold", // Texto en negrita para mayor énfasis
+                }}
+              >
+                {rowData.activo ? "Sí" : "No"}
+              </span>
+            )}
           />
           <Column
             header="Acciones"
@@ -309,12 +319,16 @@ const SerialesERP = ({ jwtToken }) => {
               <div style={{ display: "flex", gap: "8px" }}>
                 <Button
                   icon="pi pi-pencil"
-                  className="p-button-rounded p-button-warning"
+                  rounded
+                  severity="warning"
+                  size="small"
                   onClick={() => openDialog(rowData)}
                 />
                 <Button
                   icon="pi pi-trash"
-                  className="p-button-rounded p-button-danger"
+                  rounded
+                  severity="danger"
+                  size="small"
                   onClick={() => deleteSerial(rowData.id)}
                 />
               </div>
@@ -340,7 +354,6 @@ const SerialesERP = ({ jwtToken }) => {
       </div>
       {renderDataTable()}
       {renderDialog()}
-
       <Toast ref={toast} />
     </div>
   );

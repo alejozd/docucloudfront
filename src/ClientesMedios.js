@@ -305,6 +305,7 @@ const ClientesMedios = ({ jwtToken }) => {
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron clientes."
+          stripedRows
         >
           <Column field="id" header="ID" />
           <Column field="nombre_completo" header="Nombre" />
@@ -315,7 +316,16 @@ const ClientesMedios = ({ jwtToken }) => {
           <Column
             field="activo"
             header="Activo"
-            body={(rowData) => (rowData.activo ? "Sí" : "No")}
+            body={(rowData) => (
+              <span
+                style={{
+                  color: rowData.activo ? "#28a745" : "#dc3545", // Verde para activo, rojo para inactivo
+                  fontWeight: "bold", // Texto en negrita para mayor énfasis
+                }}
+              >
+                {rowData.activo ? "Sí" : "No"}
+              </span>
+            )}
           />
           <Column
             header="Acciones"
@@ -341,17 +351,19 @@ const ClientesMedios = ({ jwtToken }) => {
 
   return (
     <div>
-      <h2>Clientes Medios</h2>
-      <Button
-        label="Agregar Cliente"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
-      />
+      <div className="card">
+        <h2>Clientes Medios</h2>
+        <Button
+          label="Agregar Cliente"
+          icon="pi pi-plus"
+          onClick={() => openDialog()}
+          className="p-button-raised p-button-success"
+          style={{ marginBottom: "20px" }}
+        />
+        {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+      </div>
       {renderDataTable()}
       {renderDialog()}
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
       <Toast ref={toast} />
     </div>
   );

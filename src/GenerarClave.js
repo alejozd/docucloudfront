@@ -11,6 +11,7 @@ const GenerarClave = ({ jwtToken }) => {
   const [claveGenerada, setClaveGenerada] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(null);
   const toast = React.useRef(null);
 
   // Función para generar la clave
@@ -59,6 +60,32 @@ const GenerarClave = ({ jwtToken }) => {
     }
   };
 
+  // Función para copiar la clave al portapapeles
+  const copiarClave = () => {
+    if (claveGenerada?.claveGenerada) {
+      navigator.clipboard
+        .writeText(claveGenerada.claveGenerada)
+        .then(() => {
+          setCopySuccess("Clave copiada al portapapeles");
+          toast.current.show({
+            severity: "success",
+            summary: "Éxito",
+            detail: "Clave copiada al portapapeles",
+            life: 3000,
+          });
+        })
+        .catch(() => {
+          setCopySuccess("Error al copiar la clave");
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Error al copiar la clave",
+            life: 3000,
+          });
+        });
+    }
+  };
+
   return (
     <div className="card p-fluid">
       <h2>Generar Clave</h2>
@@ -101,9 +128,27 @@ const GenerarClave = ({ jwtToken }) => {
           <p>
             <strong>MAC Servidor:</strong> {claveGenerada.macServidor}
           </p>
-          <p>
-            <strong>Clave Generada:</strong> {claveGenerada.claveGenerada}
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <p>
+              <strong>Clave Generada:</strong> {claveGenerada.claveGenerada}
+            </p>
+            <Button
+              label="Copiar"
+              icon="pi pi-copy"
+              onClick={copiarClave}
+              className="p-button-outlined p-button-secondary"
+            />
+          </div>
+          {copySuccess && (
+            <p
+              style={{
+                color: copySuccess.includes("Error") ? "red" : "green",
+                marginTop: "8px",
+              }}
+            >
+              {copySuccess}
+            </p>
+          )}
         </div>
       )}
       <Toast ref={toast} />
