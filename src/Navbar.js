@@ -48,6 +48,12 @@ const Navbar = () => {
               url: "/generar-clave",
               id: "generar-clave",
             },
+            {
+              label: "Vendedores",
+              icon: "pi pi-users",
+              url: "/vendedores",
+              id: "vendedores",
+            },
           ],
         },
       ],
