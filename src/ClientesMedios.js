@@ -8,6 +8,7 @@ import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
+import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 
 const ClientesMedios = ({ jwtToken }) => {
@@ -20,7 +21,9 @@ const ClientesMedios = ({ jwtToken }) => {
     empresa: "",
     direccion: "",
     activo: true,
+    vendedor: null,
   });
+  const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -30,7 +33,8 @@ const ClientesMedios = ({ jwtToken }) => {
   // Cargar clientes al iniciar el componente
   useEffect(() => {
     fetchClientes();
-  }, []);
+    fetchVendedores();
+  }, [jwtToken]);
 
   // Función para cargar clientes desde el backend
   const fetchClientes = async () => {
@@ -55,6 +59,24 @@ const ClientesMedios = ({ jwtToken }) => {
     }
   };
 
+  // Función para cargar los vendedores desde el backend
+  const fetchVendedores = async () => {
+    try {
+      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, {
+        headers: { Authorization: `Bearer ${jwtToken}` },
+      });
+      setVendedores(response.data);
+    } catch (err) {
+      console.error("Error al cargar los vendedores:", err.message);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Error al cargar los vendedores",
+        life: 3000,
+      });
+    }
+  };
+
   // Función para abrir el diálogo de creación/edición
   const openDialog = (clienteSeleccionado = null) => {
     if (clienteSeleccionado) {
@@ -69,6 +91,7 @@ const ClientesMedios = ({ jwtToken }) => {
         empresa: "",
         direccion: "",
         activo: true,
+        vendedor: null,
       });
       setIsEditMode(false);
     }
@@ -86,6 +109,7 @@ const ClientesMedios = ({ jwtToken }) => {
       empresa: "",
       direccion: "",
       activo: true,
+      vendedor: null,
     });
   };
 
@@ -273,6 +297,24 @@ const ClientesMedios = ({ jwtToken }) => {
         </div>
         <div style={{ marginBottom: "12px" }}>
           <label
+            htmlFor="vendedor_id"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Vendedor
+          </label>
+          <Dropdown
+            id="vendedor_id"
+            value={cliente.vendedor_id || null}
+            options={vendedores}
+            onChange={(e) => setCliente({ ...cliente, vendedor_id: e.value })}
+            optionLabel="nombre"
+            optionValue="id"
+            placeholder="Selecciona un vendedor"
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
             htmlFor="activo"
             style={{ display: "block", marginBottom: "6px" }}
           >
@@ -311,8 +353,17 @@ const ClientesMedios = ({ jwtToken }) => {
           <Column field="nombre_completo" header="Nombre" sortable />
           <Column field="email" header="Email" />
           <Column field="telefono" header="Teléfono" />
-          <Column field="empresa" header="Empresa" />
-          <Column field="direccion" header="Dirección" />
+          <Column
+            field="vendedor.nombre"
+            header="Vendedor"
+            body={(rowData) => (
+              <span>
+                {rowData.vendedor ? rowData.vendedor.nombre : "Sin vendedor"}
+              </span>
+            )}
+          />
+          <Column field="empresa" header="Empresa" hidden={true} />
+          <Column field="direccion" header="Dirección" hidden={true} />
           <Column
             field="activo"
             header="Activo"
