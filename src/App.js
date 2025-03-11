@@ -19,6 +19,7 @@ import ClientesMedios from "./ClientesMedios";
 import SerialesERP from "./SerialesERP";
 import ClavesGeneradas from "./ClavesGeneradas";
 import GenerarClave from "./GenerarClave"; //Para Medios
+import Vendedores from "./Vendedores"; //Para Medios
 import Login from "./Login"; // Nuevo componente de autenticación
 
 import "primereact/resources/themes/lara-light-blue/theme.css";
@@ -166,6 +167,17 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <GenerarClave />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vendedores"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
+                  <Vendedores />
                 </ProtectedRoute>
               }
             />
