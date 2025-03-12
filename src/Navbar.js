@@ -60,6 +60,12 @@ const Navbar = () => {
               url: "/ventas",
               id: "ventas",
             },
+            {
+              label: "Pagos",
+              icon: "pi pi-dollar",
+              url: "/pagos",
+              id: "pagos",
+            },
           ],
         },
       ],

@@ -21,6 +21,7 @@ import ClavesGeneradas from "./ClavesGeneradas";
 import GenerarClave from "./GenerarClave"; //Para Medios
 import Vendedores from "./Vendedores"; //Para Medios
 import Ventas from "./Ventas";
+import Pagos from "./Pagos"; //Para Medios
 import Login from "./Login"; // Nuevo componente de autenticación
 
 import "primereact/resources/themes/lara-light-blue/theme.css";
@@ -190,6 +191,17 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <Ventas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pagos"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
+                  <Pagos />
                 </ProtectedRoute>
               }
             />
