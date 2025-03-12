@@ -100,14 +100,19 @@ const Ventas = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (ventaSeleccionada = null) => {
     if (ventaSeleccionada) {
-      setVenta(ventaSeleccionada);
+      setVenta({
+        ...ventaSeleccionada,
+        fecha_venta: ventaSeleccionada.fecha_venta
+          ? new Date(ventaSeleccionada.fecha_venta) // Convierte la cadena a objeto Date
+          : null,
+      });
       setIsEditMode(true);
     } else {
       setVenta({
         id: null,
         vendedor_id: "",
         cliente_medio_id: "",
-        fecha_venta: new Date().toISOString().split("T")[0],
+        fecha_venta: new Date(),
         valor_total: "",
         estado_pago: "pendiente",
         estado_instalacion: "pendiente",
@@ -144,12 +149,23 @@ const Ventas = ({ jwtToken }) => {
     }
     setLoading(true);
     setError(null);
+
+    const ventaParaEnviar = {
+      ...venta,
+      fecha_venta: venta.fecha_venta
+        ? venta.fecha_venta.toISOString().split("T")[0] // Convierte Date a YYYY-MM-DD
+        : null,
+    };
     try {
       if (isEditMode) {
         // Actualizar venta existente
-        await axios.put(`${Config.apiUrl}/api/ventas/${venta.id}`, venta, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
+        await axios.put(
+          `${Config.apiUrl}/api/ventas/${venta.id}`,
+          ventaParaEnviar,
+          {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          }
+        );
         toast.current.show({
           severity: "success",
           summary: "Éxito",
@@ -158,7 +174,7 @@ const Ventas = ({ jwtToken }) => {
         });
       } else {
         // Crear nueva venta
-        await axios.post(`${Config.apiUrl}/api/ventas`, venta, {
+        await axios.post(`${Config.apiUrl}/api/ventas`, ventaParaEnviar, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
         toast.current.show({
