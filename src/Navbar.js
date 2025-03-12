@@ -54,6 +54,12 @@ const Navbar = () => {
               url: "/vendedores",
               id: "vendedores",
             },
+            {
+              label: "Ventas",
+              icon: "pi pi-shopping-cart",
+              url: "/ventas",
+              id: "ventas",
+            },
           ],
         },
       ],
