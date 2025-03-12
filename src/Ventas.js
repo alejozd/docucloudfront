@@ -100,11 +100,16 @@ const Ventas = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (ventaSeleccionada = null) => {
     if (ventaSeleccionada) {
+      const fechaUtc = new Date(ventaSeleccionada.fecha_venta);
+      const fechaLocal = new Date(
+        fechaUtc.getUTCFullYear(),
+        fechaUtc.getUTCMonth(),
+        fechaUtc.getUTCDate()
+      );
+
       setVenta({
         ...ventaSeleccionada,
-        fecha_venta: ventaSeleccionada.fecha_venta
-          ? new Date(ventaSeleccionada.fecha_venta + "T00:00:00Z") // Convierte la cadena a objeto Date
-          : null,
+        fecha_venta: fechaLocal,
       });
       setIsEditMode(true);
     } else {
@@ -150,11 +155,18 @@ const Ventas = ({ jwtToken }) => {
     setLoading(true);
     setError(null);
 
+    const fechaVentaISO = venta.fecha_venta
+      ? new Date(
+          venta.fecha_venta.getTime() -
+            venta.fecha_venta.getTimezoneOffset() * 60000
+        ) // Ajusta la zona horaria
+          .toISOString()
+          .split("T")[0]
+      : null;
+
     const ventaParaEnviar = {
       ...venta,
-      fecha_venta: venta.fecha_venta
-        ? venta.fecha_venta.toISOString().split("T")[0] // Convierte Date a YYYY-MM-DD
-        : null,
+      fecha_venta: fechaVentaISO,
     };
     try {
       if (isEditMode) {
