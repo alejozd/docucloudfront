@@ -4,12 +4,12 @@ import Config from "./Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
+import { RadioButton } from "primereact/radiobutton";
 
 const Pagos = ({ jwtToken }) => {
   const [pagos, setPagos] = useState([]);
@@ -17,8 +17,8 @@ const Pagos = ({ jwtToken }) => {
     id: null,
     venta_id: "",
     fecha_pago: new Date().toISOString().split("T")[0],
-    monto: "",
-    estado: "pendiente",
+    monto_pagado: "",
+    metodo_pago: "transferencia",
   });
   const [showDialog, setShowDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -84,8 +84,8 @@ const Pagos = ({ jwtToken }) => {
         id: null,
         venta_id: "",
         fecha_pago: new Date().toISOString().split("T")[0],
-        monto: "",
-        estado: "pendiente",
+        monto_pagado: "",
+        metodo_pago: "transferencia",
       });
       setIsEditMode(false);
     }
@@ -99,14 +99,19 @@ const Pagos = ({ jwtToken }) => {
       id: null,
       venta_id: "",
       fecha_pago: new Date().toISOString().split("T")[0],
-      monto: "",
-      estado: "pendiente",
+      monto_pagado: "",
+      metodo_pago: "transferencia",
     });
   };
 
   // Función para guardar un pago
   const savePago = async () => {
-    if (!pago.venta_id || !pago.fecha_pago || !pago.monto || !pago.estado) {
+    if (
+      !pago.venta_id ||
+      !pago.fecha_pago ||
+      !pago.monto_pagado ||
+      !pago.metodo_pago
+    ) {
       setError("Por favor ingresa todos los campos obligatorios.");
       return;
     }
@@ -203,10 +208,11 @@ const Pagos = ({ jwtToken }) => {
           </label>
           <Dropdown
             id="venta_id"
-            value={pago.venta_id}
+            value={ventas.find((v) => v.id === pago.venta_id) || null}
             options={ventas}
-            onChange={(e) => setPago({ ...pago, venta_id: e.value })}
-            optionLabel="id" // Usar el ID como valor interno
+            onChange={(e) => setPago({ ...pago, venta_id: e.value.id })}
+            optionLabel="id"
+            placeholder="Selecciona una venta"
             itemTemplate={(option) => (
               <div>
                 <strong>ID:</strong> {option.id} <br />
@@ -238,7 +244,6 @@ const Pagos = ({ jwtToken }) => {
                 </div>
               );
             }}
-            placeholder="Selecciona una venta"
             style={{ width: "100%" }}
           />
         </div>
@@ -272,8 +277,8 @@ const Pagos = ({ jwtToken }) => {
           </label>
           <InputNumber
             id="monto"
-            value={pago.monto}
-            onValueChange={(e) => setPago({ ...pago, monto: e.value })}
+            value={pago.monto_pagado}
+            onValueChange={(e) => setPago({ ...pago, monto_pagado: e.value })}
             mode="currency"
             currency="COP"
             locale="es-CO"
@@ -284,25 +289,49 @@ const Pagos = ({ jwtToken }) => {
           />
         </div>
 
-        {/* Campo estado */}
         <div style={{ marginBottom: "12px" }}>
           <label
-            htmlFor="estado"
+            htmlFor="metodo_pago"
             style={{ display: "block", marginBottom: "6px" }}
           >
-            Estado:
+            Método de Pago:
           </label>
-          <Dropdown
-            id="estado"
-            value={pago.estado}
-            options={[
-              { label: "Completo", value: "completo" },
-              { label: "Pendiente", value: "pendiente" },
-            ]}
-            onChange={(e) => setPago({ ...pago, estado: e.value })}
-            placeholder="Selecciona un estado"
-            style={{ width: "100%" }}
-          />
+          <div>
+            <RadioButton
+              inputId="efectivo"
+              name="metodo_pago"
+              value="efectivo"
+              checked={pago.metodo_pago === "efectivo"}
+              onChange={(e) => setPago({ ...pago, metodo_pago: e.value })}
+            />
+            <label htmlFor="efectivo" style={{ marginLeft: "8px" }}>
+              Efectivo
+            </label>
+          </div>
+          <div>
+            <RadioButton
+              inputId="transferencia"
+              name="metodo_pago"
+              value="transferencia"
+              checked={pago.metodo_pago === "transferencia"}
+              onChange={(e) => setPago({ ...pago, metodo_pago: e.value })}
+            />
+            <label htmlFor="transferencia" style={{ marginLeft: "8px" }}>
+              Transferencia
+            </label>
+          </div>
+          <div>
+            <RadioButton
+              inputId="tarjeta"
+              name="metodo_pago"
+              value="tarjeta"
+              checked={pago.metodo_pago === "tarjeta"}
+              onChange={(e) => setPago({ ...pago, metodo_pago: e.value })}
+            />
+            <label htmlFor="tarjeta" style={{ marginLeft: "8px" }}>
+              Tarjeta
+            </label>
+          </div>
         </div>
 
         <Button
@@ -341,41 +370,33 @@ const Pagos = ({ jwtToken }) => {
           }
         />
         <Column
-          field="monto"
+          field="monto_pagado"
           header="Monto"
           body={(rowData) => {
             const formattedValue = new Intl.NumberFormat("es-CO", {
               style: "currency",
               currency: "COP",
-            }).format(rowData.monto);
+            }).format(rowData.monto_pagado);
             return <span>{formattedValue}</span>;
           }}
         />
-        <Column
-          field="estado"
-          header="Estado"
-          body={(rowData) => (
-            <span
-              style={{
-                color: rowData.estado === "completo" ? "#28a745" : "#dc3545",
-              }}
-            >
-              {rowData.estado}
-            </span>
-          )}
-        />
+        <Column field="metodo_pago" header="Método de Pago" />
         <Column
           header="Acciones"
           body={(rowData) => (
             <div style={{ display: "flex", gap: "8px" }}>
               <Button
                 icon="pi pi-pencil"
-                className="p-button-rounded p-button-warning"
+                rounded
+                text
+                severity="info"
                 onClick={() => openDialog(rowData)}
               />
               <Button
                 icon="pi pi-trash"
-                className="p-button-rounded p-button-danger"
+                rounded
+                text
+                severity="danger"
                 onClick={() => deletePago(rowData.id)}
               />
             </div>
