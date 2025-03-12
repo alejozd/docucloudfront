@@ -103,7 +103,7 @@ const Ventas = ({ jwtToken }) => {
       setVenta({
         ...ventaSeleccionada,
         fecha_venta: ventaSeleccionada.fecha_venta
-          ? new Date(ventaSeleccionada.fecha_venta) // Convierte la cadena a objeto Date
+          ? new Date(ventaSeleccionada.fecha_venta + "T00:00:00Z") // Convierte la cadena a objeto Date
           : null,
       });
       setIsEditMode(true);
@@ -339,9 +339,9 @@ const Ventas = ({ jwtToken }) => {
         <Column
           field="fecha_venta"
           header="Fecha de Venta"
-          body={(rowData) =>
-            new Date(rowData.fecha_venta).toLocaleDateString("es-CO")
-          }
+          // body={(rowData) =>
+          //   new Date(rowData.fecha_venta).toLocaleDateString("es-CO")
+          // }
         />
         <Column
           field="valor_total"
