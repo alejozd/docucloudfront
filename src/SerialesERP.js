@@ -322,16 +322,18 @@ const SerialesERP = ({ jwtToken }) => {
                 <Button
                   icon="pi pi-pencil"
                   rounded
-                  severity="warning"
-                  size="small"
+                  text
+                  severity="info"
                   onClick={() => openDialog(rowData)}
+                  size="small"
                 />
                 <Button
                   icon="pi pi-trash"
                   rounded
+                  text
                   severity="danger"
-                  size="small"
                   onClick={() => deleteSerial(rowData.id)}
+                  size="small"
                 />
               </div>
             )}
