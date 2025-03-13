@@ -5,7 +5,6 @@ import Config from "./Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
@@ -29,6 +28,16 @@ const Ventas = ({ jwtToken }) => {
   const [error, setError] = useState(null);
   const [clientesMedios, setClientesMedios] = useState([]);
   const [vendedores, setVendedores] = useState([]);
+  const opcionesEstadoPago = [
+    { label: "Pendiente", value: "pendiente" },
+    { label: "Parcial", value: "parcial" },
+    { label: "Completo", value: "completo" },
+  ];
+
+  const opcionesEstadoInstalacion = [
+    { label: "Pendiente", value: "pendiente" },
+    { label: "Instalado", value: "instalado" },
+  ];
   const toast = React.useRef(null);
 
   // Cargar ventas, clientes medios y vendedores al iniciar el componente
@@ -147,7 +156,9 @@ const Ventas = ({ jwtToken }) => {
       !venta.vendedor_id ||
       !venta.cliente_medio_id ||
       !venta.fecha_venta ||
-      !venta.valor_total
+      !venta.valor_total ||
+      !venta.estado_pago ||
+      !venta.estado_instalacion
     ) {
       setError("Por favor ingresa todos los campos obligatorios.");
       return;
@@ -171,6 +182,7 @@ const Ventas = ({ jwtToken }) => {
     try {
       if (isEditMode) {
         // Actualizar venta existente
+        console.log("ventaParaEnviar", ventaParaEnviar);
         await axios.put(
           `${Config.apiUrl}/api/ventas/${venta.id}`,
           ventaParaEnviar,
@@ -325,6 +337,41 @@ const Ventas = ({ jwtToken }) => {
             style={{ width: "100%" }}
           />
         </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="estado_pago"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Estado de Pago:
+          </label>
+          <Dropdown
+            id="estado_pago"
+            value={venta.estado_pago}
+            options={opcionesEstadoPago}
+            onChange={(e) => setVenta({ ...venta, estado_pago: e.value })}
+            placeholder="Selecciona un estado de pago"
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div style={{ marginBottom: "12px" }}>
+          <label
+            htmlFor="estado_instalacion"
+            style={{ display: "block", marginBottom: "6px" }}
+          >
+            Estado de Instalación:
+          </label>
+          <Dropdown
+            id="estado_instalacion"
+            value={venta.estado_instalacion}
+            options={opcionesEstadoInstalacion}
+            onChange={(e) =>
+              setVenta({ ...venta, estado_instalacion: e.value })
+            }
+            placeholder="Selecciona un estado de instalación"
+            style={{ width: "100%" }}
+          />
+        </div>
         <Button
           label="Guardar"
           onClick={saveVenta}
@@ -351,9 +398,9 @@ const Ventas = ({ jwtToken }) => {
         <Column
           field="fecha_venta"
           header="Fecha de Venta"
-          // body={(rowData) =>
-          //   new Date(rowData.fecha_venta).toLocaleDateString("es-CO")
-          // }
+          body={(rowData) =>
+            new Date(rowData.fecha_venta).toLocaleDateString("es-CO")
+          }
         />
         <Column
           field="valor_total"
