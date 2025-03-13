@@ -29,7 +29,11 @@ const ClavesGeneradas = ({ jwtToken }) => {
           headers: { Authorization: `Bearer ${jwtToken}` },
         }
       );
-      setClaves(response.data);
+      const transformedData = response.data.map((item) => ({
+        ...item,
+        serial_erp: item.serial?.serial_erp || "N/A", // Transformar los datos
+      }));
+      setClaves(transformedData);
     } catch (err) {
       console.error(err);
       setError("Error al cargar las claves generadas.");
@@ -80,15 +84,18 @@ const ClavesGeneradas = ({ jwtToken }) => {
           emptyMessage="No se encontraron claves generadas."
           stripedRows
           globalFilter={globalFilter} // Vincular el filtro global
+          globalFilterFields={[
+            "serial_erp",
+            "mac_servidor",
+            "iporigen",
+            "clave_generada",
+          ]}
+          filterMatchMode="contains"
           sortOrder={-1}
           sortField="generado_en"
         >
           <Column field="id" header="ID" />
-          <Column
-            field="serial_erp"
-            header="Serial ERP"
-            body={(rowData) => rowData.serial?.serial_erp || "N/A"}
-          />
+          <Column field="serial_erp" header="Serial ERP" />
           <Column field="mac_servidor" header="MAC" />
           <Column field="iporigen" header="IP-Origen" />
           <Column field="clave_generada" header="Clave" />
