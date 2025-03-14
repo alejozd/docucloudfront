@@ -345,9 +345,17 @@ const Vendedores = ({ jwtToken }) => {
           </span>
         </div>
 
-        {/* Detalle por Venta */}
+        {/* Tabla de Ventas con Pagos Expandibles */}
         <h4>Detalle por Venta</h4>
-        <DataTable value={cartera.ventas} paginator rows={5}>
+        <DataTable
+          value={cartera.ventas}
+          expandedRows={expandedRows} // Estado para controlar las filas expandidas
+          onRowToggle={(e) => setExpandedRows(e.data)} // Actualizar las filas expandidas
+          rowExpansionTemplate={rowExpansionTemplate} // Plantilla para los pagos
+          paginator
+          rows={10}
+        >
+          <Column expander style={{ width: "3em" }} />
           <Column field="venta_id" header="ID Venta" />
           <Column
             field="fecha_venta"
@@ -396,6 +404,46 @@ const Vendedores = ({ jwtToken }) => {
           />
         </DataTable>
       </Dialog>
+    );
+  };
+
+  // Estado para controlar las filas expandidas
+  const [expandedRows, setExpandedRows] = useState([]);
+
+  // Plantilla para mostrar los pagos asociados a una venta
+  const rowExpansionTemplate = (data) => {
+    return (
+      <div className="p-3">
+        <h5>Pagos Asociados</h5>
+        <DataTable value={data.pagos}>
+          <Column field="pago_id" header="ID Pago" style={{ width: "10%" }} />
+          <Column
+            field="monto"
+            header="Monto"
+            body={(rowData) =>
+              new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+              }).format(rowData.monto_pagado)
+            }
+            style={{ width: "20%" }}
+          />
+          <Column
+            field="fecha_pago"
+            header="Fecha de Pago"
+            body={(rowData) => {
+              const fechaLocal = convertToLocalDate(rowData.fecha_pago);
+              return formatDate(fechaLocal);
+            }}
+            style={{ width: "20%" }}
+          />
+          <Column
+            field="metodo_pago"
+            header="Método de Pago"
+            style={{ width: "20%" }}
+          />
+        </DataTable>
+      </div>
     );
   };
 
