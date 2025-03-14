@@ -1,222 +1,165 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Config from "./Config";
-import { Toast } from "primereact/toast";
-import VendedoresTable from "./VendedoresTable";
-import VendedorDialog from "./VendedorDialog";
-import CarteraDialog from "./CarteraDialog";
+import React, { useState } from "react";
+import { Dialog } from "primereact/dialog";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { convertToLocalDate } from "./dateUtils";
+import { formatDate } from "./dateUtils";
 
-const Vendedores = ({ jwtToken }) => {
-  const [vendedores, setVendedores] = useState([]);
-  const [vendedor, setVendedor] = useState({
-    id: null,
-    nombre: "",
-    telefono: "",
-    activo: true,
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showDialog, setShowDialog] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [cartera, setCartera] = useState(null);
-  const [showCarteraDialog, setShowCarteraDialog] = useState(false);
-  const toast = React.useRef(null);
+const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
+  // Estado para controlar las filas expandidas
+  const [expandedRows, setExpandedRows] = useState([]);
 
-  // Cargar vendedores al iniciar el componente
-  useEffect(() => {
-    fetchVendedores();
-  }, []);
+  // Retorno anticipado si no hay cartera
+  if (!cartera) return null;
 
-  const fetchVendedores = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
-      setVendedores(response.data);
-    } catch (err) {
-      console.error(err);
-      setError("Error al cargar los vendedores.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los vendedores",
-        life: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const openDialog = (vendedorSeleccionado = null) => {
-    if (vendedorSeleccionado) {
-      setVendedor(vendedorSeleccionado);
-      setIsEditMode(true);
-    } else {
-      setVendedor({ id: null, nombre: "", telefono: "", activo: true });
-      setIsEditMode(false);
-    }
-    setShowDialog(true);
-  };
-
-  const closeDialog = () => {
-    setShowDialog(false);
-    setVendedor({ id: null, nombre: "", telefono: "", activo: true });
-  };
-
-  const saveVendedor = async () => {
-    if (!vendedor.nombre.trim()) {
-      setError("Por favor ingresa todos los campos obligatorios.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      if (isEditMode) {
-        // Actualizar vendedor existente
-        await axios.put(
-          `${Config.apiUrl}/api/vendedores/${vendedor.id}`,
-          vendedor,
-          { headers: { Authorization: `Bearer ${jwtToken}` } }
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor actualizado exitosamente",
-          life: 3000,
-        });
-      } else {
-        // Crear nuevo vendedor
-        await axios.post(`${Config.apiUrl}/api/vendedores`, vendedor, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor creado exitosamente",
-          life: 3000,
-        });
-      }
-      closeDialog();
-      fetchVendedores(); // Recargar la lista de vendedores
-    } catch (err) {
-      console.error(err);
-      setError("Error al guardar el vendedor.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al guardar el vendedor",
-        life: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteVendedor = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este vendedor?")) {
-      setLoading(true);
-      setError(null);
-      try {
-        await axios.delete(`${Config.apiUrl}/api/vendedores/${id}`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor eliminado exitosamente",
-          life: 3000,
-        });
-        fetchVendedores(); // Recargar la lista de vendedores
-      } catch (err) {
-        console.error(err);
-        setError("Error al eliminar el vendedor.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Error al eliminar el vendedor",
-          life: 3000,
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const viewCartera = async (vendedorId, vendedorNombre) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        `${Config.apiUrl}/api/vendedores/${vendedorId}/cartera`,
-        { headers: { Authorization: `Bearer ${jwtToken}` } }
-      );
-      setCartera({ ...response.data, nombre: vendedorNombre });
-      setShowCarteraDialog(true);
-    } catch (err) {
-      console.error(err);
-      setError("Error al cargar el detalle de cartera.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar el detalle de cartera",
-        life: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
+  // Plantilla para mostrar los pagos asociados a una venta
+  const rowExpansionTemplate = (data) => {
+    return (
+      <div className="p-3">
+        <h5>Pagos Asociados</h5>
+        <DataTable value={data.pagos}>
+          <Column field="id" header="ID Pago" style={{ width: "10%" }} />
+          <Column
+            field="monto"
+            header="Monto"
+            body={(rowData) =>
+              new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+              }).format(rowData.monto_pagado)
+            }
+            style={{ width: "20%" }}
+          />
+          <Column
+            field="fecha_pago"
+            header="Fecha de Pago"
+            body={(rowData) => {
+              const fechaLocal = convertToLocalDate(rowData.fecha_pago);
+              return formatDate(fechaLocal);
+            }}
+            style={{ width: "20%" }}
+          />
+          <Column
+            field="metodo_pago"
+            header="Método de Pago"
+            style={{ width: "20%" }}
+          />
+        </DataTable>
+      </div>
+    );
   };
 
   return (
-    <div>
-      {/* Componente Toast para mostrar notificaciones */}
-      <Toast ref={toast} />
+    <Dialog
+      visible={showCarteraDialog}
+      header={`Detalle de Cartera - ${cartera.nombre}`}
+      onHide={onClose}
+      //   style={{ width: "600px" }}
+    >
+      {/* Totales */}
+      <div style={{ marginBottom: "12px" }}>
+        <strong>Total Ventas:</strong>{" "}
+        {new Intl.NumberFormat("es-CO", {
+          style: "currency",
+          currency: "COP",
+        }).format(cartera.totales.totalVentas)}
+      </div>
+      <div style={{ marginBottom: "12px" }}>
+        <strong>Total Pagos:</strong>{" "}
+        {new Intl.NumberFormat("es-CO", {
+          style: "currency",
+          currency: "COP",
+        }).format(cartera.totales.totalPagos)}
+      </div>
+      <div style={{ marginBottom: "12px" }}>
+        <strong>Saldo Total:</strong>{" "}
+        <span
+          style={{
+            color:
+              cartera.totales.saldoTotal <= 50000
+                ? "#28a745" // Verde si el saldo es menor o igual a 50,000
+                : cartera.totales.saldoTotal > 50000 &&
+                  cartera.totales.saldoTotal <= 100000
+                ? "#fd7e14" // Naranja si el saldo está entre 50,000 y 100,000
+                : "#dc3545", // Rojo si el saldo es mayor a 100,000
+            fontWeight: "bold",
+          }}
+        >
+          {new Intl.NumberFormat("es-CO", {
+            style: "currency",
+            currency: "COP",
+          }).format(cartera.totales.saldoTotal)}
+        </span>
+      </div>
 
-      <h2>Vendedores</h2>
-
-      {/* Botón para agregar un nuevo vendedor */}
-      <button
-        label="Agregar Vendedor"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
+      {/* Detalle por Venta */}
+      <h4>Detalle por Venta</h4>
+      <DataTable
+        value={cartera.ventas}
+        expandedRows={expandedRows} // Estado para controlar las filas expandidas
+        onRowToggle={(e) => setExpandedRows(e.data)} // Actualizar las filas expandidas
+        rowExpansionTemplate={rowExpansionTemplate} // Plantilla para los pagos
       >
-        Agregar Vendedor
-      </button>
+        {/* Columna de expansión */}
+        <Column expander style={{ width: "3em" }} />
+        <Column field="venta_id" header="ID Venta" />
+        <Column
+          field="fecha_venta"
+          header="Fecha de Venta"
+          body={(rowData) => {
+            const fechaLocal = convertToLocalDate(rowData.fecha_venta);
+            return formatDate(fechaLocal);
+          }}
+        />
+        <Column
+          field="valor_venta"
+          header="Valor de Venta"
+          body={(rowData) =>
+            new Intl.NumberFormat("es-CO", {
+              style: "currency",
+              currency: "COP",
+            }).format(rowData.valor_venta)
+          }
+        />
+        <Column
+          field="total_pagos"
+          header="Total Pagos"
+          body={(rowData) =>
+            new Intl.NumberFormat("es-CO", {
+              style: "currency",
+              currency: "COP",
+            }).format(rowData.total_pagos)
+          }
+        />
+        <Column
+          field="saldo"
+          header="Saldo"
+          body={(rowData) => {
+            let color =
+              rowData.saldo <= 50000
+                ? "#28a745" // Verde si el saldo es menor o igual a 50,000
+                : rowData.saldo > 50000 && rowData.saldo <= 100000
+                ? "#fd7e14" // Naranja si el saldo está entre 50,000 y 100,000
+                : "#dc3545"; // Rojo si el saldo es mayor a 100,000
 
-      {/* Tabla de vendedores */}
-      <VendedoresTable
-        vendedores={vendedores}
-        loading={loading}
-        onViewCartera={viewCartera}
-        onEdit={openDialog}
-        onDelete={deleteVendedor}
-      />
-
-      {/* Diálogo para crear/editar vendedores */}
-      <VendedorDialog
-        showDialog={showDialog}
-        isEditMode={isEditMode}
-        vendedor={vendedor}
-        onClose={closeDialog}
-        onSave={saveVendedor}
-        loading={loading}
-        error={error}
-      />
-
-      {/* Diálogo para ver el detalle de cartera */}
-      <CarteraDialog
-        cartera={cartera}
-        showCarteraDialog={showCarteraDialog}
-        onClose={() => setShowCarteraDialog(false)}
-      />
-
-      {/* Mensaje de error general */}
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
-    </div>
+            return (
+              <span
+                style={{
+                  color: color,
+                  fontWeight: "bold",
+                }}
+              >
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                }).format(rowData.saldo)}
+              </span>
+            );
+          }}
+        />
+      </DataTable>
+    </Dialog>
   );
 };
 
-export default Vendedores;
+export default CarteraDialog;
