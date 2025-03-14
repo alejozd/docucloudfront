@@ -334,7 +334,13 @@ const Vendedores = ({ jwtToken }) => {
           <strong>Saldo Total:</strong>{" "}
           <span
             style={{
-              color: cartera.totales.saldoTotal >= 0 ? "#28a745" : "#dc3545",
+              color:
+                cartera.totales.saldoTotal <= 50000
+                  ? "#28a745" // Verde si el saldo es menor o igual a 50,000
+                  : cartera.totales.saldoTotal > 50000 &&
+                    cartera.totales.saldoTotal <= 100000
+                  ? "#fd7e14" // Naranja si el saldo está entre 50,000 y 100,000
+                  : "#dc3545", // Rojo si el saldo es mayor a 100,000
               fontWeight: "bold",
             }}
           >
@@ -388,19 +394,29 @@ const Vendedores = ({ jwtToken }) => {
           <Column
             field="saldo"
             header="Saldo"
-            body={(rowData) => (
-              <span
-                style={{
-                  color: rowData.saldo >= 0 ? "#28a745" : "#dc3545",
-                  fontWeight: "bold",
-                }}
-              >
-                {new Intl.NumberFormat("es-CO", {
-                  style: "currency",
-                  currency: "COP",
-                }).format(rowData.saldo)}
-              </span>
-            )}
+            body={(rowData) => {
+              // Determinar el color según el valor del saldo
+              let color = "#28a745"; // Verde por defecto
+              if (rowData.saldo > 100000) {
+                color = "#dc3545"; // Rojo si el saldo es mayor a 100,000
+              } else if (rowData.saldo > 50000) {
+                color = "#fd7e14"; // Naranja si el saldo es mayor a 50,000 pero menor o igual a 100,000
+              }
+
+              return (
+                <span
+                  style={{
+                    color: color,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {new Intl.NumberFormat("es-CO", {
+                    style: "currency",
+                    currency: "COP",
+                  }).format(rowData.saldo)}
+                </span>
+              );
+            }}
           />
         </DataTable>
       </Dialog>
