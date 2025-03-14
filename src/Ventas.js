@@ -464,7 +464,6 @@ const Ventas = ({ jwtToken }) => {
                 text
                 severity="info"
                 onClick={() => openDialog(rowData)}
-                size="small"
               />
               <Button
                 icon="pi pi-trash"
@@ -472,7 +471,6 @@ const Ventas = ({ jwtToken }) => {
                 text
                 severity="danger"
                 onClick={() => deleteVenta(rowData.id)}
-                size="small"
               />
             </div>
           )}
