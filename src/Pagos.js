@@ -408,6 +408,7 @@ const Pagos = ({ jwtToken }) => {
 
   return (
     <div>
+      <Toast ref={toast} />
       <h2>Pagos</h2>
       <Button
         label="Agregar Pago"
@@ -419,7 +420,6 @@ const Pagos = ({ jwtToken }) => {
       {renderDataTable()}
       {renderDialog()}
       {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
-      <Toast ref={toast} />
     </div>
   );
 };

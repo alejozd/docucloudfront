@@ -409,6 +409,7 @@ const ClientesMedios = ({ jwtToken }) => {
 
   return (
     <div>
+      <Toast ref={toast} />
       <div className="card">
         <h2>Clientes Medios</h2>
         <Button
@@ -422,7 +423,6 @@ const ClientesMedios = ({ jwtToken }) => {
       </div>
       {renderDataTable()}
       {renderDialog()}
-      <Toast ref={toast} />
     </div>
   );
 };

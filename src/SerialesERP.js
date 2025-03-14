@@ -345,6 +345,7 @@ const SerialesERP = ({ jwtToken }) => {
 
   return (
     <div>
+      <Toast ref={toast} />
       <div className="card">
         <h2>Seriales ERP</h2>
         <Button
@@ -358,7 +359,6 @@ const SerialesERP = ({ jwtToken }) => {
       </div>
       {renderDataTable()}
       {renderDialog()}
-      <Toast ref={toast} />
     </div>
   );
 };

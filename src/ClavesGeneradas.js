@@ -112,6 +112,9 @@ const ClavesGeneradas = ({ jwtToken }) => {
 
   return (
     <div>
+      {/* Componente Toast para notificaciones */}
+      <Toast ref={toast} />
+
       <div className="card">
         <h2>Claves Generadas</h2>
 
@@ -129,9 +132,6 @@ const ClavesGeneradas = ({ jwtToken }) => {
       </div>
       {/* Renderizar el DataTable */}
       {renderDataTable()}
-
-      {/* Componente Toast para notificaciones */}
-      <Toast ref={toast} />
     </div>
   );
 };
