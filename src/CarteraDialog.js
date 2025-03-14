@@ -54,7 +54,8 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
       visible={showCarteraDialog}
       header={`Detalle de Cartera - ${cartera.nombre}`}
       onHide={onClose}
-      //   style={{ width: "600px" }}
+      className="p-fluid p-m-0"
+      style={{ width: "90%", maxWidth: "600px" }}
     >
       {/* Totales */}
       <div style={{ marginBottom: "12px" }}>
