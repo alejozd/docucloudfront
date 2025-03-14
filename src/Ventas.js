@@ -10,6 +10,8 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
+import { convertToLocalDate } from "./dateUtils";
+import { formatDate } from "./dateUtils";
 
 const Ventas = ({ jwtToken }) => {
   const [ventas, setVentas] = useState([]);
@@ -109,12 +111,8 @@ const Ventas = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (ventaSeleccionada = null) => {
     if (ventaSeleccionada) {
-      const fechaUtc = new Date(ventaSeleccionada.fecha_venta);
-      const fechaLocal = new Date(
-        fechaUtc.getUTCFullYear(),
-        fechaUtc.getUTCMonth(),
-        fechaUtc.getUTCDate()
-      );
+      // Convertir la fecha UTC/ISO a una fecha local
+      const fechaLocal = convertToLocalDate(ventaSeleccionada.fecha_venta);
 
       setVenta({
         ...ventaSeleccionada,
@@ -398,9 +396,10 @@ const Ventas = ({ jwtToken }) => {
         <Column
           field="fecha_venta"
           header="Fecha de Venta"
-          body={(rowData) =>
-            new Date(rowData.fecha_venta).toLocaleDateString("es-CO")
-          }
+          body={(rowData) => {
+            const fechaLocal = convertToLocalDate(rowData.fecha_venta);
+            return formatDate(fechaLocal);
+          }}
         />
         <Column
           field="valor_total"
