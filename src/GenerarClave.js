@@ -88,6 +88,7 @@ const GenerarClave = ({ jwtToken }) => {
 
   return (
     <div className="card p-fluid">
+      <Toast ref={toast} />
       <h2>Generar Clave</h2>
       <p>Ingresa el serial ERP para generar la clave:</p>
       <div style={{ marginBottom: "12px" }}>
@@ -151,7 +152,6 @@ const GenerarClave = ({ jwtToken }) => {
           )}
         </div>
       )}
-      <Toast ref={toast} />
     </div>
   );
 };
