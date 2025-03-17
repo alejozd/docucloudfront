@@ -24,7 +24,8 @@ const AutorizacionPage = () => {
   const toast = useRef(null);
 
   // Clave de acceso válida (puedes cambiarla según tus necesidades)
-  const CLAVE_ACCESO_VALIDA = "clave-secreta";
+  //   const CLAVE_ACCESO_VALIDA = "clave-secreta";
+  const CLAVE_ACCESO_VALIDA = process.env.REACT_APP_ACCESS_KEY;
 
   // Estados posibles para el dropdown
   const estados = [
