@@ -185,16 +185,22 @@ const AutorizacionPage = () => {
     </div>
   );
 
+  const cerrarDialog = () => {
+    setClaveIngresada(""); // Limpiar la clave ingresada
+  };
+
   // Diálogo para ingresar la clave de acceso
   const renderAccessDialog = () => (
     <Dialog
       header="Acceso Restringido"
       visible={!accessGranted}
-      onHide={() => {}}
-      style={{ width: "30vw" }}
-      closable={false}
+      onHide={cerrarDialog}
+      style={{ width: "100%", maxWidth: "400px" }}
+      closable={true}
+      modal={false}
+      className="p-fluid"
     >
-      <div>
+      <div style={{ marginBottom: "16px" }}>
         <label
           htmlFor="clave-acceso"
           style={{ display: "block", marginBottom: "8px" }}
@@ -209,13 +215,21 @@ const AutorizacionPage = () => {
           onKeyDown={handleKeyPress} // Agregar el manejador de eventos
           style={{ width: "100%", marginBottom: "16px" }}
         />
-        <Button
-          label={loading ? "Autenticando..." : "Ingresar"}
-          onClick={verificarClave}
-          icon={loading ? "pi pi-spin pi-spinner" : "pi pi-sign-in"}
-          severity="success"
-          disabled={loading}
-        />
+        <div className="flex justify-content-end gap-2">
+          <Button
+            label="Cancelar"
+            onClick={cerrarDialog}
+            severity="danger"
+            outlined
+          />
+          <Button
+            label={loading ? "Autenticando..." : "Ingresar"}
+            onClick={verificarClave}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-sign-in"}
+            severity="success"
+            disabled={loading}
+          />
+        </div>
       </div>
     </Dialog>
   );
