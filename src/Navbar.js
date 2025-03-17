@@ -15,10 +15,22 @@ const Navbar = () => {
       icon: "pi pi-key",
       items: [
         {
-          label: "Serial Reportes",
+          label: "Soft Reportes",
           icon: "pi pi-address-book",
-          url: "/SerialReportes",
-          id: "SerialReportes",
+          items: [
+            {
+              label: "Serial Reportes",
+              icon: "pi pi-address-book",
+              url: "/SerialReportes",
+              id: "SerialReportes",
+            },
+            {
+              label: "Autorizaciones",
+              icon: "pi pi-thumbs-up",
+              url: "/AutorizacionPage",
+              id: "AutorizacionPage",
+            },
+          ],
         },
         {
           label: "Medios",

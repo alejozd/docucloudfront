@@ -18,11 +18,12 @@ import ProtectedRoute from "./ProtectedRoute";
 import ClientesMedios from "./ClientesMedios";
 import SerialesERP from "./SerialesERP";
 import ClavesGeneradas from "./ClavesGeneradas";
-import GenerarClave from "./GenerarClave"; //Para Medios
-import Vendedores from "./Vendedores"; //Para Medios
+import GenerarClave from "./GenerarClave";
+import Vendedores from "./Vendedores";
 import Ventas from "./Ventas";
-import Pagos from "./Pagos"; //Para Medios
-import Login from "./Login"; // Nuevo componente de autenticación
+import Pagos from "./Pagos";
+import Login from "./Login";
+import AutorizacionPage from "./AutorizacionPage";
 
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -205,6 +206,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/AutorizacionPage" element={<AutorizacionPage />} />
           </Routes>
         </div>
       </div>
