@@ -8,6 +8,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
 
 const AutorizacionPage = () => {
   const [autorizaciones, setAutorizaciones] = useState([]);
@@ -84,7 +85,12 @@ const AutorizacionPage = () => {
   // Acción para abrir el diálogo de edición
   const editarAutorizacion = (autorizacion) => {
     setSelectedAutorizacion(autorizacion);
-    setNuevoEstado(autorizacion.estado);
+    setNuevoEstado(autorizacion.estado); // Actualizar el estado
+    setNuevaAutorizacion({
+      ...nuevaAutorizacion,
+      estado: autorizacion.estado,
+      intentos_envio: autorizacion.intentos_envio || 0, // Asegurar que tenga un valor predeterminado
+    });
     setIsEditMode(true);
     setDialogVisible(true);
   };
@@ -92,10 +98,17 @@ const AutorizacionPage = () => {
   // Acción para guardar cambios en una autorización
   const guardarCambios = async () => {
     try {
+      const datosActualizados = isEditMode
+        ? {
+            nuevo_estado: nuevoEstado,
+            nuevos_intentos: nuevaAutorizacion.intentos_envio,
+          }
+        : nuevaAutorizacion;
+
       if (isEditMode) {
         await axios.put(
           `${Config.apiUrl}/api/autorizacion/cambiar-estado/${selectedAutorizacion.idautorizacion}`, // Usar idautorizacion
-          { nuevo_estado: nuevoEstado }
+          datosActualizados
         );
         toast.current.show({
           severity: "success",
@@ -105,7 +118,7 @@ const AutorizacionPage = () => {
       } else {
         await axios.post(
           `${Config.apiUrl}/api/autorizacion`,
-          nuevaAutorizacion
+          datosActualizados
         );
         toast.current.show({
           severity: "success",
@@ -158,7 +171,7 @@ const AutorizacionPage = () => {
 
   // Renderizar el cuerpo del diálogo
   const renderDialogContent = () => (
-    <div>
+    <div className="p-fluid">
       {isEditMode ? (
         <>
           <Dropdown
@@ -166,8 +179,30 @@ const AutorizacionPage = () => {
             options={estados}
             onChange={(e) => setNuevoEstado(e.value)}
             placeholder="Seleccionar estado"
-            style={{ width: "100%" }}
+            style={{ width: "100%", marginBottom: "16px" }}
           />
+          {/* InputNumber para modificar los intentos */}
+          <div className="pfluid">
+            <label
+              htmlFor="intentos-envio"
+              style={{ display: "block", marginBottom: "8px" }}
+            >
+              Intentos de Envío:
+            </label>
+            <InputNumber
+              id="intentos-envio"
+              value={nuevaAutorizacion.intentos_envio}
+              onValueChange={(e) =>
+                setNuevaAutorizacion({
+                  ...nuevaAutorizacion,
+                  intentos_envio: e.value,
+                })
+              }
+              min={0} // Los intentos no pueden ser negativos
+              placeholder="Ingresa los intentos"
+              style={{ width: "100%" }}
+            />
+          </div>
         </>
       ) : (
         <>
@@ -178,6 +213,26 @@ const AutorizacionPage = () => {
               setNuevaAutorizacion({ ...nuevaAutorizacion, estado: e.value })
             }
             placeholder="Seleccionar estado"
+            style={{ width: "100%" }}
+          />
+          {/* InputNumber para modificar los intentos */}
+          <label
+            htmlFor="intentos-envio"
+            style={{ display: "block", marginBottom: "8px" }}
+          >
+            Intentos de Envío:
+          </label>
+          <InputNumber
+            id="intentos-envio"
+            value={nuevaAutorizacion.intentos_envio}
+            onValueChange={(e) =>
+              setNuevaAutorizacion({
+                ...nuevaAutorizacion,
+                intentos_envio: e.value,
+              })
+            }
+            min={0} // Los intentos no pueden ser negativos
+            placeholder="Ingresa los intentos"
             style={{ width: "100%" }}
           />
         </>
@@ -278,6 +333,7 @@ const AutorizacionPage = () => {
           )}
           style={{ minWidth: "8rem" }}
         />
+        <Column field="intentos_envio" header="Intentos" />
       </DataTable>
 
       <Dialog
