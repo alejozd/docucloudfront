@@ -124,6 +124,7 @@ const RegistroSolicitudesPage = () => {
             className="p-datatable-sm"
           >
             <Column field="ip_cliente" header="IP Cliente" sortable filter />
+            <Column field="id_autorizacion" header="ID Autorización" sortable />
             <Column field="estado" header="Estado" sortable />
             <Column
               field="fecha_solicitud"
