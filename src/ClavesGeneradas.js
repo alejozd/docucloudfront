@@ -96,6 +96,7 @@ const ClavesGeneradas = ({ jwtToken }) => {
         >
           <Column field="id" header="ID" />
           <Column field="serial_erp" header="Serial ERP" />
+          <Column field="serial.cliente.nombre_completo" header="Cliente" />
           <Column field="mac_servidor" header="MAC" />
           <Column field="iporigen" header="IP-Origen" />
           <Column field="clave_generada" header="Clave" />
