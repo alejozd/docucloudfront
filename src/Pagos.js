@@ -120,6 +120,7 @@ const Pagos = ({ jwtToken }) => {
     try {
       if (isEditMode) {
         // Actualizar pago existente
+        console.log("Actualizando pago:", pago);
         await axios.put(`${Config.apiUrl}/api/pagos/${pago.id}`, pago, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
@@ -220,13 +221,13 @@ const Pagos = ({ jwtToken }) => {
                   <div className="font-semibold text-left flex-1">
                     #{option.id}
                   </div>
-                  <div className="text-gray-600 text-right flex-1">
+                  <div className="font-semibold text-right flex-1">
                     {new Date(option.fecha_venta).toLocaleDateString("es-CO")}
                   </div>
                 </div>
 
                 {/* Valor total */}
-                <div className="text-primary-600 font-medium my-1 text-left">
+                <div className="text-primary-600 text-sm font-medium my-1 text-left">
                   <strong>Valor:</strong>{" "}
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
@@ -253,13 +254,24 @@ const Pagos = ({ jwtToken }) => {
             valueTemplate={(selectedOption) => {
               if (!selectedOption) return "Selecciona una venta";
               return (
-                <div className="flex justify-between w-full items-center">
-                  <span className="font-semibold">#{selectedOption.id}</span>
-                  <span className="text-gray-600">
+                <div className="flex justify-between w-full">
+                  <div className="font-semibold text-left flex-1">
+                    #{selectedOption.id}
+                  </div>
+                  <div className="text-gray-600 text-center flex-1">
                     {new Date(selectedOption.fecha_venta).toLocaleDateString(
                       "es-CO"
                     )}
-                  </span>
+                  </div>
+                  {/* Valor total */}
+                  <div className="text-primary-600 font-medium text-right">
+                    <strong>Valor:</strong>{" "}
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      minimumFractionDigits: 0,
+                    }).format(selectedOption.valor_total)}
+                  </div>
                 </div>
               );
             }}
@@ -278,8 +290,13 @@ const Pagos = ({ jwtToken }) => {
           </label>
           <Calendar
             id="fecha_pago"
-            value={pago.fecha_pago}
-            onChange={(e) => setPago({ ...pago, fecha_pago: e.value })}
+            value={pago.fecha_pago ? new Date(pago.fecha_pago) : null}
+            onChange={(e) =>
+              setPago({
+                ...pago,
+                fecha_pago: e.value.toISOString().split("T")[0],
+              })
+            }
             dateFormat="dd/mm/yy"
             showIcon
             placeholder="Selecciona una fecha"
