@@ -99,7 +99,7 @@ const DashboardVendedores = ({ jwtToken }) => {
     plugins: {
       datalabels: {
         anchor: "end",
-        align: "top",
+        align: "center",
         color: "black",
         font: { weight: "bold" },
         formatter: (value) => value.toLocaleString(),
