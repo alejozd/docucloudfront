@@ -74,10 +74,11 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
           font: {
             size: 10,
           },
-          padding: 6, // Reducido de 8 a 6
+          padding: 6,
           usePointStyle: true,
-          boxWidth: 6, // Ancho más pequeño para los puntos de leyenda
+          boxWidth: 6,
         },
+        rtl: false, // Asegura que la leyenda esté alineada a la izquierda
       },
       tooltip: {
         callbacks: {
@@ -90,27 +91,19 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
         },
       },
       datalabels: {
-        // Plugin adicional para mostrar valores dentro del gráfico
-        formatter: (value) => {
-          return new Intl.NumberFormat("es-CO", {
-            style: "currency",
-            currency: "COP",
-            maximumFractionDigits: 0,
-          }).format(value);
-        },
-        font: {
-          weight: "bold",
-          size: 10,
-        },
-        anchor: "center",
-        align: "center",
-        offset: 0,
+        display: false, // Ocultamos los labels internos para evitar problemas
       },
     },
     maintainAspectRatio: false,
     responsive: true,
-    cutout: "60%",
-    spacing: 2, // Espacio entre elementos
+    cutout: "55%", // Más espacio para los segmentos
+    spacing: 0, // Eliminamos espacio entre segmentos
+    layout: {
+      padding: {
+        left: 10, // Espacio adicional a la izquierda
+        right: 10, // Espacio adicional a la derecha
+      },
+    },
   };
 
   return (
@@ -128,14 +121,13 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
         style={{ marginBottom: "0.1rem" }}
       >
         {" "}
-        {/* Reducido mb */}
         {/* Totales compactos */}
         <div className="flex flex-column" style={{ minWidth: "200px" }}>
           <h4 className="mt-0 mb-2" style={{ fontSize: "1.1rem" }}>
             Resumen
           </h4>{" "}
           {/* Título más pequeño */}
-          <div className="mb-1">
+          <div className="mb-1" style={{ color: "#42A5F5" }}>
             {" "}
             {/* Reducido margen inferior */}
             <div className="text-sm font-medium">Total Ventas:</div>
@@ -146,7 +138,7 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
               }).format(cartera.totales.totalVentas)}
             </div>
           </div>
-          <div className="mb-1">
+          <div className="mb-1" style={{ color: "#66BB6A" }}>
             <div className="text-sm font-medium">Total Pagos:</div>
             <div className="text-lg">
               {new Intl.NumberFormat("es-CO", {
@@ -156,7 +148,9 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
             </div>
           </div>
           <div className="mb-1">
-            <div className="text-sm font-medium">Saldo Total:</div>
+            <div className="text-sm font-medium" style={{ color: "#FFA726" }}>
+              Saldo Total:
+            </div>
             <div
               className="text-lg"
               style={{
@@ -180,9 +174,10 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
         {/* Gráfico optimizado */}
         <div
           style={{
-            width: "160px", // Reducido de 180px
-            height: "160px",
+            width: "170px", // Reducido de 180px
+            height: "170px",
             position: "relative", // Para mejor posicionamiento
+            marginLeft: "10px",
           }}
         >
           <Chart type="doughnut" data={chartData} options={chartOptions} />
