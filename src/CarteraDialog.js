@@ -60,8 +60,8 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
           cartera.totales.totalPagos,
           cartera.totales.saldoTotal,
         ],
-        backgroundColor: ["#42A5F5", "#66BB6A", "#FFA726"],
-        hoverBackgroundColor: ["#64B5F6", "#81C784", "#FFB74D"],
+        backgroundColor: ["#42A5F5", "#66BB6A", "#FF5252"],
+        hoverBackgroundColor: ["#64B5F6", "#81C784", "#FF6E6E"],
       },
     ],
   };
@@ -130,7 +130,7 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
           <div className="mb-1" style={{ color: "#42A5F5" }}>
             {" "}
             {/* Reducido margen inferior */}
-            <div className="text-sm font-medium">Total Ventas:</div>
+            <div>Total Ventas:</div>
             <div className="text-lg">
               {new Intl.NumberFormat("es-CO", {
                 style: "currency",
@@ -139,7 +139,7 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
             </div>
           </div>
           <div className="mb-1" style={{ color: "#66BB6A" }}>
-            <div className="text-sm font-medium">Total Pagos:</div>
+            <div>Total Pagos:</div>
             <div className="text-lg">
               {new Intl.NumberFormat("es-CO", {
                 style: "currency",
@@ -148,9 +148,7 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
             </div>
           </div>
           <div className="mb-1">
-            <div className="text-sm font-medium" style={{ color: "#FFA726" }}>
-              Saldo Total:
-            </div>
+            <div style={{ color: "#dc3545" }}>Saldo Total:</div>
             <div
               className="text-lg"
               style={{
@@ -185,10 +183,8 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
       </div>
 
       {/* Detalle por Venta */}
-      <div style={{ marginTop: "0.2rem", padding: "0.2rem" }}>
-        <h3 className="mt-0 mb-2" style={{ padding: "0.2rem" }}>
-          Detalle por Venta
-        </h3>
+      <div>
+        <h3 className="mt-0 mb-2">Detalle por Venta</h3>
         <DataTable
           value={cartera.ventas}
           expandedRows={expandedRows}
