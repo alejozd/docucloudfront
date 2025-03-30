@@ -185,65 +185,69 @@ const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
       {/* Detalle por Venta */}
       <div>
         <h3 className="mt-0 mb-2">Detalle por Venta</h3>
-        <DataTable
-          value={cartera.ventas}
-          expandedRows={expandedRows}
-          onRowToggle={(e) => setExpandedRows(e.data)}
-          rowExpansionTemplate={rowExpansionTemplate}
-          scrollable
-          scrollHeight="flex"
-        >
-          <Column expander style={{ width: "3em" }} />
-          <Column field="venta_id" header="ID Venta" />
-          <Column
-            field="fecha_venta"
-            header="Fecha de Venta"
-            body={(rowData) => {
-              const fechaLocal = convertToLocalDate(rowData.fecha_venta);
-              return formatDate(fechaLocal);
-            }}
-          />
-          <Column
-            field="valor_venta"
-            header="Valor de Venta"
-            body={(rowData) =>
-              new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-              }).format(rowData.valor_venta)
-            }
-          />
-          <Column
-            field="total_pagos"
-            header="Total Pagos"
-            body={(rowData) =>
-              new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-              }).format(rowData.total_pagos)
-            }
-          />
-          <Column
-            field="saldo"
-            header="Saldo"
-            body={(rowData) => {
-              const color =
-                rowData.saldo <= 50000
-                  ? "#28a745"
-                  : rowData.saldo > 50000 && rowData.saldo <= 100000
-                  ? "#fd7e14"
-                  : "#dc3545";
-              return (
-                <span style={{ color, fontWeight: "bold" }}>
-                  {new Intl.NumberFormat("es-CO", {
-                    style: "currency",
-                    currency: "COP",
-                  }).format(rowData.saldo)}
-                </span>
-              );
-            }}
-          />
-        </DataTable>
+        {cartera.ventas.length === 0 ? (
+          <p>No hay ventas registradas para este vendedor.</p>
+        ) : (
+          <DataTable
+            value={cartera.ventas}
+            expandedRows={expandedRows}
+            onRowToggle={(e) => setExpandedRows(e.data)}
+            rowExpansionTemplate={rowExpansionTemplate}
+            scrollable
+            scrollHeight="flex"
+          >
+            <Column expander style={{ width: "3em" }} />
+            <Column field="venta_id" header="ID Venta" />
+            <Column
+              field="fecha_venta"
+              header="Fecha de Venta"
+              body={(rowData) => {
+                const fechaLocal = convertToLocalDate(rowData.fecha_venta);
+                return formatDate(fechaLocal);
+              }}
+            />
+            <Column
+              field="valor_venta"
+              header="Valor de Venta"
+              body={(rowData) =>
+                new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                }).format(rowData.valor_venta)
+              }
+            />
+            <Column
+              field="total_pagos"
+              header="Total Pagos"
+              body={(rowData) =>
+                new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                }).format(rowData.total_pagos)
+              }
+            />
+            <Column
+              field="saldo"
+              header="Saldo"
+              body={(rowData) => {
+                const color =
+                  rowData.saldo <= 50000
+                    ? "#28a745"
+                    : rowData.saldo > 50000 && rowData.saldo <= 100000
+                    ? "#fd7e14"
+                    : "#dc3545";
+                return (
+                  <span style={{ color, fontWeight: "bold" }}>
+                    {new Intl.NumberFormat("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                    }).format(rowData.saldo)}
+                  </span>
+                );
+              }}
+            />
+          </DataTable>
+        )}
       </div>
     </Dialog>
   );
