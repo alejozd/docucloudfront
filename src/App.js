@@ -20,6 +20,7 @@ import SerialesERP from "./SerialesERP";
 import ClavesGeneradas from "./ClavesGeneradas";
 import GenerarClave from "./GenerarClave";
 import Vendedores from "./Vendedores";
+import DashboardVendedores from "./DashboardVendedores";
 import Ventas from "./Ventas";
 import Pagos from "./Pagos";
 import Login from "./Login";
@@ -181,6 +182,17 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <Vendedores />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/DashboardVendedores"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
+                  <DashboardVendedores />
                 </ProtectedRoute>
               }
             />
