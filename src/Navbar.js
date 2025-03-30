@@ -67,6 +67,12 @@ const Navbar = () => {
               id: "vendedores",
             },
             {
+              label: "Dashboard de Ventas",
+              icon: "pi pi-chart-bar",
+              url: "/DashboardVendedores",
+              id: "DashboardVendedores",
+            },
+            {
               label: "Ventas",
               icon: "pi pi-shopping-cart",
               url: "/ventas",
