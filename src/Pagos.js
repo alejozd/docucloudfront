@@ -214,37 +214,57 @@ const Pagos = ({ jwtToken }) => {
             optionLabel="id"
             placeholder="Selecciona una venta"
             itemTemplate={(option) => (
-              <div>
-                <strong>ID:</strong> {option.id} <br />
-                <strong>Fecha:</strong>{" "}
-                {new Date(option.fecha_venta).toLocaleDateString("es-CO")}{" "}
-                <br />
-                <strong>Valor Total:</strong>{" "}
-                {new Intl.NumberFormat("es-CO", {
-                  style: "currency",
-                  currency: "COP",
-                }).format(option.valor_total)}
-              </div>
-            )}
-            valueTemplate={(selectedOption) => {
-              if (!selectedOption) return "Selecciona una venta"; // Placeholder si no hay selección
-              return (
-                <div>
-                  <strong>ID:</strong> {selectedOption.id} <br />
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(selectedOption.fecha_venta).toLocaleDateString(
-                    "es-CO"
-                  )}{" "}
-                  <br />
-                  <strong>Valor Total:</strong>{" "}
+              <div className="p-2">
+                {/* Línea superior: ID y Fecha en extremos opuestos */}
+                <div className="flex justify-between w-full">
+                  <div className="font-semibold text-left flex-1">
+                    #{option.id}
+                  </div>
+                  <div className="text-gray-600 text-right flex-1">
+                    {new Date(option.fecha_venta).toLocaleDateString("es-CO")}
+                  </div>
+                </div>
+
+                {/* Valor total */}
+                <div className="text-primary-600 font-medium my-1 text-left">
+                  <strong>Valor:</strong>{" "}
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
                     currency: "COP",
-                  }).format(selectedOption.valor_total)}
+                    minimumFractionDigits: 0,
+                  }).format(option.valor_total)}
+                </div>
+
+                {/* Cliente y Vendedor */}
+                <div className="text-sm text-gray-700 text-left">
+                  <span className="text-gray-500">
+                    <strong>Cliente:</strong>
+                  </span>{" "}
+                  {option.cliente_medio?.nombre_completo || "N/A"}
+                </div>
+                <div className="text-sm text-gray-700 text-left">
+                  <span className="text-gray-500">
+                    <strong>Vendedor:</strong>
+                  </span>{" "}
+                  {option.vendedor?.nombre || "N/A"}
+                </div>
+              </div>
+            )}
+            valueTemplate={(selectedOption) => {
+              if (!selectedOption) return "Selecciona una venta";
+              return (
+                <div className="flex justify-between w-full items-center">
+                  <span className="font-semibold">#{selectedOption.id}</span>
+                  <span className="text-gray-600">
+                    {new Date(selectedOption.fecha_venta).toLocaleDateString(
+                      "es-CO"
+                    )}
+                  </span>
                 </div>
               );
             }}
             style={{ width: "100%" }}
+            panelClassName="min-w-[350px]"
           />
         </div>
 
