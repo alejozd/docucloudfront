@@ -1,7 +1,7 @@
 // ClientesMedios.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Config from "./Config";
+import Config from "././Config";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";

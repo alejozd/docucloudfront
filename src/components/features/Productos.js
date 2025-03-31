@@ -6,8 +6,8 @@ import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import Config from "./Config";
-import ProductoDialog from "./ProductoDialog";
+import Config from "././Config";
+import ProductoDialog from "././ProductoDialog";
 // import "./Productos.css"; // Importa el archivo CSS
 
 const initialProductoState = {

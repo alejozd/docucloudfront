@@ -1,7 +1,7 @@
 // ClavesGeneradas.js
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
-import Config from "./Config";
+import Config from "././Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";

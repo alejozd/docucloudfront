@@ -1,7 +1,7 @@
 // Ventas.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Config from "./Config";
+import Config from "././Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
@@ -10,8 +10,8 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { convertToLocalDate } from "./dateUtils";
-import { formatDate } from "./dateUtils";
+import { convertToLocalDate } from "./../../utils/dateUtils";
+import { formatDate } from "./../../utils/dateUtils";
 
 const Ventas = ({ jwtToken }) => {
   const [ventas, setVentas] = useState([]);
