@@ -1,7 +1,7 @@
 // GenerarClave.js
 import React, { useState } from "react";
 import axios from "axios";
-import Config from "././Config";
+import Config from "../../components/features/Config";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";

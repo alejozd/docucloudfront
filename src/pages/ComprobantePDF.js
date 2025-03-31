@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Image } from "primereact/image";
-import logo from '../../assets/images/logo-metro.png';
+import logo from "./../assets/images/logo-metro.png";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ReactToPrint from "react-to-print";

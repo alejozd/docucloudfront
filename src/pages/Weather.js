@@ -1,6 +1,6 @@
 import React, { useState } from "react"; //
-import AccuWeatherComponent from "././AccuWeatherComponent";
-import OpenWeatherMapComponent from "././OpenWeatherMapComponent";
+import AccuWeatherComponent from "./AccuWeatherComponent";
+import OpenWeatherMapComponent from "./OpenWeatherMapComponent";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";

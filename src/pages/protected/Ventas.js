@@ -1,7 +1,7 @@
 // Ventas.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Config from "././Config";
+import Config from "../../components/features/Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";

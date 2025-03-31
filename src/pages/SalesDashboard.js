@@ -4,7 +4,7 @@ import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import CardDashboard from '../ui/CardDashboard';
+import CardDashboard from "../components/ui/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {
   segments,
@@ -12,7 +12,7 @@ import {
   segmentSales,
   kpis,
   products,
-} from "./../../misc/mockData"; // Importar datos ficticios
+} from "../misc/mockData"; // Importar datos ficticios
 import "./SalesDashboard.css";
 
 const SalesDashboard = () => {
