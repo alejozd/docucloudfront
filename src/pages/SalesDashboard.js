@@ -13,7 +13,7 @@ import {
   kpis,
   products,
 } from "../misc/mockData"; // Importar datos ficticios
-import "./SalesDashboard.css";
+import "../styles/SalesDashboard.css";
 
 const SalesDashboard = () => {
   // Referencias para los gráficos
