@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import Config from "./Config";
+import Config from "././Config";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { Skeleton } from "primereact/skeleton";

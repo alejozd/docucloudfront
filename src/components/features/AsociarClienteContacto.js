@@ -3,7 +3,7 @@ import { PickList } from "primereact/picklist";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import axios from "axios";
-import Config from "./Config";
+import Config from "././Config";
 
 const AsociarClienteContacto = () => {
   const [clientes, setClientes] = useState([]);

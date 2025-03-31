@@ -7,9 +7,9 @@ import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
-import Config from "./Config";
-import ContactoDialog from "./ContactoDialog";
-import ComprobantePDF from "./ComprobantePDF";
+import Config from "././Config";
+import ContactoDialog from "././ContactoDialog";
+import ComprobantePDF from "././ComprobantePDF";
 // import "./Clientes.css"; // Importa el archivo CSS
 
 const initialContactoState = {

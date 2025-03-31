@@ -3,8 +3,8 @@ import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Chart } from "primereact/chart";
-import { convertToLocalDate } from "./dateUtils";
-import { formatDate } from "./dateUtils";
+import { convertToLocalDate } from "./../../utils/dateUtils";
+import { formatDate } from "./../../utils/dateUtils";
 
 const CarteraDialog = ({ cartera, showCarteraDialog, onClose }) => {
   // Estado para controlar las filas expandidas
