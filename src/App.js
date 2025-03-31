@@ -1,4 +1,3 @@
-import "./App.css";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "././components/layout/Navbar";
@@ -25,7 +24,7 @@ import Ventas from "./pages/protected/Ventas";
 import Pagos from "./pages/protected/Pagos";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
-
+import "././styles/App.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";

@@ -7,7 +7,6 @@ import { TabView, TabPanel } from "primereact/tabview";
 import ClienteDialogAdicional from "././ClienteDialogAdicional";
 import ClienteDialogFE from "././ClienteDialogFE";
 import "react-phone-number-input/style.css";
-// import "./ClienteDialog.css";
 import es from "react-phone-number-input/locale/es";
 
 const ClienteDialog = ({

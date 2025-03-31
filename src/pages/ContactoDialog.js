@@ -5,7 +5,7 @@ import { Button } from "primereact/button"; // Librería para enviar correos ele
 import { Dropdown } from "primereact/dropdown";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css"; // Importa los estilos de la librería
-import "./ClienteDialog.css";
+import "../styles/ClienteDialog.css";
 import es from "react-phone-number-input/locale/es";
 
 const ContactoDialog = ({

@@ -8,7 +8,6 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import Config from "./../components/features/Config";
 import ProductoDialog from "././ProductoDialog";
-// import "./Productos.css"; // Importa el archivo CSS
 
 const initialProductoState = {
   idproducto: null,
