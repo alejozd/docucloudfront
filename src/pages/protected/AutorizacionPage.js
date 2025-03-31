@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import Config from "././Config"; // Asegúrate de importar tu configuración de API
+import Config from "../../components/features/Config"; // Asegúrate de importar tu configuración de API
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";

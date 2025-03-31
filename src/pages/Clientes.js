@@ -6,10 +6,10 @@ import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import Config from "././Config";
-import ClienteDialog from "././ClienteDialog";
-import ComprobantePDF from "././ComprobantePDF";
-// import "./Clientes.css"; // Importa el archivo CSS
+import Config from "../components/features/Config";
+import ClienteDialog from "./ClienteDialog";
+import ComprobantePDF from "./ComprobantePDF";
+import "./Clientes.css"; // Importa el archivo CSS
 
 const initialClienteState = {
   idcliente: null,

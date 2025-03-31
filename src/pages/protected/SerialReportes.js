@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import Config from "././Config";
+import Config from "../../components/features/Config";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";

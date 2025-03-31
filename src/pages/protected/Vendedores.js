@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Config from "././Config";
+import Config from "../../components/features/Config";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
-import CarteraDialog from "././CarteraDialog";
+import CarteraDialog from "./CarteraDialog";
 
 const Vendedores = ({ jwtToken }) => {
   const [vendedores, setVendedores] = useState([]);
