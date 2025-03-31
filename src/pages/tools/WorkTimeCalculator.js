@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
-import "../styles/WorkTimeCalculator.css";
+import "../../styles/WorkTimeCalculator.css";
 
 const WorkTimeCalculator = () => {
   const [entryTime, setEntryTime] = useState(null);
