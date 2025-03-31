@@ -1,114 +1,92 @@
 const fs = require("fs");
 const path = require("path");
 
-// Define la estructura óptima para un proyecto React
-const structure = {
-  components: ["common", "features"],
-  pages: [],
-  "assets/images": [],
-  "assets/styles": [],
-  utils: [],
-  hooks: [],
-  context: [],
-  services: [],
+const srcDir = path.join(__dirname, "src");
+const folders = {
+  components: path.join(srcDir, "components"),
+  pages: path.join(srcDir, "pages"),
+  hooks: path.join(srcDir, "hooks"),
+  utils: path.join(srcDir, "utils"),
 };
 
-const baseDir = path.join(__dirname, "src");
-const excludedDirs = [".git", "node_modules", "build", "public"];
-const excludedFiles = ["package.json", "package-lock.json", "organize.js"];
+const ignoreFiles = [
+  "node_modules",
+  "public",
+  "README.md",
+  "smart-reorganize.js",
+  ".gitignore",
+];
+const componentExtensions = [".jsx", ".tsx", ".js"];
+const utilsExtensions = [".js", ".ts"];
+const hookPattern = /^use[A-Z].*\.js$/;
+const pagePattern = /Page\.js$/;
 
-// Crear las carpetas necesarias
-const createFolders = () => {
-  Object.keys(structure).forEach((folder) => {
-    const folderPath = path.join(baseDir, folder);
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-    }
-    structure[folder].forEach((subfolder) => {
-      const subfolderPath = path.join(folderPath, subfolder);
-      if (!fs.existsSync(subfolderPath)) {
-        fs.mkdirSync(subfolderPath, { recursive: true });
-      }
-    });
-  });
-};
+// Asegurar que las carpetas existen
+Object.values(folders).forEach((folder) => {
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true });
+  }
+});
 
-// Clasificar archivos y moverlos a su carpeta correcta
-const classifyAndMoveFiles = (dir) => {
+// Escanear archivos en src/
+function scanAndMoveFiles(dir) {
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
-    if (excludedDirs.includes(file) || excludedFiles.includes(file)) return;
-
+    if (ignoreFiles.includes(file)) return;
     if (fs.statSync(fullPath).isDirectory()) {
-      classifyAndMoveFiles(fullPath);
+      scanAndMoveFiles(fullPath);
+      return;
+    }
+
+    const ext = path.extname(file);
+    if (!componentExtensions.includes(ext)) return;
+
+    let newLocation = null;
+    if (hookPattern.test(file)) {
+      newLocation = path.join(folders.hooks, file);
+    } else if (pagePattern.test(file)) {
+      newLocation = path.join(folders.pages, file);
+    } else if (utilsExtensions.includes(ext) && file.includes("utils")) {
+      newLocation = path.join(folders.utils, file);
     } else {
-      let targetFolder = null;
-      if (file.match(/\.jsx?$/)) {
-        if (fullPath.includes("features")) {
-          targetFolder = path.join(baseDir, "components/features");
-        } else if (file.toLowerCase().includes("page")) {
-          targetFolder = path.join(baseDir, "pages");
-        } else {
-          targetFolder = path.join(baseDir, "components/common");
-        }
-      } else if (file.match(/\.css$/) || file.match(/\.scss$/)) {
-        targetFolder = path.join(baseDir, "assets/styles");
-      } else if (file.match(/\.(png|jpg|jpeg|gif|svg)$/)) {
-        targetFolder = path.join(baseDir, "assets/images");
-      } else if (file.match(/\.js$/) && file.toLowerCase().includes("hook")) {
-        targetFolder = path.join(baseDir, "hooks");
-      } else if (
-        file.match(/\.js$/) &&
-        file.toLowerCase().includes("service")
-      ) {
-        targetFolder = path.join(baseDir, "services");
-      } else if (
-        file.match(/\.js$/) &&
-        file.toLowerCase().includes("context")
-      ) {
-        targetFolder = path.join(baseDir, "context");
-      } else if (file.match(/\.js$/)) {
-        targetFolder = path.join(baseDir, "utils");
-      }
+      newLocation = path.join(folders.components, file);
+    }
 
-      if (targetFolder) {
-        const newPath = path.join(targetFolder, file);
-        if (!fs.existsSync(newPath)) {
-          fs.renameSync(fullPath, newPath);
-        } else {
-          console.log(`Archivo ya existe en destino: ${newPath}, se omite.`);
-        }
-      }
+    if (newLocation && fullPath !== newLocation) {
+      fs.renameSync(fullPath, newLocation);
+      console.log(`Movido: ${file} -> ${newLocation}`);
+      updateImports(srcDir, file, newLocation);
     }
   });
-};
+}
 
-// Actualizar rutas de importación en los archivos
-const updateImports = (dir) => {
+// Actualizar importaciones en todos los archivos
+function updateImports(dir, oldFile, newLocation) {
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
     if (fs.statSync(fullPath).isDirectory()) {
-      updateImports(fullPath);
-    } else if (file.match(/\.jsx?$/)) {
-      let content = fs.readFileSync(fullPath, "utf-8");
-      content = content.replace(
-        /(['"])(\.\/[^'"]+)(['"])/g,
-        (match, p1, p2, p3) => {
-          let resolvedPath = path.resolve(dir, p2);
-          let relativePath = path
-            .relative(dir, resolvedPath)
-            .replace(/\\/g, "/");
-          return `${p1}${relativePath}${p3}`;
-        }
-      );
-      fs.writeFileSync(fullPath, content, "utf-8");
+      updateImports(fullPath, oldFile, newLocation);
+      return;
     }
+    if (!componentExtensions.includes(path.extname(file))) return;
+
+    let content = fs.readFileSync(fullPath, "utf8");
+    const oldImportRegex = new RegExp(
+      `import (.+?) from ['"](.+?${oldFile})['"];`,
+      "g"
+    );
+    const relativePath = path
+      .relative(path.dirname(fullPath), newLocation)
+      .replace(/\\/g, "/");
+
+    content = content.replace(oldImportRegex, (match, component, oldPath) => {
+      return `import ${component} from "./${relativePath}";`;
+    });
+
+    fs.writeFileSync(fullPath, content, "utf8");
+    console.log(`Actualizado: ${file}`);
   });
-};
+}
 
-// Ejecutar las funciones
-createFolders();
-classifyAndMoveFiles(baseDir);
-updateImports(baseDir);
-
-console.log("Estructura reorganizada correctamente sin mover todo a src.");
+scanAndMoveFiles(srcDir);
+console.log("✅ Reorganización completa.");
