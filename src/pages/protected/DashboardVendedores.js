@@ -184,27 +184,35 @@ const DashboardVendedores = ({ jwtToken }) => {
         <CardDashboard
           title="Ventas"
           values={[
-            resumen?.totalVentas
-              ? `Total: $${resumen.totalVentas.toLocaleString()}`
-              : "Total: $0",
-            resumen?.cantidadTotalVentas
-              ? `Cantidad: ${resumen.cantidadTotalVentas}`
-              : "Cantidad: 0",
+            {
+              label: "Total",
+              text: resumen?.totalVentas
+                ? `$${resumen.totalVentas.toLocaleString()}`
+                : "$0",
+            },
+            {
+              label: "Cantidad",
+              text: resumen?.cantidadTotalVentas
+                ? `${resumen.cantidadTotalVentas}`
+                : "0",
+            },
           ]}
           icon="pi pi-dollar"
           iconBgColor={colors.primary}
         />
-
-        {/* Tarjeta combinada para Pagos */}
         <CardDashboard
           title="Pagos"
           values={[
-            resumen?.totalPagos
-              ? `Total: $${resumen.totalPagos.toLocaleString()}`
-              : "Total: $0",
-            resumen?.cantidadTotalPagos
-              ? `Cantidad: ${resumen.cantidadTotalPagos}`
-              : "Cantidad: 0",
+            {
+              label: "Total:",
+              text: resumen?.totalPagos
+                ? `$${resumen.totalPagos.toLocaleString()}`
+                : "$0",
+            },
+            {
+              label: "Cantidad:",
+              text: resumen?.cantidadTotalPagos || "0",
+            },
           ]}
           icon="pi pi-money-bill"
           iconBgColor={colors.success}
@@ -218,6 +226,11 @@ const DashboardVendedores = ({ jwtToken }) => {
               ? resumen.saldoPendiente.toLocaleString()
               : "0"
           }`}
+          // value={`$${
+          //   resumen.saldoPendiente
+          //     ? resumen.saldoPendiente.toLocaleString()
+          //     : "0"
+          // }`}
           icon="pi pi-exclamation-triangle"
           iconBgColor={colors.danger}
         />
