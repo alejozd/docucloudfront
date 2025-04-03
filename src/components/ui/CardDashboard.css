@@ -45,7 +45,7 @@
 
 .card-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
 }
 
@@ -64,9 +64,19 @@
   margin: 0;
 }
 
+.card-value-bold {
+  font-weight: bold; /* Aplica negrita al texto */
+  margin-right: 5px; /* Espacio entre el texto en negrita y el resto del valor */
+}
+
 .card-value {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.3rem;
   line-height: 1.5;
   color: #333;
+}
+
+.card-value-bold {
+  font-weight: bold;
+  margin-right: 5px;
 }

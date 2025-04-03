@@ -16,12 +16,14 @@ const CardDashboard = ({ title, values, value, icon, iconBgColor }) => {
           // Mostrar múltiples líneas si se pasa `values`
           values.map((line, index) => (
             <p key={index} className="card-value">
-              {line}
+              <span className="card-value-bold">{line.label}</span> {line.text}
             </p>
           ))
         ) : (
           // Mostrar una sola línea si se pasa `value`
-          <p className="card-value">{value}</p>
+          <p className="card-value">
+            <span className="card-value-bold">Total:</span> {value}
+          </p>
         )}
       </div>
     </Card>
