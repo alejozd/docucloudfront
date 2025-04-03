@@ -1,8 +1,8 @@
 import React from "react";
 import { Card } from "primereact/card";
-import "./CardDashboard.css"; // Archivo CSS personalizado
+import "./CardDashboard.css";
 
-const CardDashboard = ({ title, value, icon, iconBgColor }) => {
+const CardDashboard = ({ title, values, value, icon, iconBgColor }) => {
   return (
     <Card className="card-dashboard">
       <div className="card-header">
@@ -11,7 +11,19 @@ const CardDashboard = ({ title, value, icon, iconBgColor }) => {
           <i className={`pi ${icon}`} />
         </div>
       </div>
-      <h2 className="card-value">{value}</h2>
+      <div className="card-values">
+        {values ? (
+          // Mostrar múltiples líneas si se pasa `values`
+          values.map((line, index) => (
+            <p key={index} className="card-value">
+              {line}
+            </p>
+          ))
+        ) : (
+          // Mostrar una sola línea si se pasa `value`
+          <p className="card-value">{value}</p>
+        )}
+      </div>
     </Card>
   );
 };

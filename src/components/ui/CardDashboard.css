@@ -1,20 +1,52 @@
 /* Estilos generales */
+.sales-dashboard {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.kpi-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
 .card-dashboard {
   flex: 1;
   padding: 15px; /* Espaciado interno */
   min-width: 200px; /* Ancho mínimo para evitar que las tarjetas se hagan demasiado pequeñas */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el hover */
+}
+
+.card-dashboard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   display: flex;
-  justify-content: space-between; /* Alinea el título a la izquierda y el ícono a la derecha */
-  align-items: center; /* Centra verticalmente el título y el ícono */
-  margin-bottom: 10px; /* Espacio entre el encabezado y el valor */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .card-title {
-  margin: 0; /* Elimina el margen predeterminado del título */
-  font-size: 1.5rem; /* Tamaño de fuente para el título */
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .card-icon {
@@ -23,13 +55,18 @@
   align-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 50%; /* Hace que el fondo sea circular */
-  color: white; /* Color del ícono */
-  font-size: 1rem; /* Tamaño del ícono */
+  border-radius: 50%;
+  color: white;
+  font-size: 1rem;
+}
+
+.card-values {
+  margin: 0;
 }
 
 .card-value {
-  margin: 0; /* Elimina el margen predeterminado del valor */
-  font-size: 1.5rem; /* Tamaño de fuente para el valor */
-  text-align: left; /* Alinea el valor a la izquierda */
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
 }
