@@ -4,8 +4,10 @@ import Config from "../../components/features/Config";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { Skeleton } from "primereact/skeleton";
+import CardDashboard from "../../components/ui/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Chart as ChartJS, registerables } from "chart.js";
+import { SortOrder } from "primereact/api";
 
 // Registrar Chart.js y los plugins necesarios
 ChartJS.register(...registerables, ChartDataLabels);
@@ -16,6 +18,11 @@ const DashboardVendedores = ({ jwtToken }) => {
   const [error, setError] = useState(null);
   const fetched = useRef(false);
 
+  // Referencias para almacenar las instancias de los gráficos
+  const ventasChartRef = useRef(null);
+  const deudaChartRef = useRef(null);
+  const pagosChartRef = useRef(null);
+
   useEffect(() => {
     if (!fetched.current) {
       fetched.current = true;
@@ -24,7 +31,10 @@ const DashboardVendedores = ({ jwtToken }) => {
           headers: { Authorization: `Bearer ${jwtToken}` },
         })
         .then((response) => {
-          setEstadisticas(response.data);
+          const newData = response.data;
+          if (JSON.stringify(newData) !== JSON.stringify(estadisticas)) {
+            setEstadisticas(newData);
+          }
           setLoading(false);
         })
         .catch((err) => {
@@ -42,6 +52,12 @@ const DashboardVendedores = ({ jwtToken }) => {
           }
           setLoading(false);
         });
+      // Limpiar las instancias de los gráficos al desmontar el componente
+      return () => {
+        if (ventasChartRef.current) ventasChartRef.current.destroy();
+        if (deudaChartRef.current) deudaChartRef.current.destroy();
+        if (pagosChartRef.current) pagosChartRef.current.destroy();
+      };
     }
   }, [jwtToken]);
 
@@ -89,60 +105,129 @@ const DashboardVendedores = ({ jwtToken }) => {
     datasets: [
       {
         data: [resumen.totalPagos, resumen.saldoPendiente],
-        backgroundColor: ["#4CAF50", "#FF5733"],
+        backgroundColor: [colors[1], colors[3]],
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       datalabels: {
-        anchor: "end",
+        anchor: "center",
         align: "center",
-        color: "black",
+        color: "white",
         font: { weight: "bold" },
         formatter: (value) => value.toLocaleString(),
+      },
+      legend: {
+        display: true, // Oculta la leyenda
+        position: "top", // Posición de la leyenda
+        labels: {
+          boxWidth: 20, // Ancho de la caja de la leyenda
+          font: {
+            size: 14, // Tamaño de la fuente de la leyenda
+            weight: "bold", // Negrita
+          },
+        },
       },
     },
   };
 
+  // Opciones del gráfico de pastel
+  const pieChartOptions = {
+    plugins: {
+      tooltip: {
+        enabled: true, // Habilita el tooltip al pasar el mouse
+      },
+      datalabels: {
+        formatter: (value, context) => {
+          const total = context.chart.data.datasets[0].data.reduce(
+            (a, b) => a + b,
+            0
+          );
+          const percentage = ((value / total) * 100).toFixed(2);
+          return `${percentage}%`; // Muestra el porcentaje dentro del segmento
+        },
+        color: "#fff", // Color del texto
+        font: {
+          size: 14, // Tamaño del texto
+          weight: "bold", // Negrita
+        },
+      },
+      legend: {
+        display: true,
+        position: "top", // Posición de la leyenda
+        labels: {
+          boxWidth: 20, // Ancho de la caja de la leyenda
+          font: {
+            size: 14, // Tamaño de la fuente de la leyenda
+            weight: "bold", // Negrita
+          },
+        },
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+      display: false, // Oculta la leyenda
+    },
+  };
+
   return (
-    <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card title="Total Ventas">
-        <p className="text-2xl font-bold">
-          ${resumen.totalVentas?.toLocaleString() || 0}
-        </p>
-      </Card>
-      <Card title="Total Pagos">
-        <p className="text-2xl font-bold">
-          ${resumen.totalPagos?.toLocaleString() || 0}
-        </p>
-      </Card>
-      <Card title="Saldo Pendiente">
-        <p className="text-2xl font-bold">
-          ${resumen.saldoPendiente?.toLocaleString() || 0}
-        </p>
-      </Card>
-      <Card title="Vendedores con más ventas">
-        <Chart
-          type="bar"
-          data={ventasData}
-          options={chartOptions}
-          plugins={[ChartDataLabels]}
-        />
-      </Card>
-      <Card title="Vendedores con mayor deuda">
-        <Chart
-          type="bar"
-          data={deudaData}
-          options={chartOptions}
-          plugins={[ChartDataLabels]}
-        />
-      </Card>
-      <Card title="Distribución de pagos">
-        <Chart type="pie" data={pagosVsDeudaData} />
-      </Card>
+    <div className="card, sales-dashboard">
+      <div className="section kpi-section">
+        <CardDashboard
+          title="Total Ventas"
+          value={resumen.totalVentas?.toLocaleString() || 0}
+          icon="pi pi-dollar"
+          iconBgColor="#4CAF50"
+        ></CardDashboard>
+        <CardDashboard
+          title="Total Pagos"
+          value={resumen.totalPagos?.toLocaleString() || 0}
+          icon={"pi pi-money-bill"}
+          iconBgColor="#FF9800"
+        ></CardDashboard>
+        <CardDashboard
+          title="Saldo Pendiente"
+          value={resumen.saldoPendiente?.toLocaleString() || 0}
+          icon={"pi pi-exclamation-triangle"}
+          iconBgColor="#F44336"
+        ></CardDashboard>
+      </div>
+      <div className="section charts-section">
+        <Card title="Vendedores con más ventas">
+          <Chart
+            ref={ventasChartRef}
+            type="bar"
+            data={ventasData}
+            options={chartOptions}
+            plugins={[ChartDataLabels]}
+            height="300px"
+          />
+        </Card>
+        <Card title="Vendedores con mayor deuda">
+          <Chart
+            ref={deudaChartRef}
+            type="bar"
+            data={deudaData}
+            options={chartOptions}
+            plugins={[ChartDataLabels]}
+            height="300px"
+          />
+        </Card>
+        <Card title="Distribución de pagos">
+          <Chart
+            ref={pagosChartRef}
+            type="doughnut"
+            data={pagosVsDeudaData}
+            options={pieChartOptions}
+            plugins={[ChartDataLabels]}
+          />
+        </Card>
+      </div>
     </div>
   );
 };
