@@ -44,6 +44,7 @@ const DashboardVendedores = ({ jwtToken }) => {
         })
         .then((response) => {
           const newData = response.data;
+          console.log("Datos recibidos:", newData);
           setEstadisticas(newData);
           setLoading(false);
         })
@@ -54,19 +55,20 @@ const DashboardVendedores = ({ jwtToken }) => {
         });
     }
 
-    return () => {
-      const ventasChart = ventasChartRef.current;
-      const deudaChart = deudaChartRef.current;
-      const pagosChart = pagosChartRef.current;
-      const cantidadVentasChart = cantidadVentasChartRef.current;
+    // Guardamos las referencias actuales en variables locales
+    const ventasChart = ventasChartRef.current;
+    const deudaChart = deudaChartRef.current;
+    const pagosChart = pagosChartRef.current;
+    const cantidadVentasChart = cantidadVentasChartRef.current;
 
-      if (ventasChart) ventasChart.destroy();
-      if (deudaChart) deudaChart.destroy();
-      if (pagosChart) pagosChart.destroy();
-      if (cantidadVentasChart) cantidadVentasChart.destroy();
+    // Función de limpieza
+    return () => {
+      if (ventasChart?.destroy) ventasChart.destroy();
+      if (deudaChart?.destroy) deudaChart.destroy();
+      if (pagosChart?.destroy) pagosChart.destroy();
+      if (cantidadVentasChart?.destroy) cantidadVentasChart.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jwtToken]);
+  }, [jwtToken]); // Dependencias del useEffect
 
   if (loading) {
     return (
@@ -81,7 +83,16 @@ const DashboardVendedores = ({ jwtToken }) => {
   if (error) return <p className="text-red-500">{error}</p>;
   if (!estadisticas) return <p>No hay datos disponibles</p>;
 
-  const { topVendedores, mayorDeuda, resumen } = estadisticas;
+  // Estructura predeterminada para resumen
+  const defaultResumen = {
+    totalVentas: 0,
+    totalPagos: 0,
+    saldoPendiente: 0,
+    cantidadTotalVentas: 0,
+    cantidadTotalPagos: 0,
+  };
+
+  const { topVendedores, mayorDeuda, resumen = defaultResumen } = estadisticas;
 
   // Datos para el gráfico de ventas totales
   const ventasData = {
