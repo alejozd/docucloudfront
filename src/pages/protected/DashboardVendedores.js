@@ -237,11 +237,6 @@ const DashboardVendedores = ({ jwtToken }) => {
               ? resumen.saldoPendiente.toLocaleString()
               : "0"
           }`}
-          // value={`$${
-          //   resumen.saldoPendiente
-          //     ? resumen.saldoPendiente.toLocaleString()
-          //     : "0"
-          // }`}
           icon="pi pi-exclamation-triangle"
           iconBgColor={colors.danger}
         />
