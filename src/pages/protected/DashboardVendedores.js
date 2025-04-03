@@ -7,7 +7,6 @@ import { Skeleton } from "primereact/skeleton";
 import CardDashboard from "../../components/ui/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Chart as ChartJS, registerables } from "chart.js";
-import { SortOrder } from "primereact/api";
 
 // Registrar Chart.js y los plugins necesarios
 ChartJS.register(...registerables, ChartDataLabels);
@@ -18,10 +17,10 @@ const DashboardVendedores = ({ jwtToken }) => {
   const [error, setError] = useState(null);
   const fetched = useRef(false);
 
-  // Referencias para almacenar las instancias de los gráficos
   const ventasChartRef = useRef(null);
   const deudaChartRef = useRef(null);
   const pagosChartRef = useRef(null);
+  const cantidadVentasChartRef = useRef(null);
 
   useEffect(() => {
     if (!fetched.current) {
@@ -39,24 +38,15 @@ const DashboardVendedores = ({ jwtToken }) => {
         })
         .catch((err) => {
           console.error("Error al obtener estadísticas", err);
-          if (err.response) {
-            setError(
-              `Error ${err.response.status}: ${
-                err.response.data.message || "No se pudieron cargar los datos"
-              }`
-            );
-          } else if (err.request) {
-            setError("No hay conexión con el servidor");
-          } else {
-            setError("Error desconocido");
-          }
+          setError("Error desconocido");
           setLoading(false);
         });
-      // Limpiar las instancias de los gráficos al desmontar el componente
       return () => {
         if (ventasChartRef.current) ventasChartRef.current.destroy();
         if (deudaChartRef.current) deudaChartRef.current.destroy();
         if (pagosChartRef.current) pagosChartRef.current.destroy();
+        if (cantidadVentasChartRef.current)
+          cantidadVentasChartRef.current.destroy();
       };
     }
   }, [jwtToken]);
@@ -76,7 +66,16 @@ const DashboardVendedores = ({ jwtToken }) => {
 
   const { topVendedores, mayorDeuda, resumen } = estadisticas;
 
-  const colors = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC", "#26C6DA"];
+  const colors = {
+    primary: "#6366F1", // Azul vibrante (primario)
+    secondary: "#EC4899", // Rosa suave (secundario)
+    accent: "#F59E0B", // Naranja cálido (énfasis)
+    success: "#22C55E", // Verde éxito
+    warning: "#FBBF24", // Amarillo advertencia
+    danger: "#EF4444", // Rojo peligro
+    info: "#3B82F6", // Azul informativo
+    neutral: "#6B7280", // Gris neutro
+  };
 
   const ventasData = {
     labels: topVendedores.map((v) => v.nombre),
@@ -84,7 +83,26 @@ const DashboardVendedores = ({ jwtToken }) => {
       {
         label: "Ventas ($)",
         data: topVendedores.map((v) => v.totalVentas || 0),
-        backgroundColor: topVendedores.map((_, i) => colors[i % colors.length]),
+        backgroundColor: topVendedores.map(
+          (_, i) =>
+            [colors.primary, colors.secondary, colors.accent, colors.info][
+              i % 4
+            ]
+        ),
+      },
+    ],
+  };
+
+  const cantidadVentasData = {
+    labels: topVendedores.map((v) => v.nombre),
+    datasets: [
+      {
+        label: "Cantidad de Ventas",
+        data: topVendedores.map((v) => v.cantidadVentas),
+        backgroundColor: topVendedores.map(
+          (_, i) =>
+            [colors.info, colors.success, colors.warning, colors.danger][i % 4]
+        ),
       },
     ],
   };
@@ -105,7 +123,7 @@ const DashboardVendedores = ({ jwtToken }) => {
     datasets: [
       {
         data: [resumen.totalPagos, resumen.saldoPendiente],
-        backgroundColor: [colors[1], colors[3]],
+        backgroundColor: [colors.success, colors.danger], // Verde y rojo
       },
     ],
   };
@@ -122,25 +140,14 @@ const DashboardVendedores = ({ jwtToken }) => {
         formatter: (value) => value.toLocaleString(),
       },
       legend: {
-        display: true, // Oculta la leyenda
-        position: "top", // Posición de la leyenda
-        labels: {
-          boxWidth: 20, // Ancho de la caja de la leyenda
-          font: {
-            size: 14, // Tamaño de la fuente de la leyenda
-            weight: "bold", // Negrita
-          },
-        },
+        display: false,
       },
     },
   };
 
-  // Opciones del gráfico de pastel
   const pieChartOptions = {
     plugins: {
-      tooltip: {
-        enabled: true, // Habilita el tooltip al pasar el mouse
-      },
+      tooltip: { enabled: true },
       datalabels: {
         formatter: (value, context) => {
           const total = context.chart.data.datasets[0].data.reduce(
@@ -148,54 +155,49 @@ const DashboardVendedores = ({ jwtToken }) => {
             0
           );
           const percentage = ((value / total) * 100).toFixed(2);
-          return `${percentage}%`; // Muestra el porcentaje dentro del segmento
+          return `${percentage}%`;
         },
-        color: "#fff", // Color del texto
-        font: {
-          size: 14, // Tamaño del texto
-          weight: "bold", // Negrita
-        },
-      },
-      legend: {
-        display: true,
-        position: "top", // Posición de la leyenda
-        labels: {
-          boxWidth: 20, // Ancho de la caja de la leyenda
-          font: {
-            size: 14, // Tamaño de la fuente de la leyenda
-            weight: "bold", // Negrita
-          },
-        },
+        color: "#fff",
+        font: { size: 14, weight: "bold" },
       },
     },
     responsive: true,
     maintainAspectRatio: false,
-    legend: {
-      display: false, // Oculta la leyenda
-    },
   };
 
   return (
-    <div className="card, sales-dashboard">
+    <div className="card sales-dashboard">
       <div className="section kpi-section">
         <CardDashboard
           title="Total Ventas"
           value={resumen.totalVentas?.toLocaleString() || 0}
           icon="pi pi-dollar"
           iconBgColor="#4CAF50"
-        ></CardDashboard>
+        />
         <CardDashboard
           title="Total Pagos"
           value={resumen.totalPagos?.toLocaleString() || 0}
-          icon={"pi pi-money-bill"}
+          icon="pi pi-money-bill"
           iconBgColor="#FF9800"
-        ></CardDashboard>
+        />
         <CardDashboard
           title="Saldo Pendiente"
           value={resumen.saldoPendiente?.toLocaleString() || 0}
-          icon={"pi pi-exclamation-triangle"}
+          icon="pi pi-exclamation-triangle"
           iconBgColor="#F44336"
-        ></CardDashboard>
+        />
+        <CardDashboard
+          title="Cantidad Ventas"
+          value={resumen.cantidadTotalVentas || 0}
+          icon="pi pi-shopping-cart"
+          iconBgColor="#2196F3"
+        />
+        <CardDashboard
+          title="Cantidad Pagos"
+          value={resumen.cantidadTotalPagos || 0}
+          icon="pi pi-credit-card"
+          iconBgColor="#9C27B0"
+        />
       </div>
       <div className="section charts-section">
         <Card title="Vendedores con más ventas">
@@ -225,6 +227,16 @@ const DashboardVendedores = ({ jwtToken }) => {
             data={pagosVsDeudaData}
             options={pieChartOptions}
             plugins={[ChartDataLabels]}
+          />
+        </Card>
+        <Card title="Cantidad de Ventas por Vendedor">
+          <Chart
+            ref={cantidadVentasChartRef}
+            type="bar"
+            data={cantidadVentasData}
+            options={chartOptions}
+            plugins={[ChartDataLabels]}
+            height="300px"
           />
         </Card>
       </div>
