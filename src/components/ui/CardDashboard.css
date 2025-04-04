@@ -80,3 +80,30 @@
   font-weight: bold;
   margin-right: 5px;
 }
+
+.meter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meter-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meter-detail {
+  margin: 0;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
