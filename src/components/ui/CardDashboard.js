@@ -2,7 +2,14 @@ import React from "react";
 import { Card } from "primereact/card";
 import "./CardDashboard.css";
 
-const CardDashboard = ({ title, values, value, icon, iconBgColor }) => {
+const CardDashboard = ({
+  title,
+  values,
+  value,
+  icon,
+  iconBgColor,
+  children,
+}) => {
   return (
     <Card className="card-dashboard">
       <div className="card-header">
@@ -19,11 +26,14 @@ const CardDashboard = ({ title, values, value, icon, iconBgColor }) => {
               <span className="card-value-bold">{line.label}</span> {line.text}
             </p>
           ))
-        ) : (
+        ) : value ? (
           // Mostrar una sola línea si se pasa `value`
           <p className="card-value">
             <span className="card-value-bold">Total:</span> {value}
           </p>
+        ) : (
+          // Mostrar contenido personalizado si se pasa `children`
+          children
         )}
       </div>
     </Card>

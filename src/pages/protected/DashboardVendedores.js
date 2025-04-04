@@ -4,6 +4,9 @@ import Config from "../../components/features/Config";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { Skeleton } from "primereact/skeleton";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { MeterGroup } from "primereact/metergroup";
 import CardDashboard from "../../components/ui/CardDashboard";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Chart as ChartJS, registerables } from "chart.js";
@@ -13,9 +16,12 @@ ChartJS.register(...registerables, ChartDataLabels);
 
 const DashboardVendedores = ({ jwtToken }) => {
   const [estadisticas, setEstadisticas] = useState(null);
+  const [ventas, setVentas] = useState([]);
+  const [pagos, setPagos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const fetched = useRef(false);
+  const [selectedVendedor, setSelectedVendedor] = useState(null);
 
   // Referencias para almacenar las instancias de los gráficos
   const ventasChartRef = useRef(null);
@@ -36,39 +42,44 @@ const DashboardVendedores = ({ jwtToken }) => {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Obtener estadísticas
+        const estadisticasResponse = await axios.get(
+          `${Config.apiUrl}/api/vendedores/estadisticas`,
+          {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          }
+        );
+
+        // Obtener datos de ventas
+        const ventasResponse = await axios.get(`${Config.apiUrl}/api/ventas`, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
+
+        // Obtener datos de pagos
+        const pagosResponse = await axios.get(`${Config.apiUrl}/api/pagos`, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
+
+        console.log("Pagos:", pagosResponse.data);
+
+        setEstadisticas(estadisticasResponse.data);
+        setVentas(ventasResponse.data);
+        setPagos(pagosResponse.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error al obtener datos:", err);
+        setError("Error desconocido");
+        setLoading(false);
+      }
+    };
+
     if (!fetched.current) {
       fetched.current = true;
-      axios
-        .get(`${Config.apiUrl}/api/vendedores/estadisticas`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        })
-        .then((response) => {
-          const newData = response.data;
-          console.log("Datos recibidos:", newData);
-          setEstadisticas(newData);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error al obtener estadísticas", err);
-          setError("Error desconocido");
-          setLoading(false);
-        });
+      fetchData();
     }
-
-    // Guardamos las referencias actuales en variables locales
-    const ventasChart = ventasChartRef.current;
-    const deudaChart = deudaChartRef.current;
-    const pagosChart = pagosChartRef.current;
-    const cantidadVentasChart = cantidadVentasChartRef.current;
-
-    // Función de limpieza
-    return () => {
-      if (ventasChart?.destroy) ventasChart.destroy();
-      if (deudaChart?.destroy) deudaChart.destroy();
-      if (pagosChart?.destroy) pagosChart.destroy();
-      if (cantidadVentasChart?.destroy) cantidadVentasChart.destroy();
-    };
-  }, [jwtToken]); // Dependencias del useEffect
+  }, [jwtToken]);
 
   if (loading) {
     return (
@@ -90,9 +101,17 @@ const DashboardVendedores = ({ jwtToken }) => {
     saldoPendiente: 0,
     cantidadTotalVentas: 0,
     cantidadTotalPagos: 0,
+    totalPagosCompletos: 0,
+    totalPagosParciales: 0,
+    totalPagosPendientes: 0,
   };
 
-  const { topVendedores, mayorDeuda, resumen = defaultResumen } = estadisticas;
+  const {
+    topVendedores,
+    mayorDeuda,
+    resumen = defaultResumen,
+    ventasDetalladas,
+  } = estadisticas;
 
   // Datos para el gráfico de ventas totales
   const ventasData = {
@@ -188,6 +207,60 @@ const DashboardVendedores = ({ jwtToken }) => {
     maintainAspectRatio: false,
   };
 
+  // Datos para el componente MeterGroup
+  const totalVentas = resumen.totalVentas || 0;
+  const totalPagosCompletos = resumen.totalPagosCompletos || 0;
+  const totalPagosParciales = resumen.totalPagosParciales || 0;
+  const totalPagosPendientes = resumen.totalPagosPendientes || 0;
+
+  // Calcular porcentajes para el MeterGroup
+  const meterValues = [];
+  if (totalVentas > 0) {
+    meterValues.push(
+      {
+        label: "Completas",
+        color: colors.success,
+        value: parseFloat(
+          ((totalPagosCompletos / totalVentas) * 100).toFixed(2)
+        ),
+      },
+      {
+        label: "Parciales",
+        color: colors.warning,
+        value: parseFloat(
+          ((totalPagosParciales / totalVentas) * 100).toFixed(2)
+        ),
+      },
+      {
+        label: "Pendientes",
+        color: colors.danger,
+        value: parseFloat(
+          ((totalPagosPendientes / totalVentas) * 100).toFixed(2)
+        ),
+      }
+    );
+  } else {
+    // Si no hay ventas, mostrar valores predeterminados
+    meterValues.push(
+      { label: "Completas", color: colors.success, value: 0 },
+      { label: "Parciales", color: colors.warning, value: 0 },
+      { label: "Pendientes", color: colors.danger, value: 0 }
+    );
+  }
+
+  // Filtrar las ventas detalladas por el vendedor seleccionado
+  const ventasFiltradas = selectedVendedor
+    ? ventas.filter((venta) => venta.vendedor?.nombre === selectedVendedor)
+    : ventas;
+
+  // IDs de las ventas del vendedor seleccionado
+  const idsVentasFiltradas = ventasFiltradas.map((venta) => venta.id);
+
+  // Filtrar los pagos por las IDs de las ventas del vendedor seleccionado
+  const pagosFiltrados = selectedVendedor
+    ? pagos.filter((pago) => idsVentasFiltradas.includes(pago.venta_id))
+    : pagos;
+
   return (
     <div className="card sales-dashboard">
       {/* Sección de KPIs */}
@@ -240,6 +313,28 @@ const DashboardVendedores = ({ jwtToken }) => {
           icon="pi pi-exclamation-triangle"
           iconBgColor={colors.danger}
         />
+
+        {/* Tarjeta con MeterGroup */}
+        <CardDashboard
+          title="Estado de Ventas"
+          icon="pi pi-chart-bar"
+          iconBgColor={colors.primary}
+        >
+          <div className="meter-container">
+            <MeterGroup values={meterValues} />
+            <div className="meter-details">
+              {meterValues.map((item, index) => (
+                <p key={index} className="meter-detail">
+                  <span
+                    className="color-indicator"
+                    style={{ backgroundColor: item.color }}
+                  ></span>
+                  {item.label}: {item.value}%
+                </p>
+              ))}
+            </div>
+          </div>
+        </CardDashboard>
       </div>
 
       {/* Sección de gráficos */}
@@ -285,12 +380,71 @@ const DashboardVendedores = ({ jwtToken }) => {
               ref={cantidadVentasChartRef}
               type="bar"
               data={cantidadVentasData}
-              options={chartOptions}
+              options={{
+                ...chartOptions,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    // Obtener el índice de la barra clicada
+                    const clickedIndex = elements[0].index;
+                    // Obtener el nombre del vendedor correspondiente
+                    const vendedorSeleccionado =
+                      cantidadVentasData.labels[clickedIndex];
+                    setSelectedVendedor(vendedorSeleccionado);
+                  }
+                },
+              }}
               plugins={[ChartDataLabels]}
               height="300px"
             />
           </div>
         </Card>
+      </div>
+
+      {/* Sección de tabla ventas detalladas */}
+      <div className="table-card">
+        <h3>
+          Detalle de Ventas - {selectedVendedor || "Todos los vendedores"}
+        </h3>
+        <DataTable value={ventasFiltradas} paginator rows={5}>
+          <Column field="id" header="ID" />
+          <Column field="fecha_venta" header="Fecha" />
+          <Column
+            field="cliente_medio.nombre_completo"
+            header="Cliente"
+            body={(rowData) => rowData.cliente_medio?.nombre_completo || "N/A"}
+          />
+          <Column field="estado_pago" header="Estado Pago" />
+          <Column
+            field="valor_total"
+            header="Monto Total"
+            body={(rowData) =>
+              `$${parseFloat(rowData.valor_total).toLocaleString()}`
+            }
+          />
+          <Column
+            field="vendedor.nombre"
+            header="Vendedor"
+            body={(rowData) => rowData.vendedor?.nombre || "N/A"}
+          />
+        </DataTable>
+      </div>
+
+      {/* Sección de tabla de pagos */}
+      <div className="table-card">
+        <h3>Pagos Realizados</h3>
+        <DataTable value={pagosFiltrados} paginator rows={5}>
+          <Column field="id" header="ID" />
+          <Column field="venta_id" header="Venta ID" />
+          <Column
+            field="monto_pagado"
+            header="Monto Pagado"
+            body={(rowData) =>
+              `$${parseFloat(rowData.monto_pagado).toLocaleString()}`
+            }
+          />
+          <Column field="fecha_pago" header="Fecha de Pago" />
+          <Column field="metodo_pago" header="Método de Pago" />
+        </DataTable>
       </div>
     </div>
   );
