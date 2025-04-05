@@ -1,6 +1,6 @@
 /* Estilos generales */
 .sales-dashboard {
-  padding: 20px;
+  padding: 15px;
 }
 
 .section {
@@ -10,7 +10,7 @@
 .kpi-section {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap; /* Permite que las tarjetas se ajusten en pantallas pequeñas */
+  flex-wrap: wrap; /* Permite que las tarjetas se ajusten en pantallas pequeñas */  
 }
 
 .datatable-section {

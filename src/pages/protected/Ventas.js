@@ -384,111 +384,115 @@ const Ventas = ({ jwtToken }) => {
   // Renderizar el DataTable
   const renderDataTable = () => {
     return (
-      <DataTable
-        value={ventas}
-        loading={loading}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No se encontraron ventas."
-      >
-        <Column field="id" header="ID" />
-        <Column
-          field="fecha_venta"
-          header="Fecha de Venta"
-          body={(rowData) => {
-            const fechaLocal = convertToLocalDate(rowData.fecha_venta);
-            return formatDate(fechaLocal);
-          }}
-        />
-        <Column
-          field="valor_total"
-          header="Valor Total"
-          body={(rowData) => {
-            const formattedValue = new Intl.NumberFormat("es-CO", {
-              style: "currency",
-              currency: "COP",
-            }).format(rowData.valor_total);
-            return <span>{formattedValue}</span>;
-          }}
-        />
-        <Column
-          field="cliente_medio.nombre_completo"
-          header="Cliente Medio"
-          body={(rowData) =>
-            rowData.cliente_medio?.nombre_completo || "Sin cliente"
-          }
-        />
-        <Column
-          field="vendedor.nombre"
-          header="Vendedor"
-          body={(rowData) => rowData.vendedor?.nombre || "Sin vendedor"}
-        />
-        <Column
-          field="estado_pago"
-          header="Estado Pago"
-          body={(rowData) => (
-            <span
-              style={{
-                color:
-                  rowData.estado_pago === "completo" ? "#28a745" : "#dc3545",
-              }}
-            >
-              {rowData.estado_pago}
-            </span>
-          )}
-        />
-        <Column
-          field="estado_instalacion"
-          header="Estado Instalación"
-          body={(rowData) => (
-            <span
-              style={{
-                color:
-                  rowData.estado_instalacion === "instalado"
-                    ? "#28a745"
-                    : "#dc3545",
-              }}
-            >
-              {rowData.estado_instalacion}
-            </span>
-          )}
-        />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button
-                icon="pi pi-pencil"
-                rounded
-                text
-                severity="info"
-                onClick={() => openDialog(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                rounded
-                text
-                severity="danger"
-                onClick={() => deleteVenta(rowData.id)}
-              />
-            </div>
-          )}
-        />
-      </DataTable>
+      <div className="card">
+        <DataTable
+          value={ventas}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No se encontraron ventas."
+        >
+          <Column field="id" header="ID" />
+          <Column
+            field="fecha_venta"
+            header="Fecha de Venta"
+            body={(rowData) => {
+              const fechaLocal = convertToLocalDate(rowData.fecha_venta);
+              return formatDate(fechaLocal);
+            }}
+          />
+          <Column
+            field="valor_total"
+            header="Valor Total"
+            body={(rowData) => {
+              const formattedValue = new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+              }).format(rowData.valor_total);
+              return <span>{formattedValue}</span>;
+            }}
+          />
+          <Column
+            field="cliente_medio.nombre_completo"
+            header="Cliente Medio"
+            body={(rowData) =>
+              rowData.cliente_medio?.nombre_completo || "Sin cliente"
+            }
+          />
+          <Column
+            field="vendedor.nombre"
+            header="Vendedor"
+            body={(rowData) => rowData.vendedor?.nombre || "Sin vendedor"}
+          />
+          <Column
+            field="estado_pago"
+            header="Estado Pago"
+            body={(rowData) => (
+              <span
+                style={{
+                  color:
+                    rowData.estado_pago === "completo" ? "#28a745" : "#dc3545",
+                }}
+              >
+                {rowData.estado_pago}
+              </span>
+            )}
+          />
+          <Column
+            field="estado_instalacion"
+            header="Estado Instalación"
+            body={(rowData) => (
+              <span
+                style={{
+                  color:
+                    rowData.estado_instalacion === "instalado"
+                      ? "#28a745"
+                      : "#dc3545",
+                }}
+              >
+                {rowData.estado_instalacion}
+              </span>
+            )}
+          />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  icon="pi pi-pencil"
+                  rounded
+                  text
+                  severity="info"
+                  onClick={() => openDialog(rowData)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  rounded
+                  text
+                  severity="danger"
+                  onClick={() => deleteVenta(rowData.id)}
+                />
+              </div>
+            )}
+          />
+        </DataTable>
+      </div>
     );
   };
 
   return (
     <div>
-      <h2>Ventas</h2>
-      <Button
-        label="Agregar Venta"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
-      />
+      <div className="card">
+        <h2>Ventas</h2>
+        <Button
+          label="Agregar Venta"
+          icon="pi pi-plus"
+          onClick={() => openDialog()}
+          className="p-button-raised p-button-success"
+          style={{ marginBottom: "20px" }}
+        />
+      </div>
       {renderDataTable()}
       {renderDialog()}
       {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}

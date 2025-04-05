@@ -1,10 +1,10 @@
 /* Estilos generales */
 .sales-dashboard {
-  padding: 20px;
+  padding: 10px;
 }
 
 .section {
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .kpi-section {
@@ -15,11 +15,12 @@
 
 .card-dashboard {
   flex: 1;
-  padding: 15px; /* Espaciado interno */
+  padding: 10px; /* Espaciado interno */  
   min-width: 200px; /* Ancho mínimo para evitar que las tarjetas se hagan demasiado pequeñas */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el hover */
+  ;
 }
 
 .card-dashboard:hover {

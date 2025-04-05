@@ -173,68 +173,71 @@ const Vendedores = ({ jwtToken }) => {
     <div>
       {/* Componente Toast para mostrar notificaciones */}
       <Toast ref={toast} />
+      <div className="card">
+        <h2>Vendedores</h2>
 
-      <h2>Vendedores</h2>
-
-      {/* Botón para agregar un nuevo vendedor */}
-      <Button
-        label="Agregar Vendedor"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
-      />
+        {/* Botón para agregar un nuevo vendedor */}
+        <Button
+          label="Agregar Vendedor"
+          icon="pi pi-plus"
+          onClick={() => openDialog()}
+          className="p-button-raised p-button-success"
+          style={{ marginBottom: "20px" }}
+        />
+      </div>
 
       {/* Tabla de vendedores */}
-      <DataTable
-        value={vendedores}
-        loading={loading}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No se encontraron vendedores."
-      >
-        <Column field="id" header="ID" />
-        <Column field="nombre" header="Nombre" sortable />
-        <Column
-          field="telefono"
-          header="Teléfono"
-          body={(rowData) => rowData.telefono || "N/A"}
-        />
-        <Column
-          field="activo"
-          header="Activo"
-          body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
-        />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button
-                icon="pi pi-pencil"
-                rounded
-                text
-                severity="info"
-                onClick={() => openDialog(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                rounded
-                text
-                severity="danger"
-                onClick={() => deleteVendedor(rowData.id)}
-              />
-              <Button
-                icon="pi pi-eye"
-                rounded
-                text
-                severity="success"
-                onClick={() => viewCartera(rowData.id, rowData.nombre)}
-              />
-            </div>
-          )}
-        />
-      </DataTable>
+      <div className="card">
+        <DataTable
+          value={vendedores}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No se encontraron vendedores."
+        >
+          <Column field="id" header="ID" />
+          <Column field="nombre" header="Nombre" sortable />
+          <Column
+            field="telefono"
+            header="Teléfono"
+            body={(rowData) => rowData.telefono || "N/A"}
+          />
+          <Column
+            field="activo"
+            header="Activo"
+            body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
+          />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  icon="pi pi-pencil"
+                  rounded
+                  text
+                  severity="info"
+                  onClick={() => openDialog(rowData)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  rounded
+                  text
+                  severity="danger"
+                  onClick={() => deleteVendedor(rowData.id)}
+                />
+                <Button
+                  icon="pi pi-eye"
+                  rounded
+                  text
+                  severity="success"
+                  onClick={() => viewCartera(rowData.id, rowData.nombre)}
+                />
+              </div>
+            )}
+          />
+        </DataTable>
+      </div>
 
       {/* Diálogo para crear/editar vendedores */}
       <Dialog
