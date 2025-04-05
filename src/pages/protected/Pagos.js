@@ -385,75 +385,79 @@ const Pagos = ({ jwtToken }) => {
   // Renderizar el DataTable
   const renderDataTable = () => {
     return (
-      <DataTable
-        value={pagos}
-        loading={loading}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No se encontraron pagos."
-      >
-        <Column field="id" header="ID" />
-        <Column
-          field="venta_id"
-          header="Venta"
-          body={(rowData) => <span>{rowData.venta?.id || "Sin venta"}</span>}
-        />
-        <Column
-          field="fecha_pago"
-          header="Fecha de Pago"
-          body={(rowData) =>
-            new Date(rowData.fecha_pago).toLocaleDateString("es-CO")
-          }
-        />
-        <Column
-          field="monto_pagado"
-          header="Monto"
-          body={(rowData) => {
-            const formattedValue = new Intl.NumberFormat("es-CO", {
-              style: "currency",
-              currency: "COP",
-            }).format(rowData.monto_pagado);
-            return <span>{formattedValue}</span>;
-          }}
-        />
-        <Column field="metodo_pago" header="Método de Pago" />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <Button
-                icon="pi pi-pencil"
-                rounded
-                text
-                severity="info"
-                onClick={() => openDialog(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                rounded
-                text
-                severity="danger"
-                onClick={() => deletePago(rowData.id)}
-              />
-            </div>
-          )}
-        />
-      </DataTable>
+      <div className="card">
+        <DataTable
+          value={pagos}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No se encontraron pagos."
+        >
+          <Column field="id" header="ID" />
+          <Column
+            field="venta_id"
+            header="Venta"
+            body={(rowData) => <span>{rowData.venta?.id || "Sin venta"}</span>}
+          />
+          <Column
+            field="fecha_pago"
+            header="Fecha de Pago"
+            body={(rowData) =>
+              new Date(rowData.fecha_pago).toLocaleDateString("es-CO")
+            }
+          />
+          <Column
+            field="monto_pagado"
+            header="Monto"
+            body={(rowData) => {
+              const formattedValue = new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+              }).format(rowData.monto_pagado);
+              return <span>{formattedValue}</span>;
+            }}
+          />
+          <Column field="metodo_pago" header="Método de Pago" />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  icon="pi pi-pencil"
+                  rounded
+                  text
+                  severity="info"
+                  onClick={() => openDialog(rowData)}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  rounded
+                  text
+                  severity="danger"
+                  onClick={() => deletePago(rowData.id)}
+                />
+              </div>
+            )}
+          />
+        </DataTable>
+      </div>
     );
   };
 
   return (
     <div>
       <Toast ref={toast} />
-      <h2>Pagos</h2>
-      <Button
-        label="Agregar Pago"
-        icon="pi pi-plus"
-        onClick={() => openDialog()}
-        className="p-button-raised p-button-success"
-        style={{ marginBottom: "20px" }}
-      />
+      <div className="card">
+        <h2>Pagos</h2>
+        <Button
+          label="Agregar Pago"
+          icon="pi pi-plus"
+          onClick={() => openDialog()}
+          className="p-button-raised p-button-success"
+          style={{ marginBottom: "20px" }}
+        />
+      </div>
       {renderDataTable()}
       {renderDialog()}
       {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
