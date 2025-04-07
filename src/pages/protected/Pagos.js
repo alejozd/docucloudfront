@@ -132,7 +132,6 @@ const Pagos = ({ jwtToken }) => {
         });
       } else {
         // Crear nuevo pago
-        console.log("Creando pago:", pago);
         await axios.post(`${Config.apiUrl}/api/pagos`, pago, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
