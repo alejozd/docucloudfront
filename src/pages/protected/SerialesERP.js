@@ -77,10 +77,7 @@ const SerialesERP = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (serialSeleccionado = null) => {
     if (serialSeleccionado) {
-      setSerial({
-        ...serialSeleccionado,
-        activo: serialSeleccionado.activo || true, // Asegura el valor booleano
-      });
+      setSerial(serialSeleccionado);
       setIsEditMode(true);
     } else {
       setSerial({
