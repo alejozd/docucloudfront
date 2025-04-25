@@ -9,6 +9,9 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { FilterMatchMode } from "primereact/api";
 import { Toast } from "primereact/toast";
 
 const ClientesMedios = ({ jwtToken }) => {
@@ -28,6 +31,11 @@ const ClientesMedios = ({ jwtToken }) => {
   const [error, setError] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  });
   const toast = React.useRef(null);
 
   // Cargar clientes al iniciar el componente
@@ -35,6 +43,34 @@ const ClientesMedios = ({ jwtToken }) => {
     fetchClientes();
     fetchVendedores();
   }, [jwtToken]);
+
+  // Manejo del filtro global
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  // Encabezado con Input global
+  const renderHeader = () => {
+    return (
+      <div className="flex justify-content-end">
+        <IconField iconPosition="left">
+          <InputIcon className="pi pi-search" />
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Buscar nombre..."
+          />
+        </IconField>
+      </div>
+    );
+  };
+
+  const header = renderHeader();
 
   // Función para cargar clientes desde el backend
   const fetchClientes = async () => {
@@ -345,9 +381,14 @@ const ClientesMedios = ({ jwtToken }) => {
           loading={loading}
           paginator
           rows={10}
+          dataKey="id"
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron clientes."
           stripedRows
+          filters={filters}
+          globalFilterFields={["nombre_completo", "vendedor.nombre"]}
+          header={header}
+          filterDisplay="row"
         >
           <Column field="id" header="ID" />
           <Column field="nombre_completo" header="Nombre" sortable />
