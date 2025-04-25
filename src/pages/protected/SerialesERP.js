@@ -9,6 +9,9 @@ import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { FilterMatchMode } from "primereact/api";
 import { Toast } from "primereact/toast";
 
 const SerialesERP = ({ jwtToken }) => {
@@ -25,6 +28,11 @@ const SerialesERP = ({ jwtToken }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  });
   const toast = React.useRef(null);
 
   // Función para cargar seriales desde el backend
@@ -73,6 +81,34 @@ const SerialesERP = ({ jwtToken }) => {
     fetchSeriales();
     fetchClientes();
   }, [fetchSeriales, fetchClientes]); // Las funciones están memoizadas con useCallback
+
+  // Manejo del filtro global
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters["global"].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  // Encabezado con Input global
+  const renderHeader = () => {
+    return (
+      <div className="flex justify-content-end">
+        <IconField iconPosition="left">
+          <InputIcon className="pi pi-search" />
+          <InputText
+            value={globalFilterValue}
+            onChange={onGlobalFilterChange}
+            placeholder="Buscar serial..."
+          />
+        </IconField>
+      </div>
+    );
+  };
+
+  const header = renderHeader();
 
   // Función para abrir el diálogo de creación/edición
   const openDialog = (serialSeleccionado = null) => {
@@ -283,9 +319,14 @@ const SerialesERP = ({ jwtToken }) => {
           loading={loading}
           paginator
           rows={10}
+          dataKey="id"
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron seriales ERP."
           stripedRows
+          filters={filters}
+          globalFilterFields={["serial_erp", "cliente.nombre_completo"]}
+          header={header}
+          filterDisplay="row"
         >
           <Column field="id" header="ID" />
           <Column field="serial_erp" header="Serial ERP" sortable />
