@@ -7,6 +7,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import Config from "../../components/features/Config";
+import { convertToLocalDate } from "./../../utils/dateUtils";
+import { formatDate } from "./../../utils/dateUtils";
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -139,7 +141,14 @@ const Usuarios = () => {
           <Column field="id" header="ID" />
           <Column field="nombre" header="Nombre" />
           <Column field="email" header="Email" />
-          <Column field="creado_en" header="Creado En." />
+          <Column
+            field="creado_en"
+            header="Creado En."
+            body={(rowData) => {
+              const fechaLocal = convertToLocalDate(rowData.creado_en);
+              return formatDate(fechaLocal);
+            }}
+          />
           <Column
             body={accionesTemplate}
             header="Acciones"
