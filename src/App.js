@@ -24,6 +24,7 @@ import Ventas from "./pages/protected/Ventas";
 import Pagos from "./pages/protected/Pagos";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
+import Usuarios from "./pages/microservices/Usuarios";
 import "././styles/App.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -110,6 +111,8 @@ function App() {
             />
             <Route path="/BatteryStatus" element={<BatteryStatus />} />
             <Route path="/SalesDashboard" element={<SalesDashboard />} />
+            {/* Rutas de microservicios */}
+            <Route path="/Usuarios" element={<Usuarios />} />
 
             {/* Ruta de autenticación */}
             <Route
