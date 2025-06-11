@@ -173,6 +173,18 @@ const Navbar = () => {
         },
       ],
     },
+    {
+      label: "Microservicios",
+      icon: "pi pi-server",
+      items: [
+        {
+          label: "Usuarios",
+          icon: "pi pi-users",
+          url: "/usuarios",
+          id: "usuarios",
+        },
+      ],
+    },
   ];
 
   const start = (
