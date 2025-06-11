@@ -110,12 +110,16 @@ const Usuarios = () => {
     <>
       <Button
         icon="pi pi-pencil"
-        className="p-button-rounded p-button-info p-mr-2"
+        rounded
+        text
+        severity="info"
         onClick={() => editarUsuario(rowData)}
       />
       <Button
         icon="pi pi-trash"
-        className="p-button-rounded p-button-danger"
+        rounded
+        text
+        severity="danger"
         onClick={() => eliminarUsuario(rowData.id)}
       />
     </>
