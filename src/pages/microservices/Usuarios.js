@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -14,16 +14,11 @@ const Usuarios = () => {
   const [usuarioDialog, setUsuarioDialog] = useState(false);
   const [editando, setEditando] = useState(false);
   const toast = useRef(null);
-  const jwtToken = localStorage.getItem("jwtToken"); // Asumiendo que así obtienes tu token
-
-  const headers = { Authorization: `Bearer ${jwtToken}` };
 
   // Cargar usuarios
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/usuarios`, {
-        headers,
-      });
+      const response = await axios.get(`${Config.apiUrl}/api/usuarios`, {});
       setUsuarios(response.data);
     } catch (error) {
       toast.current.show({
@@ -32,11 +27,11 @@ const Usuarios = () => {
         detail: "No se pudo cargar la lista de usuarios",
       });
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUsuarios();
-  }, []);
+  }, [fetchUsuarios]);
 
   const abrirNuevo = () => {
     setUsuario({ id: null, nombre: "", email: "" });
@@ -57,18 +52,14 @@ const Usuarios = () => {
   const guardarUsuario = async () => {
     try {
       if (editando) {
-        await axios.put(
-          `${Config.apiUrl}/api/usuarios/${usuario.id}`,
-          usuario,
-          { headers }
-        );
+        await axios.put(`${Config.apiUrl}/api/usuarios/${usuario.id}`, usuario);
         toast.current.show({
           severity: "success",
           summary: "Actualizado",
           detail: "Usuario actualizado con éxito",
         });
       } else {
-        await axios.post(`${Config.apiUrl}/api/usuarios`, usuario, { headers });
+        await axios.post(`${Config.apiUrl}/api/usuarios`, usuario);
         toast.current.show({
           severity: "success",
           summary: "Creado",
@@ -88,9 +79,7 @@ const Usuarios = () => {
 
   const eliminarUsuario = async (usuarioId) => {
     try {
-      await axios.delete(`${Config.apiUrl}/api/usuarios/${usuarioId}`, {
-        headers,
-      });
+      await axios.delete(`${Config.apiUrl}/api/usuarios/${usuarioId}`);
       toast.current.show({
         severity: "success",
         summary: "Eliminado",
@@ -126,19 +115,23 @@ const Usuarios = () => {
   );
 
   return (
-    <div className="p-grid p-justify-center p-mt-4">
+    <div>
       <Toast ref={toast} />
-      <div className="p-col-12">
+      <div className="card">
         <h2>Gestión de Usuarios</h2>
+        <h3>El backend es un microservicio desarrollado con Spring Boot.</h3>
         <Button
           label="Nuevo Usuario"
           icon="pi pi-plus"
-          className="p-mb-3"
+          severity="success"
           onClick={abrirNuevo}
+          style={{ marginBottom: "20px" }}
         />
-
+      </div>
+      <div className="card">
         <DataTable
           value={usuarios}
+          stripedRows
           paginator
           rows={5}
           header="Usuarios registrados"
@@ -146,7 +139,7 @@ const Usuarios = () => {
           <Column field="id" header="ID" />
           <Column field="nombre" header="Nombre" />
           <Column field="email" header="Email" />
-          <Column field="creado_en" header="Creado En" />
+          <Column field="creado_en" header="Creado En." />
           <Column
             body={accionesTemplate}
             header="Acciones"
@@ -184,17 +177,25 @@ const Usuarios = () => {
             </div>
           </div>
 
-          <div className="p-dialog-footer">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "20px",
+            }}
+          >
             <Button
               label="Cancelar"
               icon="pi pi-times"
-              className="p-button-text"
+              // className="p-button-text"
+              severity="secondary"
               onClick={ocultarDialogo}
             />
             <Button
               label="Guardar"
               icon="pi pi-check"
-              className="p-button-text"
+              severity="success"
+              // className="p-button-text"
               onClick={guardarUsuario}
             />
           </div>
