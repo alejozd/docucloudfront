@@ -15,14 +15,19 @@ const Usuarios = () => {
   const [usuario, setUsuario] = useState({ id: null, nombre: "", email: "" });
   const [usuarioDialog, setUsuarioDialog] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   // Cargar usuarios
   const fetchUsuarios = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${Config.apiUrl}/api/usuarios`, {});
       setUsuarios(response.data);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      console.error("Error al cargar usuarios:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -137,6 +142,7 @@ const Usuarios = () => {
           paginator
           rows={5}
           header="Usuarios registrados"
+          loading={loading}
         >
           <Column field="id" header="ID" />
           <Column field="nombre" header="Nombre" />
@@ -206,6 +212,7 @@ const Usuarios = () => {
               severity="success"
               // className="p-button-text"
               onClick={guardarUsuario}
+              loading={loading}
             />
           </div>
         </Dialog>
