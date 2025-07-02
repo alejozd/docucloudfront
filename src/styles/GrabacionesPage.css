@@ -1,0 +1,16 @@
+.grabaciones-container {
+  padding: 2rem;
+}
+
+.grabaciones-bloque {
+  margin-bottom: 2rem;
+}
+
+.grabaciones-lista {
+  list-style: none;
+  padding: 0;
+}
+
+.grabaciones-item {
+  margin-bottom: 1rem;
+}

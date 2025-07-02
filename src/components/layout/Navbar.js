@@ -105,6 +105,12 @@ const Navbar = () => {
           url: "/BatteryStatus",
           id: "BatteryStatus",
         },
+        {
+          label: "Grabaciones de Radio",
+          icon: "pi pi-microphone",
+          url: "/GrabacionesPage",
+          id: "GrabacionesPage",
+        },
       ],
     },
     {
