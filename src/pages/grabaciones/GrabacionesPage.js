@@ -1,36 +1,88 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { Card } from "primereact/card";
+import { Button } from "primereact/button";
 import "../../styles/GrabacionesPage.css"; // Opcional: estilos personalizados
 
 const GrabacionesPage = () => {
   const [grabaciones, setGrabaciones] = useState([]);
+  const [activo, setActivo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Cargar datos iniciales
   useEffect(() => {
-    const fetchGrabaciones = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(
+        const resEstado = await axios.get(
+          "https://zetamini.ddns.net/api/grabacion/estado "
+        );
+        const resLista = await axios.get(
           "https://zetamini.ddns.net/api/grabacion/lista "
         );
-        setGrabaciones(res.data);
-        setLoading(false);
+
+        setActivo(resEstado.data.activo);
+        setGrabaciones(resLista.data);
       } catch (err) {
-        console.error("Error al cargar grabaciones:", err);
+        console.error("Error al cargar datos:", err);
         setError("No se pudieron cargar las grabaciones.");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchGrabaciones();
+    fetchData();
   }, []);
+
+  // Manejar cambio de estado
+  const cambiarEstado = async (nuevoEstado) => {
+    try {
+      await axios.post("https://zetamini.ddns.net/api/grabacion/estado ", {
+        activo: nuevoEstado,
+      });
+      setActivo(nuevoEstado);
+    } catch (err) {
+      alert("No se pudo actualizar el estado.");
+      console.error("Error al cambiar estado:", err);
+    }
+  };
 
   if (loading) return <div>Cargando grabaciones...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className="grabaciones-container">
+      {/* Panel de control */}
+      <Card title="Configuración de grabación">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>
+            Estado actual:{" "}
+            <strong>
+              {activo
+                ? "Activado (la grabación automática está habilitada)"
+                : "Desactivado (la grabación automática no se iniciará a las 7pm)"}
+            </strong>
+          </span>
+
+          <Button
+            label={
+              activo
+                ? "Desactivar grabación automática"
+                : "Activar grabación automática"
+            }
+            icon={activo ? "pi pi-power-off" : "pi pi-power-off"}
+            className={activo ? "p-button-warning" : "p-button-success"}
+            onClick={() => cambiarEstado(!activo)}
+          />
+        </div>
+      </Card>
+
       <h2>Programas Grabados</h2>
 
       {grabaciones.length === 0 ? (
