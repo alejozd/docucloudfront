@@ -1,27 +1,91 @@
 /* WorkTimeCalculator.css */
+
 .work-time-calculator {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .work-time-calculator .p-card {
-    padding: 1rem;
-  }
-  
-  .work-time-calculator .p-field {
-    margin-bottom: 1rem;
-  }
-  
-  .work-time-calculator .p-field label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  
-  .work-time-calculator .p-button {
-    width: 100%;
-  }
-  
-  .work-time-calculator .p-error {
-    color: red;
-  }
-  
+  max-width: 500px;
+  margin: 2rem auto;
+  font-family: "Roboto", sans-serif;
+}
+
+.work-time-calculator .p-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+}
+
+.work-time-calculator .p-field {
+  margin-bottom: 1.5rem;
+}
+
+.work-time-calculator .p-field label {
+  display: block;
+  font-weight: 600;
+  font-size: large;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+/* Estilo para los TimePicker de MUI */
+.work-time-calculator .MuiInputBase-root {
+  width: 100%;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 1rem;
+}
+
+.work-time-calculator .MuiInputBase-root fieldset {
+  border-color: #ccc;
+  transition: border-color 0.3s ease;
+}
+
+.work-time-calculator .MuiInputBase-root:hover fieldset {
+  border-color: #7c69ef;
+}
+
+.work-time-calculator .MuiInputBase-root.Mui-focused fieldset {
+  border-color: #624de6;
+  box-shadow: 0 0 0 2px rgba(98, 77, 230, 0.2);
+}
+
+/* Botón de calcular */
+/* .work-time-calculator .p-button {
+  width: 100%;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 1rem;
+  background-color: #624de6;
+  border-color: #624de6;
+} */
+
+.work-time-calculator .p-button:hover {
+  background-color: #553ecc;
+  border-color: #553ecc;
+}
+
+/* Resultados */
+.work-time-calculator .p-card.p-component.p-mt-4 {
+  background-color: #f9f9f9;
+  color: #444;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+}
+
+.work-time-calculator .p-card.p-component p {
+  margin: 0.5rem 0;
+}
+
+/* Mensaje de error */
+.work-time-calculator .p-error {
+  color: #e53935;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Título */
+.work-time-calculator h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+}
