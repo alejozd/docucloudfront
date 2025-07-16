@@ -2,17 +2,17 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "primereact/button";
-import { Slider } from "primereact/slider"; // Necesitarás PrimeReact Slider
-import "../../styles/AudioPlayer.css"; // Crearemos este archivo CSS
+import { Slider } from "primereact/slider";
+import "../../styles/AudioPlayer.css";
 
-const AudioPlayer = ({ src, title }) => {
-  const audioRef = useRef(null); // Referencia al elemento <audio>
+// Recibe globalVolume y onPlay como props
+const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
+  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(100); // Volumen en porcentaje
+  const [isSeeking, setIsSeeking] = useState(false);
 
-  // Formatea el tiempo para mostrarlo como MM:SS
   const formatTime = (time) => {
     if (isNaN(time)) return "00:00";
     const minutes = Math.floor(time / 60);
@@ -22,7 +22,6 @@ const AudioPlayer = ({ src, title }) => {
     }${seconds}`;
   };
 
-  // Manejadores de eventos del audio
   const onLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
@@ -30,15 +29,22 @@ const AudioPlayer = ({ src, title }) => {
   }, []);
 
   const onTimeUpdate = useCallback(() => {
-    if (audioRef.current) {
+    if (audioRef.current && !isSeeking) {
       setCurrentTime(audioRef.current.currentTime);
     }
-  }, []);
+  }, [isSeeking]);
 
   const onEnded = useCallback(() => {
     setIsPlaying(false);
-    setCurrentTime(0); // Reinicia el tiempo cuando termina
+    setCurrentTime(0);
   }, []);
+
+  // Efecto para aplicar el volumen global cuando el componente carga o el volumen global cambia
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = globalVolume / 100;
+    }
+  }, [globalVolume]); // Reacciona al cambio de globalVolume
 
   // Efecto para adjuntar/desadjuntar escuchadores de eventos
   useEffect(() => {
@@ -48,7 +54,6 @@ const AudioPlayer = ({ src, title }) => {
       audioEl.addEventListener("timeupdate", onTimeUpdate);
       audioEl.addEventListener("ended", onEnded);
 
-      // Limpieza de los escuchadores cuando el componente se desmonte
       return () => {
         audioEl.removeEventListener("loadedmetadata", onLoadedMetadata);
         audioEl.removeEventListener("timeupdate", onTimeUpdate);
@@ -57,12 +62,13 @@ const AudioPlayer = ({ src, title }) => {
     }
   }, [onLoadedMetadata, onTimeUpdate, onEnded]);
 
-  // Manejar reproducción/pausa
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
+        // Notifica a la página principal que este audio ha comenzado a reproducirse
+        onPlay(audioRef);
         audioRef.current
           .play()
           .catch((e) => console.error("Error al reproducir:", e));
@@ -71,67 +77,68 @@ const AudioPlayer = ({ src, title }) => {
     }
   };
 
-  // Manejar cambio de tiempo (seek)
-  const onSeek = (e) => {
+  const onSeekStart = () => {
+    setIsSeeking(true);
+  };
+
+  const onSeekEnd = (e) => {
     if (audioRef.current) {
       audioRef.current.currentTime = e.value;
       setCurrentTime(e.value);
     }
-  };
-
-  // Manejar cambio de volumen
-  const onVolumeChange = (e) => {
-    if (audioRef.current) {
-      setVolume(e.value);
-      audioRef.current.volume = e.value / 100;
-    }
+    setIsSeeking(false);
   };
 
   return (
-    <div className="audio-player-card">
-      <h4>{title}</h4>
-      <audio ref={audioRef} src={src} preload="metadata" />{" "}
-      {/* 'preload="metadata"' carga solo la info sin el audio completo */}
-      <div className="controls-row">
-        <Button
-          icon={isPlaying ? "pi pi-pause" : "pi pi-play"}
-          className="p-button-rounded p-button-success p-mr-2"
-          onClick={togglePlayPause}
-        />
-        <Button
-          icon="pi pi-stop"
-          className="p-button-rounded p-button-danger"
-          onClick={() => {
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.currentTime = 0;
-              setIsPlaying(false);
-            }
-          }}
-        />
-      </div>
-      <div className="progress-row">
-        <span>{formatTime(currentTime)}</span>
-        <Slider
-          value={currentTime}
-          onChange={onSeek}
-          min={0}
-          max={duration}
-          step={1}
-          className="audio-progress-slider"
-        />
-        <span>{formatTime(duration)}</span>
-      </div>
-      <div className="volume-row">
-        <i className="pi pi-volume-up p-mr-2" />
-        <Slider
-          value={volume}
-          onChange={onVolumeChange}
-          min={0}
-          max={100}
-          step={1}
-          className="audio-volume-slider"
-        />
+    <div className={`custom-audio-player ${isActive ? "is-active" : ""}`}>
+      {" "}
+      {/* Añade clase 'is-active' */}
+      <audio ref={audioRef} src={src} preload="metadata" />
+      <div className="player-info-controls">
+        <div className="player-meta">
+          <div className="song-details">
+            <span className="song-title">{title}</span>
+          </div>
+        </div>
+
+        <div className="player-controls">
+          <Button
+            icon={isPlaying ? "pi pi-pause" : "pi pi-play"}
+            className="p-button-rounded p-button-lg p-button-text p-button-secondary play-pause-btn"
+            onClick={togglePlayPause}
+            aria-label={isPlaying ? "Pausar" : "Reproducir"}
+          />
+          <Button
+            icon="pi pi-stop"
+            className="p-button-rounded p-button-sm p-button-text p-button-secondary stop-btn"
+            onClick={() => {
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+                setIsPlaying(false);
+              }
+            }}
+            aria-label="Detener"
+          />
+        </div>
+
+        <div className="player-progress">
+          <span className="time-current">{formatTime(currentTime)}</span>
+          <Slider
+            value={currentTime}
+            onChange={onSeekEnd}
+            onSlideEnd={onSeekEnd}
+            onSlideStart={onSeekStart}
+            min={0}
+            max={duration}
+            step={1}
+            className="audio-progress-slider p-component"
+          />
+          <span className="time-duration">{formatTime(duration)}</span>
+        </div>
+
+        {/* ELIMINAMOS EL CONTROL DE VOLUMEN DE AQUÍ */}
+        {/* <div className="volume-control-container"> ... </div> */}
       </div>
     </div>
   );

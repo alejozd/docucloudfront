@@ -1,16 +1,169 @@
+/* src/styles/GrabacionesPage.css */
+
 .grabaciones-container {
-  padding: 2rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
-.grabaciones-bloque {
+/* Estilos para el Card de configuración */
+.config-card {
   margin-bottom: 2rem;
+  max-width: 900px; /* Ancho similar al del reproductor */
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--surface-card); /* Fondo para la card */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-2);
+}
+.config-card .p-card-content {
+  padding: 1.5rem;
+}
+.config-card .p-card-title {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+.status-text {
+    font-size: 1.05rem;
+    color: var(--text-color);
+}
+.status-text strong {
+    color: var(--text-color-secondary);
+}
+/* Asegura que el botón se ajuste en pantallas pequeñas */
+.config-card .p-button {
+    flex-shrink: 0;
+    margin-top: 0; /* Reinicia el margen superior si se envuelve */
+}
+@media (max-width: 576px) {
+    .config-card .p-card-content > div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .config-card .p-button {
+        width: 100%; /* Botón de ancho completo en móvil */
+        margin-top: 1rem;
+    }
+}
+
+
+/* NUEVO: Estilos para el Card del volumen global */
+.global-volume-card {
+    margin-bottom: 2rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--surface-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-2);
+}
+
+.global-volume-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.5rem; /* Ajusta el padding para la barra de volumen */
+}
+
+.global-volume-icon {
+    font-size: 1.5rem;
+    color: var(--text-color-secondary);
+    flex-shrink: 0;
+}
+
+.global-volume-slider {
+    flex-grow: 1;
+    max-width: 250px; /* Limita el ancho del slider de volumen */
+}
+
+.global-volume-percentage {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    min-width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+
+/* NUEVO: Estilos para el Card de la lista de grabaciones */
+.grabaciones-list-card {
+    margin-bottom: 2rem;
+    max-width: 900px; /* Ancho similar al del reproductor */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--surface-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-2);
+    padding-bottom: 1.5rem; /* Ajusta el padding inferior para que el último bloque no quede pegado */
+}
+
+.grabaciones-list-card .p-card-title {
+  font-size: 1.8rem; /* Tamaño para el título principal "Programas Grabados" */
+  text-align: center;
+  color: var(--primary-color); /* Color principal para el título */
+  margin-bottom: 1.5rem;
+  padding-top: 1.5rem; /* Asegura padding superior dentro de la card */
+}
+
+.grabaciones-list-card .p-card-content {
+    padding-top: 0; /* Quita el padding superior si el título ya lo tiene */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+
+.grabaciones-bloque {
+  margin-bottom: 1.5rem; /* Espacio entre los bloques de fecha dentro de la card */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border); /* Separador entre grupos de fechas */
+}
+.grabaciones-bloque:last-child {
+    border-bottom: none; /* No hay borde inferior en el último bloque */
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.grabaciones-bloque h3 {
+  font-size: 1.25rem; /* Tamaño para la fecha */
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  padding-bottom: 0; /* No necesitas borde aquí si ya tienes en el bloque */
+  text-align: left; /* Alinea la fecha a la izquierda */
+  display: block; /* Para que ocupe todo el ancho */
 }
 
 .grabaciones-lista {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .grabaciones-item {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem; /* Pequeño espacio entre cada reproductor individual */
+}
+.grabaciones-item:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Mensajes de carga y error */
+.loading-message, .error-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--text-color-secondary);
+    margin-top: 3rem;
+}
+.error-message {
+    color: var(--red-500); /* Color de error */
+}
+
+/* Opcional: ajustar márgenes globales para PrimeReact */
+/* Esto puede ser necesario si PrimeReact agrega márgenes por defecto a los componentes */
+.p-mr-2 {
+    margin-right: 0.5rem;
+}
+.p-mb-2 {
+    margin-bottom: 0.5rem;
 }
