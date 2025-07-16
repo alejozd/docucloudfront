@@ -106,7 +106,7 @@
 .time-current,
 .time-duration {
   font-family: monospace;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   color: var(--text-color-secondary);
   min-width: 40px;
   text-align: center;
