@@ -6,7 +6,14 @@ import { Slider } from "primereact/slider";
 import "../../styles/AudioPlayer.css";
 
 // Recibe globalVolume y onPlay como props
-const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
+const AudioPlayer = ({
+  src,
+  title,
+  artist,
+  globalVolume,
+  onPlay,
+  isActive,
+}) => {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -125,14 +132,16 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
   return (
     <div className={`custom-audio-player ${isActive ? "is-active" : ""}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
+
       <div className="player-info-controls">
         <div className="player-meta">
           <div className="song-details">
-            <span className="song-title">{title}</span>
-            {isLoading && (
-              <span className="loading-indicator">Cargando...</span>
-            )}
-            {error && <span className="error-message">{error}</span>}
+            <span className="song-title">{title || "Título Desconocido"}</span>{" "}
+            {/* Usa el título del ID3 o un fallback */}
+            <span className="song-artist">
+              {artist || "Artista Desconocido"}
+            </span>{" "}
+            {/* NUEVO: Muestra el artista */}
           </div>
         </div>
 
@@ -142,7 +151,6 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
             className="p-button-rounded p-button-lg p-button-text p-button-secondary play-pause-btn"
             onClick={togglePlayPause}
             aria-label={isPlaying ? "Pausar" : "Reproducir"}
-            disabled={isLoading || error} // Deshabilitar botones si está cargando o hay un error
           />
           <Button
             icon="pi pi-stop"
@@ -155,7 +163,6 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
               }
             }}
             aria-label="Detener"
-            disabled={isLoading || error} // Deshabilitar botones si está cargando o hay un error
           />
         </div>
 
@@ -170,7 +177,6 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
             max={duration}
             step={1}
             className="audio-progress-slider p-component"
-            disabled={isLoading || error || duration === 0} // Deshabilitar slider si está cargando, hay error o no hay duración
           />
           <span className="time-duration">{formatTime(duration)}</span>
         </div>

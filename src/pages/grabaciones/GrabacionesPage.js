@@ -77,15 +77,13 @@ const GrabacionesPage = () => {
 
   return (
     <div className="grabaciones-container">
-      {/* Panel de control (se mantiene en su Card actual) */}
       <Card title="Configuración de grabación" className="config-card">
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            flexWrap:
-              "wrap" /* Permite que los elementos se envuelvan en móviles */,
+            flexWrap: "wrap",
             gap: "1rem",
           }}
         >
@@ -111,7 +109,6 @@ const GrabacionesPage = () => {
         </div>
       </Card>
 
-      {/* NUEVO: Contenedor para el control de volumen global */}
       <Card className="global-volume-card">
         <div className="global-volume-controls">
           <i className="pi pi-volume-up global-volume-icon" />
@@ -127,7 +124,6 @@ const GrabacionesPage = () => {
         </div>
       </Card>
 
-      {/* NUEVO: Card para "Programas Grabados" */}
       <Card title="Programas Grabados" className="grabaciones-list-card">
         {grabaciones.length === 0 ? (
           <p>No hay grabaciones disponibles.</p>
@@ -139,15 +135,17 @@ const GrabacionesPage = () => {
                 {grupo.archivos.map((archivo, idx) => (
                   <li key={idx} className="grabaciones-item">
                     <AudioPlayer
-                      title={archivo}
+                      // CAMBIO: Ahora archivo es un objeto, no solo un string
+                      title={archivo.titulo}
+                      artist={archivo.artista} // NUEVO PROP
                       src={`https://zetamini.ddns.net/grabaciones/${grupo.fecha.replace(
                         /-/g,
                         "/"
-                      )}/${archivo}`}
-                      // PASAMOS EL VOLUMEN GLOBAL Y EL MANEJADOR DE PLAY
+                      )}/${archivo.nombreArchivo}`} // USAMOS nombreArchivo
                       globalVolume={globalVolume}
                       onPlay={handlePlay}
-                      // También podrías pasar el activeAudioRef para que el player sepa si es el activo
+                      // Si la duración ya viene del backend, la puedes pasar aquí
+                      // durationFromBackend={archivo.duracion_segundos}
                       isActive={
                         activeAudioRef &&
                         activeAudioRef.current &&
@@ -155,7 +153,7 @@ const GrabacionesPage = () => {
                           `https://zetamini.ddns.net/grabaciones/${grupo.fecha.replace(
                             /-/g,
                             "/"
-                          )}/${archivo}`
+                          )}/${archivo.nombreArchivo}`
                       }
                     />
                   </li>
