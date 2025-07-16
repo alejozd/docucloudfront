@@ -1,0 +1,66 @@
+/* src/styles/AudioPlayer.css */
+
+.audio-player-card {
+  padding: 1rem;
+  border: 1px solid var(--surface-d); /* Usar variables de PrimeReact */
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+  background-color: var(--surface-b);
+  box-shadow: var(--shadow-2);
+}
+
+.audio-player-card h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.controls-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem; /* Espacio entre botones */
+  margin-bottom: 1rem;
+}
+
+.progress-row,
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Espacio entre elementos */
+  margin-bottom: 0.5rem;
+}
+
+.progress-row span,
+.volume-row span {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  min-width: 45px; /* Para alinear el tiempo */
+  text-align: center;
+}
+
+.audio-progress-slider,
+.audio-volume-slider {
+  flex-grow: 1;
+}
+
+/* Ajustes para los sliders de PrimeReact */
+.p-slider .p-slider-handle {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: -0.6rem;
+  box-shadow: var(--shadow-1);
+}
+
+.p-slider-horizontal .p-slider-range {
+  background: var(--primary-color);
+}
+
+.p-button-rounded {
+  width: 2.5rem; /* Asegura que los botones sean redondos */
+  height: 2.5rem;
+}
+
+/* Opcional: para p-mr-2, si no usas Tailwind o una librería similar, define tus propios márgenes */
+.p-mr-2 {
+    margin-right: 0.5rem;
+}

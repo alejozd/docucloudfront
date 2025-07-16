@@ -3,6 +3,7 @@ import axios from "axios";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import "../../styles/GrabacionesPage.css"; // Opcional: estilos personalizados
+import AudioPlayer from "../../components/audio/AudioPlayer"; // Importa el nuevo componente
 
 const GrabacionesPage = () => {
   const [grabaciones, setGrabaciones] = useState([]);
@@ -94,18 +95,13 @@ const GrabacionesPage = () => {
             <ul className="grabaciones-lista">
               {grupo.archivos.map((archivo, idx) => (
                 <li key={idx} className="grabaciones-item">
-                  <strong>{archivo}</strong>
-                  <audio
-                    className="grabaciones-audio"
-                    controls
-                    src={`https://zetamini.ddns.net/grabaciones/ ${grupo.fecha.replace(
+                  <AudioPlayer
+                    title={archivo}
+                    src={`https://zetamini.ddns.net/grabaciones/${grupo.fecha.replace(
                       /-/g,
                       "/"
                     )}/${archivo}`}
-                    style={{ width: "100%", marginTop: "1rem" }}
-                  >
-                    Tu navegador no soporta este formato de audio.
-                  </audio>
+                  />
                 </li>
               ))}
             </ul>
