@@ -12,6 +12,8 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const formatTime = (time) => {
     if (isNaN(time)) return "00:00";
@@ -25,6 +27,8 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
   const onLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      setIsLoading(false); // La metadata se ha cargado, ya no está cargando
+      setError(null); // Limpiar cualquier error previo
     }
   }, []);
 
@@ -39,6 +43,12 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
     setCurrentTime(0);
   }, []);
 
+  const onError = useCallback(() => {
+    setError("No se pudo cargar o reproducir el audio.");
+    setIsLoading(false);
+    setIsPlaying(false);
+  }, []);
+
   // Efecto para aplicar el volumen global cuando el componente carga o el volumen global cambia
   useEffect(() => {
     if (audioRef.current) {
@@ -50,17 +60,33 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
   useEffect(() => {
     const audioEl = audioRef.current;
     if (audioEl) {
+      // Resetear estados al cambiar el src
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setIsLoading(true); // Indicar que está cargando el nuevo src
+      setError(null); // Limpiar errores al cargar un nuevo src
+
       audioEl.addEventListener("loadedmetadata", onLoadedMetadata);
       audioEl.addEventListener("timeupdate", onTimeUpdate);
       audioEl.addEventListener("ended", onEnded);
+      audioEl.addEventListener("error", onError); // Escuchador de errores
+
+      // Manejar el evento 'canplaythrough' para indicar que el audio está listo para reproducirse sin interrupciones
+      const handleCanPlayThrough = () => {
+        setIsLoading(false);
+      };
+      audioEl.addEventListener("canplaythrough", handleCanPlayThrough);
 
       return () => {
         audioEl.removeEventListener("loadedmetadata", onLoadedMetadata);
         audioEl.removeEventListener("timeupdate", onTimeUpdate);
         audioEl.removeEventListener("ended", onEnded);
+        audioEl.removeEventListener("error", onError);
+        audioEl.removeEventListener("canplaythrough", handleCanPlayThrough);
       };
     }
-  }, [onLoadedMetadata, onTimeUpdate, onEnded]);
+  }, [src, onLoadedMetadata, onTimeUpdate, onEnded, onError]);
 
   const togglePlayPause = () => {
     if (audioRef.current) {
@@ -71,9 +97,16 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
         onPlay(audioRef);
         audioRef.current
           .play()
-          .catch((e) => console.error("Error al reproducir:", e));
+          .then(() => {
+            setIsPlaying(true);
+            setError(null); // Limpiar error si la reproducción es exitosa
+          })
+          .catch((e) => {
+            console.error("Error al reproducir:", e);
+            setError("No se pudo reproducir el audio.");
+            setIsPlaying(false);
+          });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -91,13 +124,15 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
 
   return (
     <div className={`custom-audio-player ${isActive ? "is-active" : ""}`}>
-      {" "}
-      {/* Añade clase 'is-active' */}
       <audio ref={audioRef} src={src} preload="metadata" />
       <div className="player-info-controls">
         <div className="player-meta">
           <div className="song-details">
             <span className="song-title">{title}</span>
+            {isLoading && (
+              <span className="loading-indicator">Cargando...</span>
+            )}
+            {error && <span className="error-message">{error}</span>}
           </div>
         </div>
 
@@ -107,6 +142,7 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
             className="p-button-rounded p-button-lg p-button-text p-button-secondary play-pause-btn"
             onClick={togglePlayPause}
             aria-label={isPlaying ? "Pausar" : "Reproducir"}
+            disabled={isLoading || error} // Deshabilitar botones si está cargando o hay un error
           />
           <Button
             icon="pi pi-stop"
@@ -119,6 +155,7 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
               }
             }}
             aria-label="Detener"
+            disabled={isLoading || error} // Deshabilitar botones si está cargando o hay un error
           />
         </div>
 
@@ -133,12 +170,10 @@ const AudioPlayer = ({ src, title, globalVolume, onPlay, isActive }) => {
             max={duration}
             step={1}
             className="audio-progress-slider p-component"
+            disabled={isLoading || error || duration === 0} // Deshabilitar slider si está cargando, hay error o no hay duración
           />
           <span className="time-duration">{formatTime(duration)}</span>
         </div>
-
-        {/* ELIMINAMOS EL CONTROL DE VOLUMEN DE AQUÍ */}
-        {/* <div className="volume-control-container"> ... </div> */}
       </div>
     </div>
   );
