@@ -208,39 +208,80 @@
 @media (max-width: 767px) {
   .video-controls-overlay {
     padding: 0.6rem 0.8rem;
+    /* Por defecto, hacemos que el overlay sea más sutil o completamente transparente si no está activo */
+    opacity: 0; /* Oculta el overlay por defecto, se mostrará al activar */
+    pointer-events: none; /* Deshabilita clics en el overlay cuando está oculto */
+    transition: opacity 0.3s ease-in-out;
   }
 
-  /* Estos ya no aplican al mover los metadatos */
-  /* .video-metadata { margin-bottom: 0.3rem; } */
-  /* .video-title { font-size: 0.9rem; } */
-  /* .video-artist-info { font-size: 0.7rem; } */
-
-  .video-metadata-below-player { /* Ajusta el padding para móviles si es necesario */
-    padding: 0.8rem 0.8rem 0.4rem 0.8rem;
-  }
-  .video-title-below {
-    font-size: 1rem;
-  }
-  .video-artist-info-below {
-    font-size: 0.75rem;
+  /* Cuando el overlay tiene la clase 'active-controls', lo mostramos completamente */
+  .video-controls-overlay.active-controls {
+    opacity: 1;
+    pointer-events: auto; /* Habilita clics cuando está visible */
   }
 
-
+  /* REORGANIZACIÓN DE CONTROLES EN MÓVILES */
   .controls-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
+    display: flex; /* Asegura que controls-row es flexbox */
+    flex-direction: row; /* Los botones principales en fila */
+    justify-content: space-between; /* Espacia los botones de play/pause y fullscreen */
+    align-items: center;
+    gap: 0; /* No necesitamos gap entre los dos elementos principales */
     width: 100%;
+    /* Añadimos un flex-wrap para que los elementos que se muestren luego puedan ir debajo */
+    flex-wrap: wrap; /* Importante para que los sliders aparezcan en una nueva línea cuando se muestren */
   }
 
+  /* Ocultar barra de progreso y volumen por defecto en móviles */
   .video-progress-area,
   .video-volume-controls {
-    width: 100%;
-    justify-content: flex-start;
+    display: none; /* Oculta estos elementos por defecto en móviles */
+    width: 100%; /* Asegura que tomen todo el ancho cuando se muestren */
+  }
+
+  /* Mostrar barra de progreso y volumen cuando el overlay está activo */
+  .video-controls-overlay.active-controls .video-progress-area,
+  .video-controls-overlay.active-controls .video-volume-controls {
+    display: flex; /* Muestra estos elementos cuando el overlay es 'active-controls' */
+    /* Puedes añadir un delay o animación si quieres, ej: transition-delay: 0.1s; */
+  }
+
+  /* Aseguramos el orden de los elementos cuando están visibles */
+  .video-play-pause-btn { order: 1; }
+  .video-fullscreen-btn { order: 2; }
+  .video-progress-area { order: 3; margin-top: 0.8rem; } /* Espacio entre los botones y la barra de progreso */
+  .video-volume-controls { order: 4; margin-top: 0.4rem; } /* Espacio entre la barra de progreso y el volumen */
+
+
+  /* Ajustes de tamaño de botones en móvil */
+  .video-play-pause-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem !important;
+  }
+
+  .video-volume-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.9rem !important;
   }
 
   .video-fullscreen-btn {
-    align-self: flex-end;
-    margin-top: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem !important;
   }
+
+  .time-current,
+  .time-duration {
+    font-size: 0.65rem;
+    min-width: 30px;
+  }
+
+  .video-volume-slider {
+    width: 60px; /* Ancho fijo para el slider de volumen en móvil, ajusta si es necesario */
+    flex-grow: 0;
+  }
+
+  /* ... (mantén los estilos de .video-metadata-below-player y .video-title-below, .video-artist-info-below) ... */
 }
