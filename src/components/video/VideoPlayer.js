@@ -16,6 +16,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false); // Estado para el modo pantalla completa nativo
   const [displayBasic, setDisplayBasic] = useState(false); // Estado para el Dialog de PrimeReact (para flotante)
+  const [showFullControls, setShowFullControls] = useState(false);
 
   const formatTime = (time) => {
     if (isNaN(time) || time < 0) return "00:00"; // Manejar valores negativos o NaN
@@ -141,26 +142,41 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
     }
   }, [src, duration, onLoadedMetadata, onTimeUpdate, onEnded]);
 
+  // Función para manejar el clic en el overlay o en el video
+  const handleVideoInteraction = () => {
+    setShowFullControls((prev) => !prev); // Alterna la visibilidad de los controles
+  };
+
   return (
     <Card className="video-player-card">
-      <div className="video-player-container">
-        {/* Usamos controls={false} para tener controles personalizados */}
+      <div className="video-player-container" onClick={handleVideoInteraction}>
+        {" "}
+        {/* Añadir onClick aquí */}
         <video
           ref={videoRef}
           src={src}
           preload="metadata"
           className="video-display"
         />
-
-        <div className="video-controls-overlay">
+        {/* Añadir la clase 'active-controls' condicionalmente para mostrar/ocultar */}
+        <div
+          className={`video-controls-overlay ${
+            showFullControls ? "active-controls" : ""
+          }`}
+        >
           <div className="controls-row">
+            {/* Botón Play/Pause (siempre visible) */}
             <Button
               icon={isPlaying ? "pi pi-pause" : "pi pi-play"}
               className="p-button-rounded p-button-lg p-button-text p-button-secondary video-play-pause-btn"
-              onClick={togglePlayPause}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayPause();
+              }} // Detener propagación para no ocultar controles
               aria-label={isPlaying ? "Pausar" : "Reproducir"}
             />
 
+            {/* Barra de Progreso (visible solo en 'active-controls' en móvil) */}
             <div className="video-progress-area">
               <span className="time-current">{formatTime(currentTime)}</span>
               <Slider
@@ -177,6 +193,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
               <span className="time-duration">{formatTime(videoDuration)}</span>
             </div>
 
+            {/* Controles de Volumen (visible solo en 'active-controls' en móvil) */}
             <div className="video-volume-controls">
               <Button
                 icon={
@@ -185,7 +202,10 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
                     : "pi pi-volume-up"
                 }
                 className="p-button-rounded p-button-sm p-button-text p-button-secondary video-volume-btn"
-                onClick={toggleMute}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMute();
+                }} // Detener propagación
                 aria-label={isMuted ? "Activar sonido" : "Silenciar"}
               />
               <Slider
@@ -198,12 +218,16 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
               />
             </div>
 
+            {/* Botón Fullscreen (siempre visible) */}
             <Button
               icon={
                 isFullScreen ? "pi pi-window-minimize" : "pi pi-window-maximize"
               }
               className="p-button-rounded p-button-sm p-button-text p-button-secondary video-fullscreen-btn"
-              onClick={toggleFullScreen}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullScreen();
+              }} // Detener propagación
               aria-label={
                 isFullScreen
                   ? "Salir de pantalla completa"
@@ -233,7 +257,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
         style={{ width: "90vw", height: "90vh" }}
         onHide={() => {
           setDisplayBasic(false);
-          if (videoRef.current && isPlaying) videoRef.current.pause(); // Pausar al cerrar si estaba reproduciendo
+          if (videoRef.current && isPlaying) videoRef.current.pause();
         }}
         contentClassName="dialog-video-content"
         modal
@@ -241,8 +265,8 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
       >
         <video
           src={src}
-          autoPlay={isPlaying} // Auto-play si ya estaba reproduciendo
-          controls // Aquí sí mostramos los controles nativos del navegador
+          autoPlay={isPlaying}
+          controls
           style={{
             width: "100%",
             height: "100%",
@@ -252,8 +276,6 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
           onEnded={onEnded}
           onLoadedMetadata={onLoadedMetadata}
           onTimeUpdate={onTimeUpdate}
-          // Podemos también pasar el ref si queremos sincronizar estados con el player principal
-          // Aunque para este modo, los controles nativos son suficientes.
         />
       </Dialog>
     </Card>
