@@ -13,6 +13,7 @@ import WorkTimeCalculator from "./pages/tools/WorkTimeCalculator";
 import RegistroSolicitudesPage from "./pages/RegistroSolicitudesPage";
 import BatteryStatus from "./pages/tools/BatteryStatus";
 import GrabacionesPage from "./pages/grabaciones/GrabacionesPage";
+import VideosPage from "./pages/videos/VideosPage";
 import SalesDashboard from "./pages/SalesDashboard";
 import ProtectedRoute from "././components/features/ProtectedRoute";
 import ClientesMedios from "./pages/protected/ClientesMedios";
@@ -112,6 +113,7 @@ function App() {
             />
             <Route path="/BatteryStatus" element={<BatteryStatus />} />
             <Route path="/GrabacionesPage" element={<GrabacionesPage />} />
+            <Route path="/VideosPage" element={<VideosPage />} />
             <Route path="/SalesDashboard" element={<SalesDashboard />} />
             {/* Rutas de microservicios */}
             <Route path="/Usuarios" element={<Usuarios />} />

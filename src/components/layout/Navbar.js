@@ -106,10 +106,16 @@ const Navbar = () => {
           id: "BatteryStatus",
         },
         {
-          label: "Grabaciones de Radio",
+          label: "Audios de Radio",
           icon: "pi pi-microphone",
           url: "/GrabacionesPage",
           id: "GrabacionesPage",
+        },
+        {
+          label: "Videos",
+          icon: "pi pi-video",
+          url: "/VideosPage",
+          id: "VideosPage",
         },
       ],
     },
