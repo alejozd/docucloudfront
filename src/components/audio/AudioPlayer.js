@@ -99,6 +99,7 @@ const AudioPlayer = ({
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
         // Notifica a la página principal que este audio ha comenzado a reproducirse
         onPlay(audioRef);
