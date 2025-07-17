@@ -1,0 +1,66 @@
+/* src/styles/VideosPage.css */
+
+.videos-container {
+  max-width: 1200px;
+  margin: 2rem auto; /* Centra el contenedor con margen superior e inferior */
+  padding: 0 1rem; /* Padding a los lados para pantallas pequeñas */
+}
+
+.videos-list-card {
+  margin-bottom: 2rem;
+  background-color: var(--surface-card); /* Usa la variable de PrimeReact para el fondo de la tarjeta */
+  border-radius: var(--border-radius); /* Bordes redondeados */
+  box-shadow: var(--shadow-2); /* Sombra suave */
+  padding-bottom: 1.5rem; /* Espacio en la parte inferior de la tarjeta */
+}
+
+.videos-list-card .p-card-title {
+  font-size: 1.8rem;
+  text-align: center;
+  color: var(--primary-color); /* Color principal de PrimeReact para el título */
+  margin-bottom: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.videos-list-card .p-card-content {
+  padding-top: 0;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.videos-grid {
+  display: grid;
+  /* Crea una cuadrícula con columnas que se ajustan automáticamente.
+     Cada columna tendrá un mínimo de 300px y ocupará el espacio equitativamente (1fr) */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem; /* Espacio entre los reproductores de video */
+  justify-content: center; /* Centra los elementos si no llenan toda la fila */
+}
+
+/* Mensajes de carga, error y "no videos" */
+.loading-message,
+.error-message,
+.no-videos-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--text-color-secondary); /* Color de texto secundario de PrimeReact */
+  margin-top: 3rem;
+}
+.error-message {
+  color: var(--red-500); /* Color rojo para mensajes de error */
+}
+
+/* Responsive: Ajustes para pantallas más pequeñas (ej. móviles) */
+@media (max-width: 767px) {
+  .videos-container {
+    padding: 0 0.8rem; /* Reduce el padding lateral en móviles */
+  }
+
+  .videos-list-card .p-card-title {
+    font-size: 1.5rem; /* Reduce el tamaño del título */
+  }
+
+  .videos-grid {
+    gap: 1rem; /* Reduce el espacio entre videos */
+  }
+}

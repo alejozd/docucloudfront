@@ -1,0 +1,228 @@
+/* src/styles/VideoPlayer.css */
+
+.video-player-card {
+  background-color: var(--surface-0); /* Fondo blanco para cada reproductor individual (tarjeta) */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-1); /* Sombra ligera para diferenciarlo */
+  border: 1px solid var(--surface-border); /* Borde sutil */
+  transition: box-shadow 0.2s, border-color 0.2s; /* Transición suave para efectos hover */
+  padding: 0 !important; /* Elimina padding por defecto de Card para controlar el diseño interno */
+  overflow: hidden; /* Asegura que el video y controles no se desborden */
+  display: flex; /* Asegura que la tarjeta se comporte bien con flex */
+  flex-direction: column; /* Apila el contenido verticalmente si es necesario */
+}
+
+.video-player-card .p-card-body {
+  padding: 0; /* Elimina padding del body de Card para controlar el diseño interno */
+}
+
+.video-player-card:hover {
+  box-shadow: var(--shadow-2); /* Sombra más pronunciada al pasar el ratón */
+  border-color: var(--primary-color); /* Borde con color principal al pasar el ratón */
+}
+
+.video-player-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* Relación de aspecto 16:9 (altura / ancho * 100). Esto mantiene el contenedor del video a la proporción correcta */
+  background-color: black; /* Fondo negro para el área del video cuando no hay contenido */
+  border-radius: var(--border-radius); /* Hereda el redondeo del padre */
+  overflow: hidden; /* Oculta cualquier parte del video que se desborde */
+}
+
+.video-display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Asegura que el video se ajuste dentro de su contenedor sin recortarse, manteniendo su relación de aspecto. Añade barras negras si es necesario (letterboxing) */
+  background-color: black; /* Fondo negro detrás del video */
+}
+
+.video-controls-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Degradado para que los controles resalten sobre el video */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+  padding: 0.8rem 1rem;
+  box-sizing: border-box; /* Incluye padding en el ancho */
+  color: white; /* Color de texto por defecto para los controles */
+  opacity: 1; /* Siempre visible por ahora, puedes añadir lógica de fade-out en hover */
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Opcional: Estilos para ocultar controles cuando el ratón no está sobre el video */
+/*
+.video-player-container:not(:hover) .video-controls-overlay {
+    opacity: 0;
+}
+*/
+
+.video-metadata {
+  margin-bottom: 0.5rem; /* Espacio debajo de la información del video */
+  padding-left: 0.2rem; /* Pequeño ajuste para alinear con botones */
+}
+
+.video-title {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap; /* Evita que el título se rompa en varias líneas */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade puntos suspensivos si el título es demasiado largo */
+  color: white;
+}
+
+.video-artist-info {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7); /* Color más tenue para la información adicional */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem; /* Espacio entre los grupos de controles */
+  flex-wrap: wrap; /* Permite que los controles se envuelvan a la siguiente línea en pantallas pequeñas */
+}
+
+/* Estilos base para los botones de PrimeReact en el reproductor de video */
+.controls-row .p-button-text.p-button-secondary {
+  background-color: transparent !important; /* Fondo transparente */
+  color: white !important; /* Iconos blancos sobre fondo oscuro */
+  border: none !important; /* Sin borde */
+  box-shadow: none !important; /* Sin sombra */
+  transition: color 0.2s, background-color 0.2s; /* Transición suave al pasar el ratón */
+  padding: 0.5rem; /* Ajuste del padding para el tamaño del botón */
+}
+
+.controls-row .p-button-text.p-button-secondary:hover {
+  color: var(--primary-color) !important; /* Cambia al color principal al pasar el ratón */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Fondo sutil al pasar el ratón */
+}
+
+.video-play-pause-btn {
+  width: 2.5rem; /* Tamaño del botón de play/pause */
+  height: 2.5rem;
+  font-size: 1.2rem !important; /* Tamaño del icono */
+  flex-shrink: 0; /* Evita que se encoja */
+}
+
+.video-progress-area {
+  display: flex;
+  flex-grow: 1; /* Permite que la barra de progreso ocupe el espacio restante */
+  align-items: center;
+  gap: 0.5rem; /* Espacio entre los tiempos y el slider */
+  min-width: 150px; /* Ancho mínimo para que se vea bien la barra */
+}
+
+.video-progress-slider {
+  flex-grow: 1; /* El slider ocupa el espacio restante */
+}
+
+.time-current,
+.time-duration {
+  font-family: monospace; /* Fuente de ancho fijo para los tiempos */
+  font-size: 0.75rem;
+  color: white;
+  min-width: 35px; /* Asegura un ancho mínimo para que el tiempo no salte */
+  text-align: center;
+  flex-shrink: 0; /* Evita que el texto de tiempo se encoja */
+}
+
+.video-volume-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100px; /* Ancho fijo para el control de volumen */
+  flex-shrink: 0;
+}
+
+.video-volume-btn {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem !important;
+  flex-shrink: 0;
+}
+
+.video-volume-slider {
+  flex-grow: 1; /* El slider de volumen ocupa el espacio restante en su grupo */
+}
+
+.video-fullscreen-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1rem !important;
+  flex-shrink: 0;
+}
+
+/* --- Estilos PrimeReact para Sliders dentro del VideoPlayer --- */
+.video-progress-slider .p-slider-handle,
+.video-volume-slider .p-slider-handle {
+  width: 0.9rem; /* Tamaño del "pulgar" del slider */
+  height: 0.9rem;
+  margin-top: -0.45rem; /* Ajuste vertical para centrar el handle */
+  border: 2px solid var(--primary-color); /* Borde con el color principal de PrimeReact */
+  background: white; /* Color del handle */
+  box-shadow: var(--shadow-1);
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.video-progress-slider .p-slider-handle:hover,
+.video-volume-slider .p-slider-handle:hover {
+  background-color: var(--primary-hover-color);
+  border-color: var(--primary-hover-color);
+}
+
+.video-progress-slider .p-slider-range,
+.video-volume-slider .p-slider-range {
+  background: var(--primary-color); /* Color de la parte "rellena" del slider */
+}
+
+.video-progress-slider .p-slider-track,
+.video-volume-slider .p-slider-track {
+  background: rgba(255, 255, 255, 0.3); /* Color de la barra de track (fondo) */
+  height: 4px; /* Altura de la barra del slider */
+}
+
+
+/* Responsive: Ajustes para pantallas más pequeñas (ej. móviles) */
+@media (max-width: 767px) {
+  .video-controls-overlay {
+    padding: 0.6rem 0.8rem; /* Reduce el padding en móviles */
+  }
+
+  .video-metadata {
+    margin-bottom: 0.3rem;
+  }
+
+  .video-title {
+    font-size: 0.9rem;
+  }
+
+  .video-artist-info {
+    font-size: 0.7rem;
+  }
+
+  .controls-row {
+    flex-direction: column; /* Apila los grupos de controles verticalmente */
+    align-items: flex-start; /* Alinea los ítems al inicio */
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .video-progress-area,
+  .video-volume-controls {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    justify-content: flex-start; /* Alinea a la izquierda */
+  }
+
+  .video-fullscreen-btn {
+    align-self: flex-end; /* Alinea el botón de pantalla completa a la derecha en móviles */
+    margin-top: 0.5rem; /* Espacio extra encima */
+  }
+}
