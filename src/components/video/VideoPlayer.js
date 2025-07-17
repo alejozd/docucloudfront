@@ -153,17 +153,6 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
         />
 
         <div className="video-controls-overlay">
-          <div className="video-metadata">
-            <div className="video-title">{title || "Video sin Título"}</div>
-            <div className="video-artist-info">
-              {artist && <span>{artist}</span>}
-              {year && artist && <span> &bull; </span>}
-              {year && <span>{year}</span>}
-              {genre && (artist || year) && <span> &bull; </span>}
-              {genre && <span>{genre}</span>}
-            </div>
-          </div>
-
           <div className="controls-row">
             <Button
               icon={isPlaying ? "pi pi-pause" : "pi pi-play"}
@@ -222,6 +211,18 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
               }
             />
           </div>
+        </div>
+      </div>
+
+      {/* AQUÍ ES DONDE DEBE IR LA INFORMACIÓN, FUERA DEL video-player-container */}
+      <div className="video-metadata-below-player">
+        <div className="video-title-below">{title || "Video sin Título"}</div>
+        <div className="video-artist-info-below">
+          {artist && <span>{artist}</span>}
+          {year && artist && <span> &bull; </span>}
+          {year && <span>{year}</span>}
+          {genre && (artist || year) && <span> &bull; </span>}
+          {genre && <span>{genre}</span>}
         </div>
       </div>
 
