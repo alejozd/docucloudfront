@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { PrimeReactProvider } from "primereact/api";
 import "././styles/index.css";
 import App from "./App";
 import reportWebVitals from "././misc/reportWebVitals";
@@ -7,7 +8,9 @@ import reportWebVitals from "././misc/reportWebVitals";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <PrimeReactProvider>
+      <App />
+    </PrimeReactProvider>
   </React.StrictMode>
 );
 
