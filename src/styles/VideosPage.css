@@ -1,66 +1,142 @@
 /* src/styles/VideosPage.css */
 
 .videos-container {
-  max-width: 1200px;
-  margin: 2rem auto; /* Centra el contenedor con margen superior e inferior */
-  padding: 0 1rem; /* Padding a los lados para pantallas pequeñas */
+    max-width: 1200px;
+    margin: 2rem auto; /* Centra el contenedor con margen superior e inferior */
+    padding: 0 1rem; /* Padding a los lados para pantallas pequeñas */
 }
 
-.videos-list-card {
-  margin-bottom: 2rem;
-  background-color: var(--surface-card); /* Usa la variable de PrimeReact para el fondo de la tarjeta */
-  border-radius: var(--border-radius); /* Bordes redondeados */
-  box-shadow: var(--shadow-2); /* Sombra suave */
-  padding-bottom: 1.5rem; /* Espacio en la parte inferior de la tarjeta */
+/* Estilos para las tarjetas de cada categoría cuando se muestran múltiples o la seleccionada */
+.videos-list-card, /* Mantén este para el estilo base si usas la opción de mostrar todas */
+.videos-category-card { /* Nuevo para la tarjeta de la categoría seleccionada */
+    margin-bottom: 2rem;
+    background-color: var(--surface-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-2);
+    padding-bottom: 1.5rem;
 }
 
-.videos-list-card .p-card-title {
-  font-size: 1.8rem;
-  text-align: center;
-  color: var(--primary-color); /* Color principal de PrimeReact para el título */
-  margin-bottom: 1.5rem;
-  padding-top: 1.5rem;
+.videos-list-card .p-card-title,
+.videos-category-card .p-card-title {
+    font-size: 1.8rem;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-top: 1.5rem;
 }
 
-.videos-list-card .p-card-content {
-  padding-top: 0;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+.videos-list-card .p-card-content,
+.videos-category-card .p-card-content {
+    padding-top: 0;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
 
-.videos-grid {
-  display: grid;
-  /* Crea una cuadrícula con columnas que se ajustan automáticamente.
-     Cada columna tendrá un mínimo de 300px y ocupará el espacio equitativamente (1fr) */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem; /* Espacio entre los reproductores de video */
-  justify-content: center; /* Centra los elementos si no llenan toda la fila */
+/* Estilos para DataView (reemplaza o complementa .videos-grid) */
+/* DataView ya maneja su propia estructura de grid/list, pero puedes ajustarla */
+.p-dataview-content .p-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Ejemplo para grid responsive */
+    gap: 1.5rem;
+    justify-content: center;
 }
+
+/* Puedes sobrescribir estilos de DataView para tu VideoPlayer */
+.p-dataview-content .p-col-12 { /* En modo lista, cada item es una columna completa */
+    width: 100%;
+}
+.p-dataview-content .p-dataview-grid .p-col-12 { /* En modo grid, si usas PrimeFlex, puedes definir tamaños */
+    /* Este es solo un ejemplo, DataView tiene su propia lógica de grid basada en layout */
+    /* Asegúrate de que tu VideoPlayer se adapte bien dentro de estos contenedores */
+}
+
+
+/* Estilos para la selección de categorías (Chips/Dropdown) */
+.category-selection-container {
+    margin-bottom: 2rem;
+    text-align: center; /* Centrar el título y los chips */
+}
+
+.category-selection-container h2 {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: nowrap; /* Evita que los chips salten de línea */
+    gap: 0.5rem; /* Espacio entre los chips */
+    justify-content: center; /* Centra los chips horizontalmente */
+    padding: 0.5rem 0; /* Espacio arriba y abajo para el scrollpanel */
+}
+
+.categories-scroll-panel {
+    height: 70px; /* Altura fija para el scroll horizontal */
+    padding-bottom: 10px; /* Asegura espacio para la barra de scroll */
+}
+
+/* Estilos para el chip seleccionado */
+.p-chip-selected {
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+    font-weight: bold;
+    border: 1px solid var(--primary-color);
+}
+/* Asegurarse de que el chip tenga un estilo de hover/click */
+.p-chip {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid var(--surface-border);
+}
+.p-chip:hover {
+    background-color: var(--surface-200);
+}
+.p-chip-selected:hover {
+    background-color: var(--primary-hover-color); /* Un color de hover para el seleccionado */
+}
+
 
 /* Mensajes de carga, error y "no videos" */
 .loading-message,
 .error-message,
 .no-videos-message {
-  text-align: center;
-  font-size: 1.2rem;
-  color: var(--text-color-secondary); /* Color de texto secundario de PrimeReact */
-  margin-top: 3rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--text-color-secondary);
+    margin-top: 3rem;
 }
 .error-message {
-  color: var(--red-500); /* Color rojo para mensajes de error */
+    color: var(--red-500);
 }
 
 /* Responsive: Ajustes para pantallas más pequeñas (ej. móviles) */
 @media (max-width: 767px) {
-  .videos-container {
-    padding: 0 0.8rem; /* Reduce el padding lateral en móviles */
-  }
+    .videos-container {
+        padding: 0 0.8rem;
+    }
 
-  .videos-list-card .p-card-title {
-    font-size: 1.5rem; /* Reduce el tamaño del título */
-  }
+    .videos-list-card .p-card-title,
+    .videos-category-card .p-card-title {
+        font-size: 1.5rem;
+    }
 
-  .videos-grid {
-    gap: 1rem; /* Reduce el espacio entre videos */
-  }
+    /* Ajustes para la cuadrícula en móviles */
+    .p-dataview-content .p-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Más pequeño en móviles */
+        gap: 1rem;
+    }
+
+    .category-selection-container h2 {
+        font-size: 1.7rem;
+    }
+
+    .chips-container {
+        justify-content: flex-start; /* Alinea a la izquierda para scroll horizontal más claro */
+    }
 }
+
+/* PrimeFlex Utilities (opcional pero muy útil) */
+/* Si usas PrimeFlex, puedes añadir sus clases para espaciado y flexbox: */
+/* .flex, .justify-content-end, .align-items-center, .mr-2, .my-2, .mt-4, .w-full, .md:w-14rem */
+/* Asegúrate de tenerlo importado en tu proyecto si usas estas clases. */
