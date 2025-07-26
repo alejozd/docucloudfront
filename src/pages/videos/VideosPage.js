@@ -5,6 +5,7 @@ import { Card } from "primereact/card";
 import { Chip } from "primereact/chip"; // Para los chips de categoría
 import { ScrollPanel } from "primereact/scrollpanel"; // Para scroll horizontal si hay muchas categorías
 import { DataView, DataViewLayoutOptions } from "primereact/dataview"; // Para mostrar los videos de forma flexible
+import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown"; // Opcional: si prefieres un dropdown para seleccionar categoría
 import VideoPlayer from "../../components/video/VideoPlayer";
 import "../../styles/VideosPage.css"; // Estilos para esta página
@@ -51,7 +52,15 @@ const VideosPage = () => {
     fetchVideos();
   }, []);
 
-  if (loading) return <div className="loading-message">Cargando videos...</div>;
+  if (loading) {
+    return (
+      <div className="loader-container">
+        <ProgressSpinner strokeWidth="4" animationDuration=".8s" />
+        <p>Cargando videos...</p>
+      </div>
+    );
+  }
+
   if (error) return <div className="error-message">{error}</div>;
 
   const folderNames = Object.keys(groupedVideos);
