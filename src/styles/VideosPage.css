@@ -136,6 +136,23 @@
     }
 }
 
+.loader-container {
+    display: flex;
+    flex-direction: column; /* Apila el spinner y el texto */
+    align-items: center; /* Centra horizontalmente */
+    justify-content: center; /* Centra verticalmente */
+    height: 60vh; /* Ocupa una buena parte de la altura de la vista */
+    color: var(--text-color-secondary); /* Color del texto de carga */
+    font-size: 1.2rem;
+}
+
+.loader-container .p-progressspinner {
+    width: 60px; /* Tamaño del spinner */
+    height: 60px;
+    margin-bottom: 1rem; /* Espacio entre el spinner y el texto */
+    color: var(--primary-color); /* Color del spinner, si no se especifica en el componente */
+}
+
 /* PrimeFlex Utilities (opcional pero muy útil) */
 /* Si usas PrimeFlex, puedes añadir sus clases para espaciado y flexbox: */
 /* .flex, .justify-content-end, .align-items-center, .mr-2, .my-2, .mt-4, .w-full, .md:w-14rem */
