@@ -94,13 +94,13 @@ const Navbar = () => {
       icon: "pi pi-cog",
       items: [
         {
-          label: "WorkTimeCalculator",
+          label: "Calculador de Horas",
           icon: "pi pi-calculator",
           url: "/WorkTimeCalculator",
           id: "WorkTimeCalculator",
         },
         {
-          label: "BatteryStatus",
+          label: "Estado de Bateria",
           icon: "pi pi-battery pi-bolt",
           url: "/BatteryStatus",
           id: "BatteryStatus",
@@ -120,7 +120,7 @@ const Navbar = () => {
       ],
     },
     {
-      label: "RegistroSolicitudespage",
+      label: "Registro-Solicitudes",
       icon: "pi pi-list",
       url: "/RegistroSolicitudespage",
       id: "RegistroSolicitudespage",
