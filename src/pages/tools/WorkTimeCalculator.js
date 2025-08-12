@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import dayjs from "dayjs";
 
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
@@ -9,6 +10,11 @@ import { Toast } from "primereact/toast";
 
 import "primeicons/primeicons.css";
 import "../../styles/WorkTimeCalculator.css";
+
+// Helper para validar si es un objeto dayjs válido
+const isValidDayjs = (value) => {
+  return value && dayjs.isDayjs(value) && value.isValid();
+};
 
 export default function WorkTimeCalculator() {
   const [entryTime, setEntryTime] = useState(null);
@@ -23,34 +29,52 @@ export default function WorkTimeCalculator() {
 
   // Cargar desde localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("workHours");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setEntryTime(parsed.entryTime ? new Date(parsed.entryTime) : null);
-      setLunchOutTime(
-        parsed.lunchOutTime ? new Date(parsed.lunchOutTime) : null
-      );
-      setLunchInTime(parsed.lunchInTime ? new Date(parsed.lunchInTime) : null);
-      setExitTime(parsed.exitTime ? new Date(parsed.exitTime) : null);
+    try {
+      const saved = localStorage.getItem("workHours");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Usamos una lógica más robusta para asegurarnos de que la fecha es válida
+        setEntryTime(
+          parsed.entryTime && dayjs(parsed.entryTime).isValid()
+            ? dayjs(parsed.entryTime)
+            : null
+        );
+        setLunchOutTime(
+          parsed.lunchOutTime && dayjs(parsed.lunchOutTime).isValid()
+            ? dayjs(parsed.lunchOutTime)
+            : null
+        );
+        setLunchInTime(
+          parsed.lunchInTime && dayjs(parsed.lunchInTime).isValid()
+            ? dayjs(parsed.lunchInTime)
+            : null
+        );
+        setExitTime(
+          parsed.exitTime && dayjs(parsed.exitTime).isValid()
+            ? dayjs(parsed.exitTime)
+            : null
+        );
+      }
+    } catch (e) {
+      console.error("Error al cargar datos desde localStorage:", e);
+      localStorage.removeItem("workHours");
     }
   }, []);
 
-  // Guardar en localStorage cuando cambien los valores
+  // Guardar en localStorage
   useEffect(() => {
     const dataToSave = {
-      entryTime: entryTime?.toISOString() || null,
-      lunchOutTime: lunchOutTime?.toISOString() || null,
-      lunchInTime: lunchInTime?.toISOString() || null,
-      exitTime: exitTime?.toISOString() || null,
+      // Usamos la función helper para validar antes de guardar
+      entryTime: isValidDayjs(entryTime) ? entryTime.toISOString() : null,
+      lunchOutTime: isValidDayjs(lunchOutTime)
+        ? lunchOutTime.toISOString()
+        : null,
+      lunchInTime: isValidDayjs(lunchInTime) ? lunchInTime.toISOString() : null,
+      exitTime: isValidDayjs(exitTime) ? exitTime.toISOString() : null,
     };
+
     localStorage.setItem("workHours", JSON.stringify(dataToSave));
   }, [entryTime, lunchOutTime, lunchInTime, exitTime]);
-
-  // Función para convertir dayjs a Date
-  const parseDayjsToDate = (time) => {
-    if (!time) return null;
-    return new Date(time.format("YYYY-MM-DD HH:mm:ss"));
-  };
 
   const formatTimeTo12Hour = (date) => {
     if (!date) return "";
@@ -68,12 +92,12 @@ export default function WorkTimeCalculator() {
 
   const calculate = () => {
     setError("");
-    const entry = parseDayjsToDate(entryTime);
-    const lunchOut = parseDayjsToDate(lunchOutTime);
-    const lunchIn = parseDayjsToDate(lunchInTime);
-    const exit = parseDayjsToDate(exitTime);
 
-    // Validaciones
+    const entry = isValidDayjs(entryTime) ? entryTime.toDate() : null;
+    const lunchOut = isValidDayjs(lunchOutTime) ? lunchOutTime.toDate() : null;
+    const lunchIn = isValidDayjs(lunchInTime) ? lunchInTime.toDate() : null;
+    const exit = isValidDayjs(exitTime) ? exitTime.toDate() : null;
+
     if (!entry) {
       setError("La hora de entrada es obligatoria.");
       showToast("Error", "La hora de entrada es obligatoria.", "error");
@@ -112,7 +136,7 @@ export default function WorkTimeCalculator() {
       return;
     }
 
-    if (exitTime && lunchIn >= exit) {
+    if (exit && lunchIn >= exit) {
       setError("La salida real debe ser después del regreso del almuerzo.");
       showToast(
         "Error",
@@ -122,8 +146,8 @@ export default function WorkTimeCalculator() {
       return;
     }
 
-    // Calcular hora estimada de salida
-    const workBeforeLunch = (lunchOut - entry) / (1000 * 60 * 60);
+    const workBeforeLunch =
+      (lunchOut.getTime() - entry.getTime()) / (1000 * 60 * 60);
     const workAfterLunch = 8.5 - workBeforeLunch;
 
     const estimatedExitTime = new Date(
@@ -131,9 +155,12 @@ export default function WorkTimeCalculator() {
     );
     setEstimatedExit(formatTimeTo12Hour(estimatedExitTime));
 
-    // Calcular total trabajado si hay salida real
     if (exit) {
-      const totalMinutes = (exit - entry - (lunchIn - lunchOut)) / (1000 * 60); // en minutos
+      const totalMinutes =
+        (exit.getTime() -
+          entry.getTime() -
+          (lunchIn.getTime() - lunchOut.getTime())) /
+        (1000 * 60);
       const hours = Math.floor(totalMinutes / 60);
       const minutes = Math.round(totalMinutes % 60);
 
@@ -155,7 +182,6 @@ export default function WorkTimeCalculator() {
       <h2>Calculadora de Jornada Laboral</h2>
       <Card>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          {/* Hora de entrada */}
           <div className="p-field">
             <TimePicker
               label="Hora de entrada"
@@ -189,8 +215,6 @@ export default function WorkTimeCalculator() {
               }}
             />
           </div>
-
-          {/* Salida almuerzo */}
           <div className="p-field">
             <TimePicker
               label="Salida almuerzo"
@@ -224,8 +248,6 @@ export default function WorkTimeCalculator() {
               }}
             />
           </div>
-
-          {/* Regreso almuerzo */}
           <div className="p-field">
             <TimePicker
               label="Regreso almuerzo"
@@ -259,8 +281,6 @@ export default function WorkTimeCalculator() {
               }}
             />
           </div>
-
-          {/* Salida real (opcional) */}
           <div className="p-field">
             <TimePicker
               label="Salida real (opcional)"
@@ -295,7 +315,6 @@ export default function WorkTimeCalculator() {
             />
           </div>
 
-          {/* Botón calcular */}
           <Button
             label="Calcular"
             icon="pi pi-calculator"
@@ -305,7 +324,6 @@ export default function WorkTimeCalculator() {
           />
         </LocalizationProvider>
 
-        {/* Mensaje de error */}
         {error && (
           <div className="p-mt-4 p-text-center p-error">
             <i className="pi pi-exclamation-triangle p-mr-2"></i>
@@ -313,7 +331,6 @@ export default function WorkTimeCalculator() {
           </div>
         )}
 
-        {/* Resultados */}
         {(estimatedExit || totalTime) && (
           <Card className="p-mt-4">
             <div style={{ textAlign: "center" }}>
