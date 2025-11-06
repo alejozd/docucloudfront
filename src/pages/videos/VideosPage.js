@@ -21,7 +21,7 @@ const VideosPage = () => {
     const fetchVideos = async () => {
       try {
         const response = await axios.get(
-          "https://zetamini.ddns.net/api/video/lista"
+          "http://Localhost:3100/api/video/lista"
         );
         const videosData = response.data;
         const newGroupedVideos = videosData.reduce((acc, video) => {
@@ -75,7 +75,7 @@ const VideosPage = () => {
         year={video.año}
         genre={video.genero}
         duration={video.duracion_segundos}
-        src={`https://zetamini.ddns.net${video.url}`}
+        src={`http://Localhost:3100${video.url}`}
       />
     );
   };
