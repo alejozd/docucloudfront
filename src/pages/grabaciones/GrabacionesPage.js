@@ -138,7 +138,7 @@ const GrabacionesPage = () => {
                       // CAMBIO: Ahora archivo es un objeto, no solo un string
                       title={archivo.titulo}
                       artist={archivo.artista} // NUEVO PROP
-                      src={`https://zetamini.ddns.net/grabaciones/${grupo.fecha.replace(
+                      src={`http://Localhost:3100/grabaciones/${grupo.fecha.replace(
                         /-/g,
                         "/"
                       )}/${archivo.nombreArchivo}`} // USAMOS nombreArchivo
@@ -150,7 +150,7 @@ const GrabacionesPage = () => {
                         activeAudioRef &&
                         activeAudioRef.current &&
                         activeAudioRef.current.src ===
-                          `https://zetamini.ddns.net/grabaciones/${grupo.fecha.replace(
+                          `http://Localhost:3100/grabaciones/${grupo.fecha.replace(
                             /-/g,
                             "/"
                           )}/${archivo.nombreArchivo}`

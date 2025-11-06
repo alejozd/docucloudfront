@@ -41,6 +41,7 @@ const RegistroSolicitudesPage = () => {
         detail: "No se pudo cargar la información",
         life: 3000,
       });
+      console.error("Error fetching registros:", error);
     } finally {
       setLoading(false);
     }
