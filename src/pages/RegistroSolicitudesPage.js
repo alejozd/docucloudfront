@@ -27,7 +27,7 @@ const RegistroSolicitudesPage = () => {
     const cleanedIp = ipCliente.replace(/_/g, "").trim(); // Elimina guiones bajos y espacios
     try {
       const response = await axios.post(
-        "https://zetamini.ddns.net/api/registro-solicitudes",
+        "http://Localhost:3100/api/registro-solicitudes",
         {
           ip_cliente: cleanedIp, // Usa la IP limpiada
           estado: estado,
