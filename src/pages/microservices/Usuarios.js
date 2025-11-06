@@ -22,7 +22,10 @@ const Usuarios = () => {
   const fetchUsuarios = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${Config.apiUrl}/api/usuarios`, {});
+      const response = await axios.get(
+        `${Config.usuarioApiUrl}/api/usuarios`,
+        {}
+      );
       setUsuarios(response.data);
       setLoading(false);
     } catch (error) {
@@ -59,14 +62,17 @@ const Usuarios = () => {
   const guardarUsuario = async () => {
     try {
       if (editando) {
-        await axios.put(`${Config.apiUrl}/api/usuarios/${usuario.id}`, usuario);
+        await axios.put(
+          `${Config.usuarioApiUrl}/api/usuarios/${usuario.id}`,
+          usuario
+        );
         toast.current.show({
           severity: "success",
           summary: "Actualizado",
           detail: "Usuario actualizado con éxito",
         });
       } else {
-        await axios.post(`${Config.apiUrl}/api/usuarios`, usuario);
+        await axios.post(`${Config.usuarioApiUrl}/api/usuarios`, usuario);
         toast.current.show({
           severity: "success",
           summary: "Creado",
@@ -86,7 +92,7 @@ const Usuarios = () => {
 
   const eliminarUsuario = async (usuarioId) => {
     try {
-      await axios.delete(`${Config.apiUrl}/api/usuarios/${usuarioId}`);
+      await axios.delete(`${Config.usuarioApiUrl}/api/usuarios/${usuarioId}`);
       toast.current.show({
         severity: "success",
         summary: "Eliminado",
