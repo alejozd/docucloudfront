@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { MeterGroup } from "primereact/metergroup";
+import Config from "./../../components/features/Config";
 
 const BatteryStatus = () => {
   const [batteryInfo, setBatteryInfo] = useState(null);
@@ -10,7 +11,7 @@ const BatteryStatus = () => {
   const fetchBatteryStatus = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://Localhost:3100/api/battery"); // Ajusta la URL según tu backend
+      const response = await fetch(`${Config.apiUrl}/api/battery`);
       const data = await response.json();
       setBatteryInfo(data);
     } catch (error) {

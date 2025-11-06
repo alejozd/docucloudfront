@@ -3,6 +3,7 @@ import axios from "axios";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Slider } from "primereact/slider";
+import Config from "./../../components/features/Config";
 import "../../styles/GrabacionesPage.css"; // Opcional: estilos personalizados
 import AudioPlayer from "../../components/audio/AudioPlayer"; // Importa el nuevo componente
 
@@ -19,10 +20,10 @@ const GrabacionesPage = () => {
     const fetchData = async () => {
       try {
         const resEstado = await axios.get(
-          "http://Localhost:3100/api/grabacion/estado "
+          `${Config.apiUrl}/api/grabacion/estado`
         );
         const resLista = await axios.get(
-          "http://Localhost:3100/api/grabacion/lista "
+          `${Config.apiUrl}/api/grabacion/lista`
         );
 
         setActivo(resEstado.data.activo);
@@ -48,7 +49,7 @@ const GrabacionesPage = () => {
   // Manejar cambio de estado
   const cambiarEstado = async (nuevoEstado) => {
     try {
-      await axios.post("http://Localhost:3100/api/grabacion/estado ", {
+      await axios.post(`${Config.apiUrl}/api/grabacion/estado`, {
         activo: nuevoEstado,
       });
       setActivo(nuevoEstado);
@@ -138,7 +139,7 @@ const GrabacionesPage = () => {
                       // CAMBIO: Ahora archivo es un objeto, no solo un string
                       title={archivo.titulo}
                       artist={archivo.artista} // NUEVO PROP
-                      src={`http://Localhost:3100/grabaciones/${grupo.fecha.replace(
+                      src={`${Config.apiUrl}/grabaciones/${grupo.fecha.replace(
                         /-/g,
                         "/"
                       )}/${archivo.nombreArchivo}`} // USAMOS nombreArchivo
@@ -150,7 +151,7 @@ const GrabacionesPage = () => {
                         activeAudioRef &&
                         activeAudioRef.current &&
                         activeAudioRef.current.src ===
-                          `http://Localhost:3100/grabaciones/${grupo.fecha.replace(
+                          `${Config.apiUrl}/grabaciones/${grupo.fecha.replace(
                             /-/g,
                             "/"
                           )}/${archivo.nombreArchivo}`
