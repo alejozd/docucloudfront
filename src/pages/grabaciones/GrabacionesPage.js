@@ -19,10 +19,10 @@ const GrabacionesPage = () => {
     const fetchData = async () => {
       try {
         const resEstado = await axios.get(
-          "https://zetamini.ddns.net/api/grabacion/estado "
+          "http://Localhost:3100/api/grabacion/estado "
         );
         const resLista = await axios.get(
-          "https://zetamini.ddns.net/api/grabacion/lista "
+          "http://Localhost:3100/api/grabacion/lista "
         );
 
         setActivo(resEstado.data.activo);
@@ -48,7 +48,7 @@ const GrabacionesPage = () => {
   // Manejar cambio de estado
   const cambiarEstado = async (nuevoEstado) => {
     try {
-      await axios.post("https://zetamini.ddns.net/api/grabacion/estado ", {
+      await axios.post("http://Localhost:3100/api/grabacion/estado ", {
         activo: nuevoEstado,
       });
       setActivo(nuevoEstado);

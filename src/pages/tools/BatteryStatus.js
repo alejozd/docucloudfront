@@ -10,7 +10,7 @@ const BatteryStatus = () => {
   const fetchBatteryStatus = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://zetamini.ddns.net/api/battery"); // Ajusta la URL según tu backend
+      const response = await fetch("http://Localhost:3100/api/battery"); // Ajusta la URL según tu backend
       const data = await response.json();
       setBatteryInfo(data);
     } catch (error) {
