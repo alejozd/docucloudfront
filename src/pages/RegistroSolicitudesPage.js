@@ -6,6 +6,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
+import Config from "./../components/features/Config";
 import axios from "axios";
 
 const RegistroSolicitudesPage = () => {
@@ -27,7 +28,7 @@ const RegistroSolicitudesPage = () => {
     const cleanedIp = ipCliente.replace(/_/g, "").trim(); // Elimina guiones bajos y espacios
     try {
       const response = await axios.post(
-        "http://Localhost:3100/api/registro-solicitudes",
+        `${Config.apiUrl}/api/registro-solicitudes`,
         {
           ip_cliente: cleanedIp, // Usa la IP limpiada
           estado: estado,

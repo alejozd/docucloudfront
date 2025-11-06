@@ -8,6 +8,7 @@ import { DataView, DataViewLayoutOptions } from "primereact/dataview"; // Para m
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown"; // Opcional: si prefieres un dropdown para seleccionar categoría
 import VideoPlayer from "../../components/video/VideoPlayer";
+import Config from "./../../components/features/Config";
 import "../../styles/VideosPage.css"; // Estilos para esta página
 
 const VideosPage = () => {
@@ -20,9 +21,7 @@ const VideosPage = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get(
-          "http://Localhost:3100/api/video/lista"
-        );
+        const response = await axios.get(`${Config.apiUrl}/api/video/lista`);
         const videosData = response.data;
         const newGroupedVideos = videosData.reduce((acc, video) => {
           const folderName = video.carpeta || "Sin Categoría";
@@ -75,7 +74,7 @@ const VideosPage = () => {
         year={video.año}
         genre={video.genero}
         duration={video.duracion_segundos}
-        src={`http://Localhost:3100${video.url}`}
+        src={`${Config.apiUrl}${video.url}`}
       />
     );
   };
