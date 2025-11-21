@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
+import { RadioButton } from "primereact/radiobutton";
 
 import "primeicons/primeicons.css";
 import "../../styles/WorkTimeCalculator.css";
@@ -16,11 +17,17 @@ const isValidDayjs = (value) => {
   return value && dayjs.isDayjs(value) && value.isValid();
 };
 
+// Detecta si el día actual es Viernes (dayjs().day() devuelve 0 para Domingo, 5 para Viernes)
+const isFriday = () => {
+  return dayjs().day() === 5;
+};
+
 export default function WorkTimeCalculator() {
   const [entryTime, setEntryTime] = useState(null);
   const [lunchOutTime, setLunchOutTime] = useState(null);
   const [lunchInTime, setLunchInTime] = useState(null);
   const [exitTime, setExitTime] = useState(null);
+  const [jobDuration, setJobDuration] = useState(isFriday() ? 6.0 : 8.5);
   const [estimatedExit, setEstimatedExit] = useState("");
   const [totalTime, setTotalTime] = useState("");
   const [error, setError] = useState("");
@@ -54,10 +61,19 @@ export default function WorkTimeCalculator() {
             ? dayjs(parsed.exitTime)
             : null
         );
+        if (parsed.jobDuration) {
+          setJobDuration(parsed.jobDuration);
+        } else {
+          setJobDuration(isFriday() ? 6.0 : 8.5);
+        }
+      } else {
+        // [NUEVO] Si no hay nada en localStorage, inicializa la duración basada en el día.
+        setJobDuration(isFriday() ? 6.0 : 8.5);
       }
     } catch (e) {
       console.error("Error al cargar datos desde localStorage:", e);
       localStorage.removeItem("workHours");
+      setJobDuration(isFriday() ? 6.0 : 8.5);
     }
   }, []);
 
@@ -71,10 +87,11 @@ export default function WorkTimeCalculator() {
         : null,
       lunchInTime: isValidDayjs(lunchInTime) ? lunchInTime.toISOString() : null,
       exitTime: isValidDayjs(exitTime) ? exitTime.toISOString() : null,
+      jobDuration: jobDuration,
     };
 
     localStorage.setItem("workHours", JSON.stringify(dataToSave));
-  }, [entryTime, lunchOutTime, lunchInTime, exitTime]);
+  }, [entryTime, lunchOutTime, lunchInTime, exitTime, jobDuration]);
 
   const formatTimeTo12Hour = (date) => {
     if (!date) return "";
@@ -97,6 +114,7 @@ export default function WorkTimeCalculator() {
     const lunchOut = isValidDayjs(lunchOutTime) ? lunchOutTime.toDate() : null;
     const lunchIn = isValidDayjs(lunchInTime) ? lunchInTime.toDate() : null;
     const exit = isValidDayjs(exitTime) ? exitTime.toDate() : null;
+    const totalJobDurationHours = jobDuration;
 
     if (!entry) {
       setError("La hora de entrada es obligatoria.");
@@ -148,7 +166,7 @@ export default function WorkTimeCalculator() {
 
     const workBeforeLunch =
       (lunchOut.getTime() - entry.getTime()) / (1000 * 60 * 60);
-    const workAfterLunch = 8.5 - workBeforeLunch;
+    const workAfterLunch = totalJobDurationHours - workBeforeLunch;
 
     const estimatedExitTime = new Date(
       lunchIn.getTime() + workAfterLunch * 60 * 60 * 1000
@@ -181,6 +199,23 @@ export default function WorkTimeCalculator() {
       <Toast ref={toast} />
       <h2>Calculadora de Jornada Laboral</h2>
       <Card>
+        <div className="p-field job-duration-selector">
+          <label>Duración de la jornada</label>
+          <div className="p-formgrid p-grid p-dir-col">
+            {[6, 8, 8.5].map((duration) => (
+              <div key={duration} className="p-field-radiobutton p-col-fixed">
+                <RadioButton
+                  inputId={`duration${duration}`}
+                  name="jobDuration"
+                  value={duration}
+                  onChange={(e) => setJobDuration(e.value)}
+                  checked={jobDuration === duration}
+                />
+                <label htmlFor={`duration${duration}`}>{duration} Horas</label>
+              </div>
+            ))}
+          </div>
+        </div>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div className="p-field">
             <TimePicker

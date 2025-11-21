@@ -4,24 +4,27 @@
   max-width: 500px;
   margin: 2rem auto;
   font-family: "Roboto", sans-serif;
+  /* Asegurar que use el 100% del ancho disponible en móviles */
+  width: 95%; 
 }
 
 .work-time-calculator .p-card {
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 .work-time-calculator .p-field {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .work-time-calculator .p-field label {
   display: block;
   font-weight: 600;
-  font-size: large;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem; 
+  margin-bottom: 0.6rem;
   color: #333;
 }
 
@@ -48,15 +51,16 @@
 }
 
 /* Botón de calcular */
-/* .work-time-calculator .p-button {
+.work-time-calculator .p-button {
   width: 100%;
   font-weight: bold;
   border-radius: 8px;
-  padding: 0.6rem;
-  font-size: 1rem;
-  background-color: #624de6;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  background-color: #624de6; /* Color primario */
   border-color: #624de6;
-} */
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
 
 .work-time-calculator .p-button:hover {
   background-color: #553ecc;
@@ -65,27 +69,80 @@
 
 /* Resultados */
 .work-time-calculator .p-card.p-component.p-mt-4 {
-  background-color: #f9f9f9;
-  color: #444;
+  background-color: #f0f7ff;
+  color: #004d80;
   text-align: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  margin-top: 1.5rem !important;
 }
 
 .work-time-calculator .p-card.p-component p {
-  margin: 0.5rem 0;
+  margin: 0.7rem 0;
+  font-size: 1.1rem;
+}
+
+.work-time-calculator .p-card.p-component strong {
+    font-weight: 600;
 }
 
 /* Mensaje de error */
 .work-time-calculator .p-error {
-  color: #e53935;
+  color: #d32f2f;
+  background-color: #ffebee;
+  border: 1px solid #d32f2f;
+  padding: 0.7rem;
+  border-radius: 8px;
   font-weight: 500;
   text-align: center;
+  margin-top: 1.5rem;
 }
 
 /* Título */
 .work-time-calculator h2 {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #2c2c2c;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Estilos para el selector de duración de jornada */
+.work-time-calculator .job-duration-selector {
+  margin-top: 0.5rem; 
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1.5rem;
+}
+
+.work-time-calculator .job-duration-selector > label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #2c2c2c;
+    display: block;
+}
+
+/* Contenedor de Radio Buttons */
+.work-time-calculator .p-formgrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Opción de Radio Button individual */
+.work-time-calculator .p-field-radiobutton {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0; 
+  cursor: pointer;
+}
+
+.work-time-calculator .p-field-radiobutton label {
+  margin-left: 0.7rem;
+  font-weight: 400;
+  font-size: 1rem; 
+  cursor: pointer;
+  color: #444;
+  white-space: nowrap; 
 }
