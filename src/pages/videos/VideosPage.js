@@ -75,53 +75,54 @@ const VideosPage = () => {
     };
 
     return (
-      // Usamos Card o un div simple, dependiendo de tu última prueba
       <Card key={video.url} className="video-item-card-content">
-        {/* Contenido del video/placeholder */}
-        {isVideoActive ? (
-          // 1. Reproductor real (Asumimos que renderiza su propia metadata)
-          <VideoPlayer
-            title={video.titulo}
-            artist={video.artista}
-            year={video.año}
-            genre={video.genero}
-            duration={video.duracion_segundos}
-            src={videoUrl}
-          />
-        ) : (
-          // 2. Placeholder con botón de reproducir
-          <div
-            className="video-placeholder"
-            onClick={handlePlayClick}
-            style={{
-              backgroundColor: "#333",
-              height: "200px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <i
-              className="pi pi-play"
-              style={{ fontSize: "3em", color: "white" }}
-              aria-label={`Reproducir ${video.titulo}`}
+        <div className="video-main-area">
+          {isVideoActive ? (
+            // 1. Reproductor real: Ocupa todo el espacio de la Card
+            <VideoPlayer
+              title={video.titulo}
+              artist={video.artista}
+              year={video.año}
+              genre={video.genero}
+              duration={video.duracion_segundos}
+              src={videoUrl}
+              // [OPCIONAL]: Asegurar que el VideoPlayer ocupe el 100% del contenedor
+              style={{ width: "100%", height: "100%" }}
             />
-          </div>
-        )}
+          ) : (
+            // 2. Placeholder + Metadata (cuando está inactivo)
+            <>
+              <div
+                className="video-placeholder"
+                onClick={handlePlayClick}
+                style={{
+                  backgroundColor: "#333",
+                  height: "200px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <i
+                  className="pi pi-play"
+                  style={{ fontSize: "3em", color: "white" }}
+                  aria-label={`Reproducir ${video.titulo}`}
+                />
+              </div>
 
-        {/* [CLAVE: SÓLO SE MUESTRA SI EL VIDEO ESTÁ INACTIVO] */}
-        {/* Si el VideoPlayer ya muestra los datos, esto previene la duplicación al estar activo. */}
-        {!isVideoActive && (
-          <div className="p-mt-2 p-px-3 p-pb-3">
-            <p>
-              <strong>{video.titulo}</strong>
-            </p>
-            <p>
-              {video.artista} - {video.año}
-            </p>
-          </div>
-        )}
+              {/* Metadata: Solo se muestra cuando el placeholder está activo */}
+              <div className="p-mt-2 p-px-3 p-pb-3">
+                <p>
+                  <strong>{video.titulo}</strong>
+                </p>
+                <p>
+                  {video.artista} - {video.año}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
       </Card>
     );
   };
