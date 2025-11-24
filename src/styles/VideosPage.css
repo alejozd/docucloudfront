@@ -157,3 +157,34 @@
 /* Si usas PrimeFlex, puedes añadir sus clases para espaciado y flexbox: */
 /* .flex, .justify-content-end, .align-items-center, .mr-2, .my-2, .mt-4, .w-full, .md:w-14rem */
 /* Asegúrate de tenerlo importado en tu proyecto si usas estas clases. */
+
+/* Aseguramos que el contenido de la Card no tenga padding extra */
+.video-item-card-content .p-card-body,
+.video-item-card-content .p-card-content {
+    padding: 0 !important;
+}
+
+/* Contenedor principal para la lógica de altura y flexbox */
+.video-main-area {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* Define la altura mínima de la tarjeta (placeholder + metadata). 
+       Altura del placeholder (200px) + margen de metadata (aprox 60px) */
+    min-height: 260px; 
+}
+
+/* Cuando el VideoPlayer está activo, debe ocupar todo el alto de video-main-area */
+.video-main-area > div:first-child:has(video) {
+    flex-grow: 1; /* Permite que el reproductor crezca */
+    width: 100%;
+}
+
+/* Ocultar el espacio de metadata cuando el placeholder está activo */
+.video-main-area .video-metadata-area {
+    /* Aquí puedes manejar estilos de padding si lo necesitas fuera de p-mt-2 */
+    padding-bottom: 1.5rem; /* Ajuste para el p-pb-3 */
+    padding-top: 0.5rem; /* Ajuste para el p-mt-2 */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
