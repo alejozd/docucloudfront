@@ -17,6 +17,7 @@ const VideosPage = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null); // Nuevo estado para la categoría seleccionada
   const [layout, setLayout] = useState("grid"); // Estado para el layout del DataView (grid/list)
+  const [activeVideoUrl, setActiveVideoUrl] = useState(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -66,16 +67,62 @@ const VideosPage = () => {
 
   // Plantilla para cada video en el DataView
   const itemTemplate = (video) => {
+    const videoUrl = `${Config.apiUrl}${video.url}`;
+    const isVideoActive = activeVideoUrl === videoUrl;
+
+    const handlePlayClick = () => {
+      setActiveVideoUrl(videoUrl);
+    };
+
     return (
-      <VideoPlayer
-        key={video.url}
-        title={video.titulo}
-        artist={video.artista}
-        year={video.año}
-        genre={video.genero}
-        duration={video.duracion_segundos}
-        src={`${Config.apiUrl}${video.url}`}
-      />
+      // Usamos Card o un div simple, dependiendo de tu última prueba
+      <Card key={video.url} className="video-item-card-content">
+        {/* Contenido del video/placeholder */}
+        {isVideoActive ? (
+          // 1. Reproductor real (Asumimos que renderiza su propia metadata)
+          <VideoPlayer
+            title={video.titulo}
+            artist={video.artista}
+            year={video.año}
+            genre={video.genero}
+            duration={video.duracion_segundos}
+            src={videoUrl}
+          />
+        ) : (
+          // 2. Placeholder con botón de reproducir
+          <div
+            className="video-placeholder"
+            onClick={handlePlayClick}
+            style={{
+              backgroundColor: "#333",
+              height: "200px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <i
+              className="pi pi-play"
+              style={{ fontSize: "3em", color: "white" }}
+              aria-label={`Reproducir ${video.titulo}`}
+            />
+          </div>
+        )}
+
+        {/* [CLAVE: SÓLO SE MUESTRA SI EL VIDEO ESTÁ INACTIVO] */}
+        {/* Si el VideoPlayer ya muestra los datos, esto previene la duplicación al estar activo. */}
+        {!isVideoActive && (
+          <div className="p-mt-2 p-px-3 p-pb-3">
+            <p>
+              <strong>{video.titulo}</strong>
+            </p>
+            <p>
+              {video.artista} - {video.año}
+            </p>
+          </div>
+        )}
+      </Card>
     );
   };
 
