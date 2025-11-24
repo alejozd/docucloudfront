@@ -34,9 +34,14 @@ const VideosPage = () => {
         }, {});
         setGroupedVideos(newGroupedVideos);
 
-        // Establecer la primera categoría como seleccionada por defecto
+        // [MODIFICACIÓN CLAVE] Solo establecer la primera categoría si aún no se ha seleccionado ninguna
         const firstCategory = Object.keys(newGroupedVideos)[0];
-        if (firstCategory) {
+
+        // El bug ocurre porque la Card o el cambio de estado hace que el componente se re-renderice
+        // y esta lógica de inicialización se re-ejecuta. Al añadir `!selectedCategory`,
+        // evitamos que se sobrescriba la categoría 'Meditaciones' con 'Automan'
+        if (firstCategory && !selectedCategory) {
+          // <-- ¡Añadir la comprobación aquí!
           setSelectedCategory(firstCategory);
         }
       } catch (err) {
@@ -50,7 +55,7 @@ const VideosPage = () => {
     };
 
     fetchVideos();
-  }, []);
+  }, [selectedCategory]);
 
   if (loading) {
     return (
