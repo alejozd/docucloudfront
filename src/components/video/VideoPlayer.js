@@ -172,7 +172,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
         <div className="video-controls-overlay">
           {/* BARRA DE TIEMPO / SLIDER */}
           <div className="time-progress-bar">
-            <span className="time-label">{formatTime(currentTime)}</span>
+            <span className="time-display">{formatTime(currentTime)}</span>
             <Slider
               value={currentTime}
               min={0}
@@ -181,7 +181,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
               onSlideEnd={handleSeekEnd}
               step={0.1} // Permite un movimiento más suave
             />
-            <span className="time-label">{formatTime(videoDuration)}</span>
+            <span className="time-display">{formatTime(videoDuration)}</span>
           </div>
 
           {/* BOTONES PRINCIPALES */}
