@@ -1,259 +1,188 @@
 /* src/styles/VideoPlayer.css */
 
-/* ----------------------------------------------------- */
-/* Contenedor principal y Tarjeta */
-/* ----------------------------------------------------- */
-
-.video-player-wrapper {
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    max-width: 100%; /* Ocupa todo el ancho disponible del contenedor */
-}
-
-.video-player-card {
-    border-radius: var(--border-radius, 12px);
-    box-shadow: var(--shadow-2, 0 4px 10px rgba(0, 0, 0, 0.1));
-    padding: 0 !important; /* El padding debe estar en el content, no en la card si es un reproductor */
-}
-
+/* ---------------------------------------------------- */
+/* --- 1. Contenedor Principal (Aspect Ratio Fix) --- */
+/* ---------------------------------------------------- */
 .video-player-container {
-    position: relative;
+    position: relative; /* Clave para el aspecto ratio hack */
     width: 100%;
-    /* 16:9 Aspect Ratio (9/16 * 100% = 56.25%) */
+    /* 16:9 Aspect Ratio Hack: 9 / 16 = 0.5625 -> 56.25% */
     padding-top: 56.25%; 
+    overflow: hidden; /* Asegura que no se salgan elementos */
     background-color: black;
-    border-radius: var(--border-radius, 12px);
-    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer; /* Indica interactividad */
+    transition: all 0.3s ease;
 }
 
-.video-element {
+/* El elemento de video debe llenar el contenedor con posición absoluta */
+.video-player-container video {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Para asegurar que todo el video se vea sin distorsión */
+    object-fit: contain; /* Asegura que el video se vea completo dentro del contenedor */
+    display: block;
 }
 
-/* ----------------------------------------------------- */
-/* Controles Personalizados */
-/* ----------------------------------------------------- */
-
-.custom-controls-overlay {
+/* ---------------------------------------------------- */
+/* --- 2. Controles y Superposición (Overlay) --- */
+/* ---------------------------------------------------- */
+.video-controls-overlay {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%);
+    right: 0;
+    height: 60px; /* Altura fija para los controles */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0)); /* Fondo degradado */
+    padding: 0 1rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    pointer-events: none; /* Permite clicks a través del overlay por defecto */
+    justify-content: flex-end; /* Alinea los controles abajo */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Permite clicks a través del overlay (importante para el video) */
 }
 
-.custom-controls-overlay.visible {
+/* Cuando se muestran los controles completos (hover o isPlaying=false) */
+.video-player-container.full-controls .video-controls-overlay {
     opacity: 1;
-    pointer-events: auto; /* Activa la interacción al hacer hover o al estar pausado */
+    pointer-events: all; /* Activa la interacción con los controles */
 }
 
-/* Botón de Play/Pause central */
-.center-play-pause {
-    flex-grow: 1; /* Ocupa el espacio central */
+/* Controles inferiores (barra de tiempo, botones) */
+.video-player-controls {
     display: flex;
-    justify-content: center;
     align-items: center;
+    padding-bottom: 0.5rem;
 }
 
-.center-play-pause .p-button {
-    background: rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.8);
+/* Barra de progreso de tiempo */
+.time-bar {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* Ocupa el espacio restante */
+    margin: 0 1rem;
+}
+
+/* Etiqueta de tiempo (00:00 / 00:00) */
+.time-label {
     color: white;
-    width: 4rem;
-    height: 4rem;
-    font-size: 2rem;
-    pointer-events: auto;
-    transition: all 0.2s ease;
-}
-
-.center-play-pause .p-button:hover {
-    background: rgba(0, 0, 0, 0.6);
-    border-color: var(--primary-color);
-}
-
-/* Barra inferior que contiene el Slider y los botones */
-.controls-bar {
-    width: 100%;
-    padding: 0.5rem 1rem 0.5rem 1rem;
-    display: flex;
-    flex-direction: column; /* Apilamos el slider y los botones */
-    align-items: center;
-    gap: 0.5rem; /* Espacio entre el slider y los botones */
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    pointer-events: auto;
-}
-
-/* ----------------------------------------------------- */
-/* Grupo de Progreso (Slider y Tiempos) */
-/* ----------------------------------------------------- */
-
-.progress-bar-group {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 0.5rem;
-}
-
-.time-display {
     font-size: 0.8rem;
-    white-space: nowrap;
-    min-width: 40px; /* Asegura que el texto no salte */
+    min-width: 45px; /* Mantiene el ancho para que no salte el layout */
     text-align: center;
 }
 
-.progress-slider {
+/* Slider de PrimeReact (barra de progreso) */
+.video-player-controls .p-slider {
     flex-grow: 1;
-    height: 6px; /* Altura de la barra */
-}
-
-/* Estilo del Slider de PrimeReact */
-.progress-slider .p-slider-handle {
-    width: 14px;
-    height: 14px;
-    background-color: var(--primary-color);
-    border: 2px solid white;
-    transition: transform 0.2s;
-}
-
-.progress-slider .p-slider-handle:hover {
-    transform: scale(1.1);
-}
-
-.progress-slider .p-slider-range {
-    background-color: var(--primary-color);
-}
-
-.progress-slider .p-slider-rail {
+    margin: 0 0.5rem;
+    height: 4px;
     background-color: rgba(255, 255, 255, 0.3);
 }
 
-/* ----------------------------------------------------- */
-/* Controles de Reproducción (Botones) */
-/* ----------------------------------------------------- */
-
-.playback-controls {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: flex-start; /* Alineación a la izquierda */
-    padding-bottom: 0.3rem; /* Espacio para que no toque el borde */
+.video-player-controls .p-slider .p-slider-handle {
+    width: 10px;
+    height: 10px;
+    margin-top: -3px; /* Ajuste para centrar el mango */
+    background-color: var(--primary-color); /* Color del tema */
+    border: 2px solid white;
 }
 
-.playback-controls .p-button {
-    color: white;
-    font-size: 1.2rem;
+.video-player-controls .p-slider .p-slider-range {
+    background-color: var(--primary-color);
+}
+
+/* Botones de control (Play/Pause, Fullscreen, etc.) */
+.video-player-controls .p-button {
     width: 30px;
     height: 30px;
-    transition: color 0.2s;
+    padding: 0;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    background-color: transparent;
+    border: none;
+    color: white;
+    transition: background-color 0.2s;
 }
 
-.playback-controls .p-button:hover {
-    color: var(--primary-color);
+.video-player-controls .p-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* ----------------------------------------------------- */
-/* Control de Volumen */
-/* ----------------------------------------------------- */
+.video-player-controls .p-button .p-button-icon {
+    font-size: 1rem;
+}
 
-.volume-control-group {
+/* Contenedor del volumen (oculto por defecto) */
+.volume-control {
     position: relative;
     display: flex;
     align-items: center;
-}
-
-/* Contenedor del slider de volumen (oculto por defecto) */
-.volume-slider-container {
-    position: absolute;
-    bottom: 100%; /* Se abre hacia arriba */
-    left: 0;
-    width: 100px;
-    padding: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 6px;
-    transform: translateX(-50%) translateY(0);
+    width: 0; /* Lo inicializamos a 0 */
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
 }
 
-.volume-control-group:hover .volume-slider-container {
+/* Mostrar control de volumen al hacer hover sobre el botón de volumen */
+.volume-button-group:hover .volume-control,
+.volume-control.active {
+    width: 80px; /* Ancho para mostrar el slider */
     opacity: 1;
-    visibility: visible;
+    margin-left: 0.5rem;
 }
 
-/* Estilo del Slider de Volumen (pequeño y horizontal) */
-.volume-slider {
-    width: 100%;
+.volume-control .p-slider {
+    width: 70px;
     height: 4px;
 }
 
-.volume-slider .p-slider-handle {
-    width: 12px;
-    height: 12px;
-}
-
-
-/* ----------------------------------------------------- */
-/* Metadatos (Debajo del reproductor) */
-/* ----------------------------------------------------- */
-
+/* ---------------------------------------------------- */
+/* --- 3. Metadatos (Debajo del Video) --- */
+/* ---------------------------------------------------- */
 .video-metadata-below-player {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
 }
 
 .video-title-below {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-color, #333);
-    margin-bottom: 0.2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
 }
 
 .video-artist-info-below {
     font-size: 0.9rem;
-    color: var(--text-color-secondary, #666);
+    color: var(--text-color-secondary);
+}
+.video-artist-info-below span {
+    white-space: nowrap; /* Evita que los metadatos se rompan en líneas extrañas */
 }
 
-/* ----------------------------------------------------- */
-/* Responsive */
-/* ----------------------------------------------------- */
+/* ---------------------------------------------------- */
+/* --- 4. Modo Pantalla Completa Flotante (Dialog) --- */
+/* ---------------------------------------------------- */
 
-@media (min-width: 768px) {
-    /* En escritorio, el slider y los botones pueden estar en la misma línea */
-    .controls-bar {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .progress-bar-group {
-        flex-grow: 1;
-        max-width: 60%; /* Darle un buen tamaño */
-        order: 1;
-    }
-
-    .playback-controls {
-        width: auto;
-        justify-content: flex-end;
-        order: 2;
-    }
-}
-
-/* Estilo para el modo flotante */
+/* Estilo para el contenido del Dialog (VideoPlayer dentro del Dialog) */
 .dialog-video-content {
-    padding: 0 !important; /* Elimina padding interno del Dialog */
-    height: 100%;
+    padding: 0 !important; /* Quitar padding por defecto */
+    background-color: black;
+}
+
+/* Media Query para responsividad (opcional) */
+@media (max-width: 768px) {
+    .video-player-container {
+        border-radius: 0; /* Quitar bordes en móvil para usar todo el ancho */
+    }
+    /* Ajustes menores de tamaño de fuente o botones si es necesario */
+    .video-player-controls .p-button {
+        width: 25px;
+        height: 25px;
+    }
+    .video-player-controls .p-button .p-button-icon {
+        font-size: 0.8rem;
+    }
 }
