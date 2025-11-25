@@ -97,7 +97,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   const onLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
       setVideoDuration(videoRef.current.duration);
-      videoRef.current.volume = volume / 100; // Aplicar volumen inicial
+      videoRef.current.volume = volume / 100;
     }
   }, [volume]);
 
@@ -108,15 +108,33 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   }, [isSeeking]);
 
   const onEnded = useCallback(() => {
-    setIsPlaying(false);
+    // setIsPlaying(false);
     setCurrentTime(0);
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      // Intenta reproducir el video tan pronto como el componente se estabilice
+      const timeoutId = setTimeout(() => {
+        videoRef.current
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch((e) => {
+            console.warn("Autoplay bloqueado (intento forzado).", e.message);
+            setIsPlaying(false);
+            setShowFullControls(true);
+          });
+      }, 100); // Pequeño retraso de 100ms
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [src]);
 
   // Efecto para adjuntar/desadjuntar escuchadores de eventos
   useEffect(() => {
     const videoEl = videoRef.current;
     if (videoEl) {
-      setIsPlaying(false); // Resetear estado de reproducción
+      // setIsPlaying(false); // Resetear estado de reproducción
       setCurrentTime(0);
       setVideoDuration(duration || 0); // Resetear duración
 
@@ -157,6 +175,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
           src={src}
           preload="metadata"
           className="video-display"
+          crossOrigin="anonymous"
         />
         {/* Añadir la clase 'active-controls' condicionalmente para mostrar/ocultar */}
         <div
