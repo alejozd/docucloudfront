@@ -171,7 +171,7 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
         {/* CONTROLES DE SUPERPOSICIÓN */}
         <div className="video-controls-overlay">
           {/* BARRA DE TIEMPO / SLIDER */}
-          <div className="time-bar">
+          <div className="time-progress-bar">
             <span className="time-label">{formatTime(currentTime)}</span>
             <Slider
               value={currentTime}
