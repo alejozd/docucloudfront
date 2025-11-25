@@ -186,3 +186,20 @@
         font-size: 0.8rem;
     }
 }
+
+/* src/styles/VideoPlayer.css (Añadir al final o en la sección de controles) */
+
+/* ---------------------------------------------------- */
+/* --- Ajuste del Slider de Progreso --- */
+/* ---------------------------------------------------- */
+.time-progress-bar {
+    /* Asegura que el contenedor del slider tenga el ancho completo */
+    flex-grow: 1; 
+    padding: 0 0.5rem; /* Espacio entre los botones y el slider */
+}
+
+/* Fuerza al componente PrimeReact Slider a ocupar el 100% del contenedor */
+.time-progress-bar .p-slider {
+    width: 100%; /* <-- Esta es la clave para expandir el slider */
+    height: 4px; /* Opcional: ajustar altura */
+}
