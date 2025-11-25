@@ -187,19 +187,43 @@
     }
 }
 
-/* src/styles/VideoPlayer.css (Añadir al final o en la sección de controles) */
+/* ---------------------------------------------------- */
+/* --- 2. Controles y Superposición (Overlay) --- */
+/* ---------------------------------------------------- */
 
-/* ---------------------------------------------------- */
-/* --- Ajuste del Slider de Progreso --- */
-/* ---------------------------------------------------- */
+.video-controls-bottom {
+    display: flex;
+    align-items: center; 
+    width: 100%;
+    padding: 0 1rem;
+    /* Ajuste: Añade un espacio sutil entre los elementos si no lo tienes */
+    gap: 0.5rem; 
+}
+
+/* Estilos para el texto de tiempo (00:00) */
+.time-display {
+    font-size: 0.9rem;
+    color: #fff;
+    /* Clave 1: Evita que el texto se comprima o rompa */
+    flex-shrink: 0; 
+    white-space: nowrap; 
+    /* Opcional: Centrar y dar un ancho fijo para alineación perfecta */
+    width: 40px; 
+    text-align: center;
+}
+
+
+/* Estilos para el contenedor del Slider */
 .time-progress-bar {
-    /* Asegura que el contenedor del slider tenga el ancho completo */
+    /* Clave 2: Absorbe todo el espacio restante */
     flex-grow: 1; 
-    padding: 0 0.5rem; /* Espacio entre los botones y el slider */
+    padding: 0 0.5rem; 
+    /* Asegura que no se expanda más allá de lo necesario */
+    min-width: 0; 
 }
 
 /* Fuerza al componente PrimeReact Slider a ocupar el 100% del contenedor */
 .time-progress-bar .p-slider {
-    width: 100%; /* <-- Esta es la clave para expandir el slider */
-    height: 4px; /* Opcional: ajustar altura */
+    width: 100%; 
+    height: 4px;
 }
