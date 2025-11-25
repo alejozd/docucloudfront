@@ -1,287 +1,258 @@
 /* src/styles/VideoPlayer.css */
 
-.video-player-card {
-  background-color: var(--surface-0);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-1);
-  border: 1px solid var(--surface-border);
-  transition: box-shadow 0.2s, border-color 0.2s;
-  padding: 0 !important;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+/* Variables de Color (usando un tema oscuro/moderno) */
+:root {
+    --player-bg: #000;
+    --controls-bg: rgba(0, 0, 0, 0.7); /* Controles semi-transparentes */
+    --primary-color-controls: #fff; /* Iconos y texto en blanco */
+    --hover-color-controls: #e7e7e7;
+    --progress-bar-color: var(--primary-color, #624de6); /* Color de PrimeReact */
+    --progress-track-color: rgba(255, 255, 255, 0.3);
 }
 
-.video-player-card .p-card-body {
-  padding: 0;
-}
+/* ---------------------------------------------------- */
+/* Contenedor Principal y Video */
+/* ---------------------------------------------------- */
 
-.video-player-card:hover {
-  box-shadow: var(--shadow-2);
-  border-color: var(--primary-color);
+.video-player-wrapper {
+    max-width: 1000px; /* Ancho máximo para el reproductor */
+    margin: 0 auto 2rem;
 }
 
 .video-player-container {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* Relación de aspecto 16:9 */
-  background-color: black;
-  /* Eliminamos border-radius aquí si queremos que la tarjeta completa tenga el radio */
-  /* Pero si lo mantienes, el video también se redondeará, lo cual está bien */
-  border-top-left-radius: var(--border-radius); /* Asegura que la parte superior del video se redondee */
-  border-top-right-radius: var(--border-radius);
-  overflow: hidden;
+    position: relative;
+    width: 100%;
+    /* Relación de aspecto 16:9 */
+    padding-top: 56.25%; 
+    background-color: var(--player-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
-.video-display {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background-color: black;
+/* El elemento de video se posiciona para llenar el contenedor con padding */
+.video-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Asegura que el video se vea completo */
+    /* Deshabilitar controles nativos de Chrome, Safari, etc. */
+    &::-webkit-media-controls {
+        display: none !important;
+    }
+    &::-webkit-media-controls-enclosure {
+        display: none !important;
+    }
 }
 
-.video-controls-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
-  padding: 0.8rem 1rem;
-  box-sizing: border-box;
-  color: white;
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-  /* Si los metadatos se movieron, ya no necesitas estilos de metadatos aquí */
+/* ---------------------------------------------------- */
+/* Controles Personalizados (Custom Controls) */
+/* ---------------------------------------------------- */
+
+.custom-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Alinea la barra de abajo en la parte inferior */
+    opacity: 1; /* Siempre visible por ahora, se puede cambiar a 0 y usar :hover */
+    transition: opacity 0.3s ease;
+    z-index: 10; /* Asegura que los controles estén sobre el video */
 }
 
-/* Opcional: Estilos para ocultar controles cuando el ratón no está sobre el video */
+/* Opcional: Ocultar/Mostrar controles al pasar el mouse */
 /*
-.video-player-container:not(:hover) .video-controls-overlay {
-    opacity: 0;
+.video-player-container:hover .custom-controls {
+    opacity: 1;
 }
 */
 
-/* ESTOS ESTILOS YA NO SON NECESARIOS O DEBEN SER REEMPLAZADOS POR LAS NUEVAS CLASES */
-/* .video-metadata { margin-bottom: 0.5rem; padding-left: 0.2rem; } */
-/* .video-title { font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; } */
-/* .video-artist-info { font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } */
-
-
-/* NUEVOS ESTILOS para la información DEBAJO del reproductor */
-.video-metadata-below-player {
-  padding: 1rem 1rem 0.5rem 1rem; /* Padding interno de la tarjeta */
-  border-top: 1px solid var(--surface-border); /* Separador sutil */
-  background-color: var(--surface-0); /* Fondo de la tarjeta, el mismo que la tarjeta principal */
-  border-bottom-left-radius: var(--border-radius); /* Para que la parte inferior de la tarjeta se redondee */
-  border-bottom-right-radius: var(--border-radius);
+/* Botón de Play/Pausa en el centro (Overlay) */
+.play-pause-overlay-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--controls-bg);
+    color: var(--primary-color-controls);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+    outline: none;
+    z-index: 11;
 }
 
-.video-title-below {
-  font-size: 1.1rem; /* Un poco más grande si está fuera del video */
-  font-weight: 600;
-  color: var(--text-color-primary); /* Color de texto principal de PrimeReact */
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.play-pause-overlay-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
 }
 
-.video-artist-info-below {
-  font-size: 0.85rem;
-  color: var(--text-color-secondary); /* Color de texto secundario */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-.controls-row {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.controls-row .p-button-text.p-button-secondary {
-  background-color: transparent !important;
-  color: white !important;
-  border: none !important;
-  box-shadow: none !important;
-  transition: color 0.2s, background-color 0.2s;
-  padding: 0.5rem;
-}
-
-.controls-row .p-button-text.p-button-secondary:hover {
-  color: var(--primary-color) !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-.video-play-pause-btn {
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1.2rem !important;
-  flex-shrink: 0;
-}
-
-.video-progress-area {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 150px;
+/* Barra de Progreso (Slider Superior) */
+.progress-bar-container {
+    padding: 0 0.5rem;
+    position: absolute;
+    top: -10px; /* Para que la barra se vea como que está encima del video o levemente sobrepuesta */
+    left: 0;
+    width: 100%;
+    z-index: 12;
 }
 
 .video-progress-slider {
-  flex-grow: 1;
+    height: 6px;
+    /* Ajustes específicos del p-slider de PrimeReact */
 }
-
-.time-current,
-.time-duration {
-  font-family: monospace;
-  font-size: 0.75rem;
-  color: white;
-  min-width: 35px;
-  text-align: center;
-  flex-shrink: 0;
+.video-progress-slider .p-slider-handle {
+    height: 12px;
+    width: 12px;
+    margin-top: -3px; /* Centrar verticalmente */
+    border: 2px solid var(--primary-color-controls);
+    background: var(--progress-bar-color);
+    box-shadow: none;
 }
-
-.video-volume-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  width: 100px;
-  flex-shrink: 0;
+.video-progress-slider .p-slider-range {
+    background: var(--progress-bar-color);
 }
-
-.video-volume-btn {
-  width: 2rem;
-  height: 2rem;
-  font-size: 0.9rem !important;
-  flex-shrink: 0;
-}
-
-.video-volume-slider {
-  flex-grow: 1;
-}
-
-.video-fullscreen-btn {
-  width: 2.2rem;
-  height: 2.2rem;
-  font-size: 1rem !important;
-  flex-shrink: 0;
-}
-
-/* --- Estilos PrimeReact para Sliders dentro del VideoPlayer --- */
-.video-progress-slider .p-slider-handle,
-.video-volume-slider .p-slider-handle {
-  width: 0.9rem;
-  height: 0.9rem;
-  margin-top: -0.45rem;
-  border: 2px solid var(--primary-color);
-  background: white;
-  box-shadow: var(--shadow-1);
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
-
-.video-progress-slider .p-slider-handle:hover,
-.video-volume-slider .p-slider-handle:hover {
-  background-color: var(--primary-hover-color);
-  border-color: var(--primary-hover-color);
-}
-
-.video-progress-slider .p-slider-range,
-.video-volume-slider .p-slider-range {
-  background: var(--primary-color);
-}
-
-.video-progress-slider .p-slider-track,
-.video-volume-slider .p-slider-track {
-  background: rgba(255, 255, 255, 0.3);
-  height: 4px;
+.video-progress-slider .p-slider-handle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.7);
 }
 
 
-/* Responsive: Ajustes para pantallas más pequeñas (ej. móviles) */
-@media (max-width: 767px) {
-  .video-controls-overlay {
-    padding: 0.6rem 0.8rem;
-    /* Por defecto, hacemos que el overlay sea más sutil o completamente transparente si no está activo */
-    opacity: 0; /* Oculta el overlay por defecto, se mostrará al activar */
-    pointer-events: none; /* Deshabilita clics en el overlay cuando está oculto */
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  /* Cuando el overlay tiene la clase 'active-controls', lo mostramos completamente */
-  .video-controls-overlay.active-controls {
-    opacity: 1;
-    pointer-events: auto; /* Habilita clics cuando está visible */
-  }
-
-  /* REORGANIZACIÓN DE CONTROLES EN MÓVILES */
-  .controls-row {
-    display: flex; /* Asegura que controls-row es flexbox */
-    flex-direction: row; /* Los botones principales en fila */
-    justify-content: space-between; /* Espacia los botones de play/pause y fullscreen */
+/* Barra de Controles Inferior */
+.controls-bar-bottom {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0; /* No necesitamos gap entre los dos elementos principales */
+    padding: 0.5rem 1rem;
+    background-color: var(--controls-bg);
     width: 100%;
-    /* Añadimos un flex-wrap para que los elementos que se muestren luego puedan ir debajo */
-    flex-wrap: wrap; /* Importante para que los sliders aparezcan en una nueva línea cuando se muestren */
-  }
+    z-index: 13;
+}
 
-  /* Ocultar barra de progreso y volumen por defecto en móviles */
-  .video-progress-area,
-  .video-volume-controls {
-    display: none; /* Oculta estos elementos por defecto en móviles */
-    width: 100%; /* Asegura que tomen todo el ancho cuando se muestren */
-  }
+.controls-left, .controls-right {
+    display: flex;
+    align-items: center;
+}
 
-  /* Mostrar barra de progreso y volumen cuando el overlay está activo */
-  .video-controls-overlay.active-controls .video-progress-area,
-  .video-controls-overlay.active-controls .video-volume-controls {
-    display: flex; /* Muestra estos elementos cuando el overlay es 'active-controls' */
-    /* Puedes añadir un delay o animación si quieres, ej: transition-delay: 0.1s; */
-  }
+/* Estilos para los botones de PrimeReact en los controles */
+.controls-bar-bottom .p-button {
+    background: transparent;
+    border: none;
+    color: var(--primary-color-controls);
+    margin-right: 0.5rem;
+    padding: 0.5rem;
+    transition: color 0.2s;
+}
 
-  /* Aseguramos el orden de los elementos cuando están visibles */
-  .video-play-pause-btn { order: 1; }
-  .video-fullscreen-btn { order: 2; }
-  .video-progress-area { order: 3; margin-top: 0.8rem; } /* Espacio entre los botones y la barra de progreso */
-  .video-volume-controls { order: 4; margin-top: 0.4rem; } /* Espacio entre la barra de progreso y el volumen */
+.controls-bar-bottom .p-button:hover {
+    color: var(--hover-color-controls);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.controls-bar-bottom .p-button:focus {
+    box-shadow: none; /* Quitamos el box-shadow de focus por defecto */
+}
+
+/* Display de Tiempo */
+.time-display {
+    color: var(--primary-color-controls);
+    font-size: 0.9rem;
+    margin-right: 1rem;
+    font-weight: 500;
+    min-width: 90px; /* Espacio fijo para el tiempo */
+}
+
+/* Controles de Volumen */
+.volume-slider-container {
+    width: 80px; /* Ancho del slider de volumen */
+    margin-right: 1rem;
+}
+/* Estilo del slider de volumen */
+.volume-slider .p-slider-range {
+    background: var(--primary-color-controls);
+}
+.volume-slider .p-slider-handle {
+    height: 10px;
+    width: 10px;
+    margin-top: -2px;
+    background: var(--primary-color-controls);
+    border: 2px solid var(--controls-bg);
+}
 
 
-  /* Ajustes de tamaño de botones en móvil */
-  .video-play-pause-btn {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.2rem !important;
-  }
+/* ---------------------------------------------------- */
+/* Metadatos Inferiores */
+/* ---------------------------------------------------- */
 
-  .video-volume-btn {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.9rem !important;
-  }
+.video-metadata-below-player {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+}
 
-  .video-fullscreen-btn {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.2rem !important;
-  }
+.video-title-below {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-color, #333);
+}
 
-  .time-current,
-  .time-duration {
-    font-size: 0.65rem;
-    min-width: 30px;
-  }
+.video-artist-info-below {
+    font-size: 0.9rem;
+    color: var(--text-color-secondary, #6c757d);
+}
 
-  .video-volume-slider {
-    width: 60px; /* Ancho fijo para el slider de volumen en móvil, ajusta si es necesario */
-    flex-grow: 0;
-  }
+/* ---------------------------------------------------- */
+/* Media Queries (Responsividad) */
+/* ---------------------------------------------------- */
 
-  /* ... (mantén los estilos de .video-metadata-below-player y .video-title-below, .video-artist-info-below) ... */
+@media screen and (max-width: 768px) {
+    .video-player-wrapper {
+        margin: 0 auto 1rem;
+    }
+
+    /* Ocultar el slider de volumen en móviles para simplificar la UI */
+    .volume-slider-container {
+        display: none; 
+    }
+
+    /* Ocultar el botón de mute/unmute si el slider está oculto, o dejar solo el mute */
+    .volume-mute-btn {
+        margin-right: 0;
+    }
+    
+    /* Disminuir el tamaño de los iconos y botones */
+    .controls-bar-bottom .p-button {
+        padding: 0.3rem;
+        margin-right: 0.2rem;
+    }
+
+    .controls-bar-bottom .p-button .pi {
+        font-size: 1.1rem;
+    }
+
+    /* Ajustar tamaño del tiempo */
+    .time-display {
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+        min-width: 80px;
+    }
+
+    .video-title-below {
+        font-size: 1.2rem;
+    }
+
+    .video-artist-info-below {
+        font-size: 0.8rem;
+    }
 }
