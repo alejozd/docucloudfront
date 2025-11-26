@@ -19,6 +19,11 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   const [displayBasic, setDisplayBasic] = useState(false); // Estado para el Dialog de PrimeReact (para flotante)
   const [showFullControls, setShowFullControls] = useState(false);
 
+  // ==========================================================
+  // [NUEVO] ESTADO PARA EL WAKE LOCK
+  // ==========================================================
+  const [wakeLock, setWakeLock] = useState(null);
+
   const formatTime = (time) => {
     if (isNaN(time) || time < 0) return "00:00"; // Manejar valores negativos o NaN
     const minutes = Math.floor(time / 60);
@@ -28,213 +33,336 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
       .padStart(2, "0")}`;
   };
 
-  const togglePlay = () => {
-    if (videoRef.current.paused || videoRef.current.ended) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
+  const togglePlayPause = () => {
+    const videoEl = videoRef.current;
+    if (videoEl) {
+      if (isPlaying) {
+        videoEl.pause();
+        setIsPlaying(false);
+      } else {
+        videoEl
+          .play()
+          .catch((e) => console.error("Error al reproducir video:", e));
+        setIsPlaying(true);
+      }
+    }
+    setShowFullControls(true); // Mostrar controles al hacer clic
+  };
+
+  const handleSeek = (e) => {
+    if (isSeeking && videoRef.current) {
+      const newTime = (e.value * videoDuration) / 100;
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
   };
 
-  const handleTimeUpdate = () => {
-    if (!isSeeking && videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
+  const onLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
       setVideoDuration(videoRef.current.duration);
-    }
-  };
+      videoRef.current.volume = volume / 100; // Aplicar volumen inicial
 
-  const handleSeekingChange = (e) => {
-    // Esto se llama cuando el usuario está arrastrando el slider (cambio en el valor)
-    setCurrentTime(e.value);
-    setIsSeeking(true);
-  };
-
-  const handleSeekEnd = (e) => {
-    // Esto se llama cuando el usuario suelta el slider
-    if (videoRef.current) {
-      videoRef.current.currentTime = e.value;
-    }
-    setIsSeeking(false);
-  };
-
-  const handleVolumeChange = (e) => {
-    const newVolume = e.value;
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume / 100;
-      if (newVolume === 0) {
-        setIsMuted(true);
-      } else if (isMuted) {
-        setIsMuted(false);
-      }
-    }
-  };
-
-  const toggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    if (videoRef.current) {
-      videoRef.current.muted = newMutedState;
-      // Si silenciamos, guardamos el volumen anterior, pero el estado principal es 'muted'
-      if (!newMutedState && volume === 0) {
-        // Si desmuteamos y el volumen estaba en 0, lo ponemos en 50
-        setVolume(50);
-        videoRef.current.volume = 0.5;
-      }
-    }
-  };
-
-  // Lógica de pantalla completa nativa
-  const handleFullScreen = () => {
-    if (document.fullscreenEnabled) {
-      if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen().catch((err) => {
-          console.error(
-            `Error intentando entrar en pantalla completa: ${err.message} (${err.name})`
+      // Intentar reproducción automática (se gestiona la promesa)
+      videoRef.current
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          setShowFullControls(false);
+        })
+        .catch((e) => {
+          // Fallo en Autoplay: El video se queda pausado, el usuario debe interactuar.
+          console.warn(
+            "Autoplay bloqueado. El usuario debe hacer clic en Play."
           );
-          setDisplayBasic(true); // Fallback al Dialog flotante
+          setIsPlaying(false);
+          setShowFullControls(true);
         });
-      } else {
-        document.exitFullscreen();
-      }
-    } else {
-      // Si la API de pantalla completa nativa no está disponible, usar el Dialog flotante
-      setDisplayBasic(true);
-    }
-  };
-
-  useEffect(() => {
-    // Escucha cambios en el estado de pantalla completa nativa
-    const fullscreenChangeHandler = () => {
-      setIsFullScreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", fullscreenChangeHandler);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", fullscreenChangeHandler);
-    };
-  }, []);
-
-  const handleMouseEnter = () => setShowFullControls(true);
-  const handleMouseLeave = () => setShowFullControls(false);
-
-  // Asegurar que el `videoRef` esté listo para las interacciones
-  useEffect(() => {
-    if (videoRef.current) {
-      // Inicializar el volumen
-      videoRef.current.volume = volume / 100;
     }
   }, [volume]);
 
-  // Se muestra una Card si el video está inactivo (por ahora)
-  if (!src) {
-    return (
-      <Card
-        title="Reproductor de Video"
-        className="p-d-flex p-ai-center p-jc-center"
-      >
-        <p className="p-text-center">Seleccione un video para comenzar.</p>
-      </Card>
-    );
-  }
+  const onTimeUpdate = useCallback(() => {
+    if (videoRef.current && !isSeeking) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  }, [isSeeking]);
+
+  const onEnded = useCallback(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setShowFullControls(true); // Mostrar controles al finalizar
+  }, []);
+
+  // Función para manejar el Fullscreen nativo
+  const toggleFullScreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    if (!isFullScreen) {
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
+      } else {
+        // Si falla el nativo, intenta el Dialog flotante de PrimeReact
+        setDisplayBasic(true);
+        return;
+      }
+      setIsFullScreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  };
+
+  // ==========================================================
+  // [NUEVO] Manejo de Screen Wake Lock (Evita que la pantalla se apague)
+  // ==========================================================
+  useEffect(() => {
+    if ("wakeLock" in navigator) {
+      if (isPlaying) {
+        // Lógica para adquirir el bloqueo
+        const acquireLock = async () => {
+          try {
+            const lock = await navigator.wakeLock.request("screen");
+            setWakeLock(lock);
+            console.log("✅ Screen Wake Lock adquirido.");
+
+            lock.addEventListener("release", () => {
+              setWakeLock(null);
+              console.log("Wake Lock liberado por el sistema.");
+            });
+          } catch (err) {
+            console.warn(
+              "⚠️ Fallo al adquirir Wake Lock (puede ser bloqueado por el navegador):",
+              err.message
+            );
+          }
+        };
+
+        // Solo intentar adquirir si aún no lo tenemos
+        if (!wakeLock) {
+          acquireLock();
+        }
+      } else {
+        // Lógica para liberar el bloqueo si el video está pausado o terminado
+        if (wakeLock) {
+          wakeLock
+            .release()
+            .then(() => {
+              setWakeLock(null);
+              console.log("🔒 Screen Wake Lock liberado.");
+            })
+            .catch((err) => {
+              console.error("❌ Error al liberar Wake Lock:", err.message);
+            });
+        }
+      }
+    } else {
+      console.log("Wake Lock API no soportada en este dispositivo.");
+    }
+
+    // Función de limpieza: Se ejecuta al desmontar el componente.
+    return () => {
+      // Intentar liberar si existe un bloqueo activo y no ha sido liberado
+      if (wakeLock && !wakeLock.released) {
+        wakeLock
+          .release()
+          .then(() => setWakeLock(null))
+          .catch((err) =>
+            console.error(
+              "❌ Error al liberar Wake Lock en limpieza:",
+              err.message
+            )
+          );
+      }
+    };
+  }, [isPlaying, wakeLock]); // Depende solo de isPlaying
+
+  // useEffect existente para listeners del elemento de video y full screen
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (videoEl) {
+      setCurrentTime(0);
+      setVideoDuration(duration || 0); // Resetear duración
+
+      // Adjuntar listeners
+      videoEl.addEventListener("loadedmetadata", onLoadedMetadata);
+      videoEl.addEventListener("timeupdate", onTimeUpdate);
+      videoEl.addEventListener("ended", onEnded);
+
+      // Listener para cambios de volumen (si es necesario)
+      const handleVolumeChange = () => setVolume(videoEl.volume * 100);
+      videoEl.addEventListener("volumechange", handleVolumeChange);
+
+      // Función de limpieza
+      return () => {
+        videoEl.removeEventListener("loadedmetadata", onLoadedMetadata);
+        videoEl.removeEventListener("timeupdate", onTimeUpdate);
+        videoEl.removeEventListener("ended", onEnded);
+        videoEl.removeEventListener("volumechange", handleVolumeChange);
+      };
+    }
+  }, [src, duration, onLoadedMetadata, onTimeUpdate, onEnded]);
+
+  // useEffect para manejar el cambio de estado de pantalla completa
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullScreenChange);
+    document.addEventListener("msfullscreenchange", handleFullScreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullScreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullScreenChange
+      );
+    };
+  }, []);
 
   return (
-    <div className="video-player-wrapper">
+    <Card className="video-player-card">
       <div
-        className={`video-player-container ${
-          showFullControls || !isPlaying ? "full-controls" : ""
-        }`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={togglePlay} // Click en el video principal para Play/Pause
-        ref={containerRef} // Asignamos la referencia al contenedor
+        className="video-player-container"
+        ref={containerRef}
+        onMouseEnter={() => setShowFullControls(true)}
+        onMouseLeave={() => {
+          if (isPlaying) {
+            setShowFullControls(false);
+          }
+        }}
       >
         <video
           ref={videoRef}
           src={src}
-          // Eliminamos width: "100%" y height: "100%" de los estilos en línea
-          // para que el CSS (padding hack) controle el tamaño y aspect ratio.
-          style={{ objectFit: "contain" }}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onDoubleClick={handleFullScreen} // Doble clic para pantalla completa
+          preload="metadata"
+          className="video-display"
+          onClick={togglePlayPause}
+          crossOrigin="anonymous" // Necesario para CORS en algunos navegadores
         />
 
-        {/* CONTROLES DE SUPERPOSICIÓN */}
-        <div className="video-controls-overlay">
-          {/* BARRA DE TIEMPO / SLIDER */}
-          <div className="time-progress-bar">
-            <span className="time-display">{formatTime(currentTime)}</span>
-            <Slider
-              value={currentTime}
-              min={0}
-              max={videoDuration}
-              onChange={handleSeekingChange}
-              onSlideEnd={handleSeekEnd}
-              step={0.1} // Permite un movimiento más suave
-            />
-            <span className="time-display">{formatTime(videoDuration)}</span>
-          </div>
+        {/* ... Resto del componente (Overlay y Controles) ... */}
 
-          {/* BOTONES PRINCIPALES */}
-          <div className="video-player-controls">
-            {/* Play/Pause */}
+        {/* Overlay para el botón central de Play/Pause */}
+        {showFullControls && (
+          <div className="video-controls-overlay" onClick={togglePlayPause}>
+            <i
+              className={`pi ${
+                isPlaying ? "pi-pause" : "pi-play"
+              } play-pause-icon`}
+            ></i>
+          </div>
+        )}
+
+        {/* Barra de Controles */}
+        <div
+          className={`video-player-controls ${
+            showFullControls ? "visible" : "hidden"
+          }`}
+          onMouseEnter={(e) => e.stopPropagation()} // Evita que el ratón se vaya del contenedor y oculte los controles
+        >
+          {/* Fila de controles inferiores */}
+          <div className="video-controls-bottom">
+            {/* Botón de Play/Pause */}
             <Button
               icon={isPlaying ? "pi pi-pause" : "pi pi-play"}
-              className="p-button-rounded"
-              onClick={(e) => {
-                e.stopPropagation(); // Previene el togglePlay doble
-                togglePlay();
-              }}
+              onClick={togglePlayPause}
+              className="p-button-rounded p-button-text p-button-lg p-mr-2"
+              style={{ width: "30px", height: "30px", padding: 0 }}
             />
 
-            {/* Controles de Volumen */}
-            <div className="volume-button-group p-d-flex p-ai-center">
+            {/* Tiempo Actual */}
+            <div className="time-display">{formatTime(currentTime)}</div>
+
+            {/* Barra de Progreso (Slider) */}
+            <div className="time-progress-bar">
+              <Slider
+                value={
+                  videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0
+                }
+                onChange={(e) => {
+                  if (videoRef.current) {
+                    const newTime = (e.value * videoDuration) / 100;
+                    videoRef.current.currentTime = newTime;
+                    setCurrentTime(newTime);
+                  }
+                }}
+                onSlideStart={() => setIsSeeking(true)}
+                onSlideEnd={(e) => {
+                  setIsSeeking(false);
+                  handleSeek(e); // Aplicar el valor final al soltar
+                }}
+                className="time-slider"
+                step={0.1}
+              />
+            </div>
+
+            {/* Duración Total */}
+            <div className="time-display">{formatTime(videoDuration)}</div>
+
+            {/* Control de Volumen */}
+            <div className="volume-control">
               <Button
                 icon={
                   isMuted || volume === 0
                     ? "pi pi-volume-off"
+                    : volume < 50
+                    ? "pi pi-volume-down"
                     : "pi pi-volume-up"
                 }
-                className="p-button-rounded"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMute();
+                onClick={() => {
+                  const newMuted = !isMuted;
+                  setIsMuted(newMuted);
+                  if (videoRef.current) {
+                    videoRef.current.muted = newMuted;
+                  }
                 }}
+                className="p-button-rounded p-button-text p-button-lg p-mr-2"
+                style={{ width: "30px", height: "30px", padding: 0 }}
               />
-              <div
-                className={`volume-control ${
-                  isMuted || volume === 0 ? "active" : ""
-                }`}
-                onClick={(e) => e.stopPropagation()} // Previene el togglePlay
-              >
-                <Slider
-                  value={volume}
-                  min={0}
-                  max={100}
-                  onChange={handleVolumeChange}
-                  orientation="horizontal"
-                />
-              </div>
+              <Slider
+                value={volume}
+                onChange={(e) => {
+                  setVolume(e.value);
+                  if (videoRef.current) {
+                    videoRef.current.volume = e.value / 100;
+                    if (e.value > 0 && isMuted) {
+                      setIsMuted(false);
+                      videoRef.current.muted = false;
+                    }
+                  }
+                }}
+                className="volume-slider"
+                step={1}
+                min={0}
+                max={100}
+              />
             </div>
 
-            <div style={{ flexGrow: 1 }}></div>
-
-            {/* Fullscreen Nativo/Dialog */}
+            {/* Botón de Pantalla Completa */}
             <Button
               icon={isFullScreen ? "pi pi-window-minimize" : "pi pi-arrows-alt"}
-              className="p-button-rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFullScreen();
+              onClick={toggleFullScreen}
+              className="p-button-rounded p-button-text p-button-lg"
+              style={{
+                width: "30px",
+                height: "30px",
+                padding: 0,
+                marginLeft: "0.5rem",
               }}
             />
           </div>
@@ -277,12 +405,10 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
             objectFit: "contain",
             backgroundColor: "black",
           }}
-          onEnded={() => {
-            setDisplayBasic(false); // Cierra el dialog al terminar
-          }}
+          onEnded={onEnded} // Reutilizar el handler de fin
         />
       </Dialog>
-    </div>
+    </Card>
   );
 };
 
