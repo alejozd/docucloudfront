@@ -43,7 +43,7 @@ const BatteryStatus = () => {
     <div className="card flex justify-content-center">
       <Card
         title="Estado de la Batería"
-        subTitle="Equipo HP Mini 210"
+        subTitle="Equipo Dell Inspiron 3421"
         className="w-full max-w-sm shadow-lg"
         footer={footer}
       >
