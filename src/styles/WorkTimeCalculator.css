@@ -1,148 +1,328 @@
-/* WorkTimeCalculator.css */
-
+/* Contenedor Principal */
 .work-time-calculator {
-  max-width: 500px;
+  max-width: 480px;
   margin: 2rem auto;
-  font-family: "Roboto", sans-serif;
-  /* Asegurar que use el 100% del ancho disponible en móviles */
-  width: 95%; 
+  font-family: 'Roboto', sans-serif;
+  width: 92%;
 }
 
-.work-time-calculator .p-card {
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
-  transition: box-shadow 0.3s ease-in-out;
+.work-time-calculator h2 {
+  text-align: center;
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
 }
 
-.work-time-calculator .p-field {
-  margin-bottom: 1.75rem;
+.main-card {
+  border-radius: 20px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+  padding: 1rem;
 }
 
-.work-time-calculator .p-field label {
+/* Selector de Jornada */
+.section-title {
   display: block;
-  font-weight: 600;
-  font-size: 1.1rem; 
-  margin-bottom: 0.6rem;
-  color: #333;
-}
-
-/* Estilo para los TimePicker de MUI */
-.work-time-calculator .MuiInputBase-root {
-  width: 100%;
-  border-radius: 8px;
-  padding: 0.3rem 0.5rem;
-  font-size: 1rem;
-}
-
-.work-time-calculator .MuiInputBase-root fieldset {
-  border-color: #ccc;
-  transition: border-color 0.3s ease;
-}
-
-.work-time-calculator .MuiInputBase-root:hover fieldset {
-  border-color: #7c69ef;
-}
-
-.work-time-calculator .MuiInputBase-root.Mui-focused fieldset {
-  border-color: #624de6;
-  box-shadow: 0 0 0 2px rgba(98, 77, 230, 0.2);
-}
-
-/* Botón de calcular */
-.work-time-calculator .p-button {
-  width: 100%;
-  font-weight: bold;
-  border-radius: 8px;
-  padding: 0.8rem;
-  font-size: 1.1rem;
-  background-color: #624de6; /* Color primario */
-  border-color: #624de6;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.work-time-calculator .p-button:hover {
-  background-color: #553ecc;
-  border-color: #553ecc;
-}
-
-/* Resultados */
-.work-time-calculator .p-card.p-component.p-mt-4 {
-  background-color: #f0f7ff;
-  color: #004d80;
   text-align: center;
-  border: 1px solid #b3d9ff;
-  border-radius: 8px;
-  margin-top: 1.5rem !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #a0a0a0 !important;
+  margin-bottom: 1rem !important;
 }
 
-.work-time-calculator .p-card.p-component p {
-  margin: 0.7rem 0;
-  font-size: 1.1rem;
+.custom-segmented-control {
+  display: flex;
+  margin-bottom: 2rem;
 }
 
-.work-time-calculator .p-card.p-component strong {
-    font-weight: 600;
+.custom-segmented-control .p-button {
+  background: #f8f9fa !important;
+  color: #666 !important;
+  border: 1px solid #eee !important;
+  flex: 1;
+  font-weight: 600 !important;
 }
 
-/* Mensaje de error */
-.work-time-calculator .p-error {
-  color: #d32f2f;
-  background-color: #ffebee;
-  border: 1px solid #d32f2f;
-  padding: 0.7rem;
-  border-radius: 8px;
-  font-weight: 500;
-  text-align: center;
+.custom-segmented-control .p-button.p-highlight {
+  background: #624de6 !important;
+  color: white !important;
+  border-color: #624de6 !important;
+  box-shadow: 0 4px 12px rgba(98, 77, 230, 0.3) !important;
+}
+
+/* Inputs y TimePickers */
+.p-field {
+  margin-bottom: 1.2rem;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #624de6 !important;
+}
+
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #624de6 !important;
+  border-width: 2px !important;
+}
+
+/* Botonera */
+.button-group {
+  display: flex;
+  gap: 12px;
   margin-top: 1.5rem;
 }
 
-/* Título */
-.work-time-calculator h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #2c2c2c;
-  margin-bottom: 2rem;
-  text-align: center;
+.calculate-btn {
+  flex: 2;
+  background: #624de6 !important;
+  border: none !important;
+  padding: 1rem !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s !important;
 }
 
-/* Estilos para el selector de duración de jornada */
-.work-time-calculator .job-duration-selector {
-  margin-top: 0.5rem; 
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1.5rem;
+.calculate-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
-.work-time-calculator .job-duration-selector > label {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: #2c2c2c;
-    display: block;
+.reset-btn {
+  flex: 1;
+  background: transparent !important;
+  color: #624de6 !important;
+  border: 1px solid #624de6 !important;
+  border-radius: 12px !important;
 }
 
-/* Contenedor de Radio Buttons */
-.work-time-calculator .p-formgrid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.reset-btn:hover {
+  background: rgba(98, 77, 230, 0.05) !important;
 }
 
-/* Opción de Radio Button individual */
-.work-time-calculator .p-field-radiobutton {
+/* Tarjeta de Resultados */
+.result-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+  margin-top: 1.5rem !important;
+  background: linear-gradient(135deg, #f8faff 0%, #eff3ff 100%) !important;
+  border-left: 6px solid #624de6 !important;
+  border: none;
+  border-radius: 15px !important;
+}
+
+.result-container {
+  padding: 0.5rem;
+}
+
+.result-item {
   display: flex;
   align-items: center;
-  padding: 0.3rem 0; 
-  cursor: pointer;
+  gap: 15px;
+  margin: 0.5rem 0;
 }
 
-.work-time-calculator .p-field-radiobutton label {
-  margin-left: 0.7rem;
-  font-weight: 400;
-  font-size: 1rem; 
-  cursor: pointer;
-  color: #444;
-  white-space: nowrap; 
+.result-item i {
+  font-size: 1.4rem;
+  color: #624de6;
+}
+
+.result-item small {
+  display: block;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+.result-item strong {
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.total-worked {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(98, 77, 230, 0.1);
+}
+
+/* Error */
+.p-error-message {
+  color: #e74c3c;
+  background: #fdedec;
+  padding: 0.8rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  border: 1px solid #fadbd8;
+}
+
+/* ... (Mantén tu CSS anterior para el contenedor, h2, y main-card) ... */
+
+.work-time-calculator {
+  max-width: 480px;
+  margin: 2rem auto;
+  font-family: 'Roboto', sans-serif;
+  width: 92%;
+}
+
+.main-card {
+  border-radius: 20px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+  padding: 1rem;
+}
+
+/* Selector de Jornada */
+.section-title {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #a0a0a0 !important;
+  margin-bottom: 1.2rem !important;
+}
+
+.custom-segmented-control {
+  display: flex;
+  margin-bottom: 2rem;
+}
+
+.custom-segmented-control .p-button {
+  background: #f8f9fa !important;
+  color: #666 !important;
+  border: 1px solid #eee !important;
+  flex: 1;
+  font-weight: 600 !important;
+}
+
+.custom-segmented-control .p-button.p-highlight {
+  background: #624de6 !important;
+  color: white !important;
+  border-color: #624de6 !important;
+  box-shadow: 0 4px 12px rgba(98, 77, 230, 0.3) !important;
+}
+
+/* Botonera */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 1.5rem;
+}
+
+.calculate-btn {
+  flex: 2;
+  background: #624de6 !important;
+  border: none !important;
+  padding: 1rem !important;
+  border-radius: 12px !important;
+}
+
+.reset-btn {
+  flex: 1;
+  background: white !important;
+  color: #624de6 !important;
+  border: 1px solid #624de6 !important;
+  border-radius: 12px !important;
+}
+
+/* --- NUEVA TARJETA DE RESULTADOS --- */
+.result-card {
+  margin-top: 2rem !important;
+  /* Fondo muy tenue para diferenciarlo del blanco de la main-card */
+  background: #f8faff !important; 
+  border: 1px solid #eef0f7 !important;
+  border-radius: 16px !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+  overflow: hidden;
+  border-left: 6px solid #624de6 !important;
+  padding: 0.5rem !important;
+}
+
+.result-grid {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+.result-block {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.result-icon-box {
+  width: 48px;
+  height: 48px;
+  background: #ffffff; /* Icono sobre fondo blanco para que resalte */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #624de6;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 10px rgba(98, 77, 230, 0.1);
+}
+
+.result-icon-box.accent {
+  color: #f39c12;
+  box-shadow: 0 4px 10px rgba(243, 156, 18, 0.1);
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-label {
+  font-size: 0.75rem;
+  color: #839192;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.result-value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.result-divider {
+  height: 1px;
+  background: #e2e8f0; /* Color gris suave pero sólido */
+  margin: 0 1.5rem;
+}
+
+/* Animación */
+.result-fade-in {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsivo: Si la pantalla es ancha, ponlos lado a lado */
+@media (min-width: 450px) {
+  .result-grid {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .result-divider {
+    width: 2px; /* Un poco más gruesa si es vertical */
+    height: 50px;
+    background: #cbd5e1;
+    margin: 0;
+  }
 }
