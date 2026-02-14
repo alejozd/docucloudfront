@@ -19,6 +19,24 @@ const initialClienteState = {
   email: "",
 };
 
+const getClientesPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.clientes)) return payload.clientes;
+  return [];
+};
+
+const getApiMessage = (error, fallbackMessage) => {
+  return (
+    error?.response?.data?.error ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallbackMessage
+  );
+};
+
+const CLIENTES_ENDPOINTS = ["/api/clientes", "/clientes"];
+
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
   const [clienteDialog, setClienteDialog] = useState(false);
@@ -32,15 +50,57 @@ const Clientes = () => {
   const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
   const toast = useRef(null);
 
+  const requestClientes = async (method, payload = null, id = null) => {
+    let latestError;
+
+    for (const endpoint of CLIENTES_ENDPOINTS) {
+      const url = `${Config.apiUrl}${endpoint}${id ? `/${id}` : ""}`;
+
+      try {
+        if (method === "get") {
+          return await axios.get(url);
+        }
+
+        if (method === "post") {
+          return await axios.post(url, payload);
+        }
+
+        if (method === "put") {
+          return await axios.put(url, payload);
+        }
+
+        if (method === "delete") {
+          return await axios.delete(url);
+        }
+      } catch (error) {
+        latestError = error;
+
+        const status = error?.response?.status;
+        if (status && status < 500 && status !== 404) {
+          break;
+        }
+      }
+    }
+
+    throw latestError;
+  };
+
   const fetchClientes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${Config.apiUrl}/api/clientes`);
-      setClientes(response.data);
+      const response = await requestClientes("get");
+      const payload = getClientesPayload(response.data);
+      setClientes(payload);
       setLoading(false);
-      console.log("Clientes recuperados:", response.data);
+      console.log("Clientes recuperados:", payload);
     } catch (error) {
       console.error("Error recuperando clientes", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudieron recuperar los clientes"),
+        life: 5000,
+      });
       setLoading(false);
     }
   };
@@ -68,9 +128,10 @@ const Clientes = () => {
       try {
         if (cliente.idcliente) {
           setLoading(true);
-          const response = await axios.put(
-            `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
-            cliente
+          const response = await requestClientes(
+            "put",
+            cliente,
+            cliente.idcliente
           );
           const index = _clientes.findIndex(
             (c) => c.idcliente === cliente.idcliente
@@ -86,10 +147,7 @@ const Clientes = () => {
           console.log("Cliente actualizado:", response.data);
         } else {
           console.log("cliente: ", cliente);
-          const response = await axios.post(
-            `${Config.apiUrl}/api/clientes`,
-            cliente
-          );
+          const response = await requestClientes("post", cliente);
           _clientes.push(response.data);
           toast.current.show({
             severity: "success",
@@ -106,7 +164,13 @@ const Clientes = () => {
         setLoading(false);
         fetchClientes();
       } catch (error) {
-        console.error("Error guardando cliente:", error.response.data.error);
+        console.error("Error guardando cliente:", error);
+        toast.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: getApiMessage(error, "No se pudo guardar el cliente"),
+          life: 5000,
+        });
         setLoading(false);
       }
     }
@@ -124,7 +188,7 @@ const Clientes = () => {
 
   const deleteCliente = async () => {
     try {
-      await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
+      await requestClientes("delete", null, cliente.idcliente);
       let _clientes = clientes.filter(
         (val) => val.idcliente !== cliente.idcliente
       );
@@ -140,6 +204,12 @@ const Clientes = () => {
       console.log("Cliente eliminado:", cliente);
     } catch (error) {
       console.error("Error eliminando cliente:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudo eliminar el cliente"),
+        life: 5000,
+      });
     }
   };
 
