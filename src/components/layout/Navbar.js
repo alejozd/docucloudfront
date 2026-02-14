@@ -135,6 +135,12 @@ const Navbar = () => {
           url: "/SalesDashboard",
           id: "SalesDashboard",
         },
+        {
+          label: "Dashboard Toma Tensión",
+          icon: "pi pi-heart",
+          url: "/toma-tension-dashboard",
+          id: "toma-tension-dashboard",
+        },
       ],
     },
     {
