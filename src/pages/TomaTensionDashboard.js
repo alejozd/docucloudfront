@@ -17,25 +17,92 @@ const getNormalizedData = (payload) => {
   return [];
 };
 
+const normalizeText = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+const getStatusCandidate = (row) => {
+  if (!row || typeof row !== "object") return null;
+
+  const directCandidates = [
+    row?.synced,
+    row?.sincronizado,
+    row?.isSynced,
+    row?.is_sync,
+    row?.status,
+    row?.estado,
+    row?.syncStatus,
+    row?.estadoSincronizacion,
+    row?.sync_result,
+  ];
+
+  const firstDirectValue = directCandidates.find(
+    (value) => value !== undefined && value !== null && value !== ""
+  );
+
+  if (firstDirectValue !== undefined) return firstDirectValue;
+
+  // Fallback: buscar cualquier campo cuyo nombre sugiera "estado/sync"
+  const dynamicKey = Object.keys(row).find((key) => {
+    const normalizedKey = normalizeText(key);
+    return (
+      normalizedKey.includes("status") ||
+      normalizedKey.includes("estado") ||
+      normalizedKey.includes("sync") ||
+      normalizedKey.includes("sincron")
+    );
+  });
+
+  return dynamicKey ? row[dynamicKey] : null;
+};
+
 const parseSyncStatus = (row) => {
-  const statusValue =
-    row?.synced ?? row?.sincronizado ?? row?.status ?? row?.estado ?? null;
+  const statusValue = getStatusCandidate(row);
 
   if (typeof statusValue === "boolean") {
     return statusValue ? "Sincronizado" : "Pendiente";
   }
 
+  if (typeof statusValue === "number") {
+    if (statusValue === 1) return "Sincronizado";
+    if (statusValue === 0) return "Pendiente";
+    if (statusValue < 0) return "Error";
+  }
+
   if (typeof statusValue === "string") {
-    const normalized = statusValue.toLowerCase();
-    if (["sync", "synced", "ok", "success", "sincronizado"].includes(normalized)) {
+    const normalized = normalizeText(statusValue);
+    if (
+      [
+        "sync",
+        "synced",
+        "ok",
+        "success",
+        "sincronizado",
+        "enviado",
+        "completado",
+      ].includes(normalized)
+    ) {
       return "Sincronizado";
     }
-    if (["pending", "pendiente", "in_progress", "processing"].includes(normalized)) {
+    if (
+      ["pending", "pendiente", "in_progress", "processing", "en cola"].includes(
+        normalized
+      )
+    ) {
       return "Pendiente";
     }
-    if (["error", "failed", "fallo", "fallido"].includes(normalized)) {
+    if (["error", "failed", "fallo", "fallido", "rechazado"].includes(normalized)) {
       return "Error";
     }
+  }
+
+  // Heurísticas por presencia de campos comunes cuando no hay un estado explícito.
+  if (row?.error || row?.errorMessage || row?.mensajeError) return "Error";
+  if (row?.syncedAt || row?.fechaSincronizacion || row?.fecha_sync) {
+    return "Sincronizado";
   }
 
   return "Desconocido";
