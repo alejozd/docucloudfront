@@ -7,6 +7,8 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import Config from "../components/features/Config";
 import ClienteDialog from "../pages/ClienteDialog";
 import ComprobantePDF from "./ComprobantePDF";
@@ -235,14 +237,14 @@ const Clientes = () => {
 
   const tableHeader = (
     <div className="clientes-table-header">
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
         <InputText
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
           placeholder="Buscar por nombre, identidad, teléfono o email"
         />
-      </span>
+      </IconField>
       <span>{clientes.length} registros</span>
     </div>
   );

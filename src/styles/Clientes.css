@@ -63,7 +63,7 @@
   flex-wrap: wrap;
 }
 
-.clientes-table-header .p-input-icon-left {
+.clientes-table-header .p-icon-field {
   width: min(100%, 360px);
 }
 
