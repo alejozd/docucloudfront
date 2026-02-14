@@ -17,6 +17,24 @@ const getNormalizedData = (payload) => {
   return [];
 };
 
+
+
+const toNumber = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const formatDate = (value) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("es-CO", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
+
 const parseSyncStatus = (row) => {
   // El endpoint /api/toma-tension/sync no devuelve un campo de estado.
   // Regla funcional acordada: si el registro existe en la respuesta, está sincronizado.
@@ -102,6 +120,52 @@ const TomaTensionDashboard = () => {
     return <Tag value={status} severity={severityMap[status] || "info"} />;
   };
 
+  const averages = useMemo(() => {
+    const metrics = ["sistole", "diastole", "ritmoCardiaco"];
+
+    return metrics.reduce((acc, metric) => {
+      const values = registros
+        .map((registro) => toNumber(registro?.[metric]))
+        .filter((value) => value !== null);
+
+      if (!values.length) {
+        acc[metric] = "-";
+        return acc;
+      }
+
+      const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
+      acc[metric] = avg.toFixed(1);
+      return acc;
+    }, {});
+  }, [registros]);
+
+  const sistoleExtremes = useMemo(() => {
+    const rowsWithSistole = registros
+      .map((registro) => ({
+        sistole: toNumber(registro?.sistole),
+        fecha: registro?.fecha_registro || registro?.created_at || null,
+      }))
+      .filter((row) => row.sistole !== null);
+
+    if (!rowsWithSistole.length) {
+      return { max: "-", min: "-", maxValue: "-", minValue: "-" };
+    }
+
+    const maxRow = rowsWithSistole.reduce((max, row) =>
+      row.sistole > max.sistole ? row : max
+    );
+    const minRow = rowsWithSistole.reduce((min, row) =>
+      row.sistole < min.sistole ? row : min
+    );
+
+    return {
+      max: formatDate(maxRow.fecha),
+      min: formatDate(minRow.fecha),
+      maxValue: maxRow.sistole,
+      minValue: minRow.sistole,
+    };
+  }, [registros]);
+
   return (
     <div className="toma-tension-dashboard">
       <div className="toma-tension-header">
@@ -128,6 +192,19 @@ const TomaTensionDashboard = () => {
         </Card>
         <Card title="Errores" className="kpi-card kpi-card-error">
           <span>{statusStats.Error}</span>
+        </Card>
+        <Card title="Promedios" className="kpi-card kpi-card-avg">
+          <div className="kpi-multiline">
+            <p>Sístole: {averages.sistole}</p>
+            <p>Diástole: {averages.diastole}</p>
+            <p>Ritmo: {averages.ritmoCardiaco}</p>
+          </div>
+        </Card>
+        <Card title="Extremos de Sístole" className="kpi-card kpi-card-extremes">
+          <div className="kpi-multiline">
+            <p>Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})</p>
+            <p>Más baja: {sistoleExtremes.min} ({sistoleExtremes.minValue})</p>
+          </div>
         </Card>
       </div>
 
