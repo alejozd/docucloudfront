@@ -117,16 +117,16 @@ const TomaTensionDashboard = () => {
       {error && <div className="toma-tension-error">{error}</div>}
 
       <div className="toma-tension-kpis">
-        <Card title="Total de registros" className="kpi-card">
+        <Card title="Total de registros" className="kpi-card kpi-card-total">
           <span>{totalRegistros}</span>
         </Card>
-        <Card title="Sincronizados" className="kpi-card">
+        <Card title="Sincronizados" className="kpi-card kpi-card-sync">
           <span>{statusStats.Sincronizado}</span>
         </Card>
-        <Card title="Pendientes" className="kpi-card">
+        <Card title="Pendientes" className="kpi-card kpi-card-pending">
           <span>{statusStats.Pendiente}</span>
         </Card>
-        <Card title="Errores" className="kpi-card">
+        <Card title="Errores" className="kpi-card kpi-card-error">
           <span>{statusStats.Error}</span>
         </Card>
       </div>
