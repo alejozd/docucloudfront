@@ -5,6 +5,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import { Calendar } from "primereact/calendar";
 import Config from "../components/features/Config";
 import "../styles/TomaTensionDashboard.css";
 
@@ -33,9 +34,14 @@ const formatDate = (value) => {
   });
 };
 
+const toIsoDate = (dateValue) => {
+  if (!dateValue) return "";
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+};
+
 const parseSyncStatus = (row) => {
-  // El endpoint /api/toma-tension/sync no devuelve un campo de estado.
-  // Regla funcional acordada: si el registro existe en la respuesta, está sincronizado.
   if (row && typeof row === "object") return "Sincronizado";
   return "Desconocido";
 };
@@ -56,6 +62,18 @@ const formatValue = (value) => {
 
 const TomaTensionDashboard = () => {
   const [registros, setRegistros] = useState([]);
+  const [filters, setFilters] = useState({
+    fecha_inicio: "",
+    fecha_fin: "",
+    page: 1,
+    limit: 20,
+  });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,21 +82,38 @@ const TomaTensionDashboard = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(
-        `${Config.apiUrl}/api/toma-tension/sync`,
-      );
+      const queryParams = {
+        page: filters.page,
+        limit: filters.limit,
+      };
+
+      if (filters.fecha_inicio) queryParams.fecha_inicio = filters.fecha_inicio;
+      if (filters.fecha_fin) queryParams.fecha_fin = filters.fecha_fin;
+
+      const response = await axios.get(`${Config.apiUrl}/api/toma-tension/sync`, {
+        params: queryParams,
+      });
+
       const data = getNormalizedData(response.data);
+      const serverPagination = response?.data?.pagination;
       setRegistros(data);
+      setPagination({
+        page: serverPagination?.page || filters.page,
+        limit: serverPagination?.limit || filters.limit,
+        total: serverPagination?.total || data.length,
+        totalPages: serverPagination?.totalPages || 1,
+      });
     } catch (requestError) {
       setError(
         requestError?.response?.data?.message ||
           "No se pudo cargar la información de sincronización de toma de tensión.",
       );
       setRegistros([]);
+      setPagination((prev) => ({ ...prev, total: 0, totalPages: 1 }));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -96,7 +131,7 @@ const TomaTensionDashboard = () => {
     return Array.from(uniqueFields);
   }, [registros]);
 
-  const totalRegistros = registros.length;
+  const totalRegistros = pagination.total;
 
   const statusStats = useMemo(
     () => ({
@@ -178,18 +213,71 @@ const TomaTensionDashboard = () => {
         />
       </div>
 
+      <Card title="Filtros" className="toma-tension-filters-card">
+        <div className="toma-tension-filters">
+          <div className="filter-field">
+            <label htmlFor="fecha_inicio">Fecha inicio</label>
+            <Calendar
+              inputId="fecha_inicio"
+              value={filters.fecha_inicio ? new Date(filters.fecha_inicio) : null}
+              onChange={(event) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_inicio: toIsoDate(event.value),
+                  page: 1,
+                }))
+              }
+              dateFormat="yy-mm-dd"
+              showIcon
+              placeholder="YYYY-MM-DD"
+              maxDate={filters.fecha_fin ? new Date(filters.fecha_fin) : undefined}
+            />
+          </div>
+
+          <div className="filter-field">
+            <label htmlFor="fecha_fin">Fecha fin</label>
+            <Calendar
+              inputId="fecha_fin"
+              value={filters.fecha_fin ? new Date(filters.fecha_fin) : null}
+              onChange={(event) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_fin: toIsoDate(event.value),
+                  page: 1,
+                }))
+              }
+              dateFormat="yy-mm-dd"
+              showIcon
+              placeholder="YYYY-MM-DD"
+              minDate={filters.fecha_inicio ? new Date(filters.fecha_inicio) : undefined}
+            />
+          </div>
+
+          <div className="filter-actions">
+            <Button
+              label="Limpiar filtros"
+              icon="pi pi-filter-slash"
+              severity="secondary"
+              outlined
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_inicio: "",
+                  fecha_fin: "",
+                  page: 1,
+                }))
+              }
+            />
+          </div>
+        </div>
+      </Card>
+
       {error && <div className="toma-tension-error">{error}</div>}
 
       <div className="toma-tension-kpis">
         <Card title="Total de registros" className="kpi-card kpi-card-total">
           <span>{totalRegistros}</span>
         </Card>
-        {/* <Card title="Sincronizados" className="kpi-card kpi-card-sync">
-          <span>{statusStats.Sincronizado}</span>
-        </Card>
-        <Card title="Pendientes" className="kpi-card kpi-card-pending">
-          <span>{statusStats.Pendiente}</span>
-        </Card> */}
         <Card title="Errores" className="kpi-card kpi-card-error">
           <span>{statusStats.Error}</span>
         </Card>
@@ -200,10 +288,7 @@ const TomaTensionDashboard = () => {
             <p>Ritmo: {averages.ritmoCardiaco}</p>
           </div>
         </Card>
-        <Card
-          title="Extremos de Sístole"
-          className="kpi-card kpi-card-extremes"
-        >
+        <Card title="Extremos de Sístole" className="kpi-card kpi-card-extremes">
           <div className="kpi-multiline">
             <p>
               Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})
@@ -220,7 +305,20 @@ const TomaTensionDashboard = () => {
           value={registros}
           loading={loading}
           paginator
-          rows={10}
+          lazy
+          first={(pagination.page - 1) * pagination.limit}
+          rows={pagination.limit}
+          totalRecords={pagination.total}
+          rowsPerPageOptions={[10, 20, 50, 100]}
+          paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+          onPage={(event) => {
+            setFilters((prev) => ({
+              ...prev,
+              page: event.page + 1,
+              limit: event.rows,
+            }));
+          }}
           emptyMessage="No hay registros disponibles"
           responsiveLayout="scroll"
           sortMode="multiple"
