@@ -136,7 +136,7 @@ const Home = () => {
         </Card>
 
         <div className="home-card">
-          <OpenWeatherMapComponent city="Bogotá" />
+          <OpenWeatherMapComponent city="Bogotá" compact />
         </div>
       </div>
     </div>
