@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { MeterGroup } from "primereact/metergroup";
 import { Toast } from "primereact/toast";
 import Config from "../../components/features/Config";
+import "../../styles/BatteryStatus.css";
 
 const BATTERY_ENDPOINT = "/api/battery";
 
@@ -29,6 +30,15 @@ const getBatteryLabel = (level) => {
   if (level <= 70) return "Medio";
   return "Alto";
 };
+
+const metricConfig = [
+  { label: "Estado", key: "chargingStatus" },
+  { label: "Energía Total", key: "energyFull" },
+  { label: "Energía Actual", key: "energyNow" },
+  { label: "Capacidad de Diseño", key: "designCapacity" },
+  { label: "Última Capacidad Total", key: "lastFullCapacity" },
+  { label: "Última actualización", key: "updatedAt" },
+];
 
 const BatteryStatus = () => {
   const [batteryInfo, setBatteryInfo] = useState(null);
@@ -73,17 +83,28 @@ const BatteryStatus = () => {
     [batteryInfo?.batteryLevel]
   );
 
+  const batteryColor = useMemo(() => getBatteryColor(batteryLevel), [batteryLevel]);
+
   const meterValues = useMemo(
     () => [
       {
         label: <span className="font-bold">Batería</span>,
         value: batteryLevel,
-        color: getBatteryColor(batteryLevel),
+        color: batteryColor,
         icon: "pi pi-bolt",
       },
     ],
-    [batteryLevel]
+    [batteryLevel, batteryColor]
   );
+
+  const formattedUpdatedAt = updatedAt
+    ? updatedAt.toLocaleString("es-CO", { dateStyle: "short", timeStyle: "medium" })
+    : "-";
+
+  const metricValue = (key) => {
+    if (key === "updatedAt") return formattedUpdatedAt;
+    return batteryInfo?.[key] || "-";
+  };
 
   const footer = (
     <Button
@@ -92,53 +113,46 @@ const BatteryStatus = () => {
       onClick={fetchBatteryStatus}
       disabled={loading}
       loading={loading}
+      className="w-full"
     />
   );
 
   return (
-    <div className="card flex justify-content-center">
+    <div className="battery-status-page">
       <Toast ref={toast} />
       <Card
         title="Estado de la Batería"
         subTitle="Equipo Dell Inspiron 3421"
-        className="w-full max-w-sm shadow-lg"
+        className="battery-status-card"
         footer={footer}
       >
         {batteryInfo ? (
-          <div className="space-y-2 text-center">
-            <div className="flex justify-content-center">
+          <>
+            <div className="battery-hero">
+              <div className="battery-hero-level">
+                <i className="pi pi-bolt" />
+                <span>{batteryLevel.toFixed(1)}%</span>
+              </div>
+              <span className="battery-badge" style={{ backgroundColor: batteryColor }}>
+                {getBatteryLabel(batteryLevel)}
+              </span>
+            </div>
+
+            <div className="battery-meter-wrap">
               <MeterGroup values={meterValues} />
             </div>
 
-            <p>
-              <strong>Nivel:</strong> {batteryLevel.toFixed(1)}% ({getBatteryLabel(batteryLevel)})
-            </p>
-            <p>
-              <strong>Estado:</strong> {batteryInfo.chargingStatus || "-"}
-            </p>
-            <p>
-              <strong>Energía Total:</strong> {batteryInfo.energyFull || "-"}
-            </p>
-            <p>
-              <strong>Energía Actual:</strong> {batteryInfo.energyNow || "-"}
-            </p>
-            <p>
-              <strong>Capacidad de Diseño:</strong> {batteryInfo.designCapacity || "-"}
-            </p>
-            <p>
-              <strong>Última Capacidad Total:</strong> {batteryInfo.lastFullCapacity || "-"}
-            </p>
-            <p>
-              <strong>Última actualización:</strong>{" "}
-              {updatedAt
-                ? updatedAt.toLocaleString("es-CO", { dateStyle: "short", timeStyle: "medium" })
-                : "-"}
-            </p>
-          </div>
+            <div className="battery-metrics">
+              {metricConfig.map((metric) => (
+                <div key={metric.key} className="battery-metric">
+                  <p className="battery-metric-label">{metric.label}</p>
+                  <p className="battery-metric-value">{metricValue(metric.key)}</p>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <p className="text-center text-gray-500">
-            Presiona el botón para obtener la información de la batería.
-          </p>
+          <p className="battery-empty">Presiona el botón para obtener la información de la batería.</p>
         )}
       </Card>
     </div>
