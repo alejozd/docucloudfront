@@ -90,9 +90,12 @@ const TomaTensionDashboard = () => {
       if (filters.fecha_inicio) queryParams.fecha_inicio = filters.fecha_inicio;
       if (filters.fecha_fin) queryParams.fecha_fin = filters.fecha_fin;
 
-      const response = await axios.get(`${Config.apiUrl}/api/toma-tension/sync`, {
-        params: queryParams,
-      });
+      const response = await axios.get(
+        `${Config.apiUrl}/api/toma-tension/sync`,
+        {
+          params: queryParams,
+        },
+      );
 
       const data = getNormalizedData(response.data);
       const serverPagination = response?.data?.pagination;
@@ -207,7 +210,9 @@ const TomaTensionDashboard = () => {
             <label htmlFor="fecha_inicio">Fecha inicio</label>
             <Calendar
               inputId="fecha_inicio"
-              value={filters.fecha_inicio ? new Date(filters.fecha_inicio) : null}
+              value={
+                filters.fecha_inicio ? new Date(filters.fecha_inicio) : null
+              }
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
@@ -218,7 +223,9 @@ const TomaTensionDashboard = () => {
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
-              maxDate={filters.fecha_fin ? new Date(filters.fecha_fin) : undefined}
+              maxDate={
+                filters.fecha_fin ? new Date(filters.fecha_fin) : undefined
+              }
             />
           </div>
 
@@ -237,7 +244,11 @@ const TomaTensionDashboard = () => {
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
-              minDate={filters.fecha_inicio ? new Date(filters.fecha_inicio) : undefined}
+              minDate={
+                filters.fecha_inicio
+                  ? new Date(filters.fecha_inicio)
+                  : undefined
+              }
             />
           </div>
 
@@ -276,7 +287,10 @@ const TomaTensionDashboard = () => {
             <p>Ritmo: {averages.ritmoCardiaco}</p>
           </div>
         </Card>
-        <Card title="Extremos de Sístole" className="kpi-card kpi-card-extremes">
+        <Card
+          title="Extremos de Sístole"
+          className="kpi-card kpi-card-extremes"
+        >
           <div className="kpi-multiline">
             <p>
               Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})
@@ -324,20 +338,14 @@ const TomaTensionDashboard = () => {
             sortable
             style={{ minWidth: "8rem" }}
             body={(rowData) => formatValue(rowData.id)}
+            hidden={true}
           />
           <Column
-            field="paciente"
+            field="paciente_id"
             header="Paciente"
             sortable
             style={{ minWidth: "14rem" }}
-            body={(rowData) => formatValue(rowData.paciente)}
-          />
-          <Column
-            field="documento"
-            header="Documento"
-            sortable
-            style={{ minWidth: "12rem" }}
-            body={(rowData) => formatValue(rowData.documento)}
+            body={(rowData) => formatValue(rowData.paciente_id)}
           />
           <Column
             field="sistole"
@@ -368,11 +376,11 @@ const TomaTensionDashboard = () => {
             body={(rowData) => formatDate(rowData.fecha_registro)}
           />
           <Column
-            field="updated_at"
+            field="created_at"
             header="Actualizado"
             sortable
             style={{ minWidth: "12rem" }}
-            body={(rowData) => formatDate(rowData.updated_at)}
+            hidden={true}
           />
         </DataTable>
       </Card>
