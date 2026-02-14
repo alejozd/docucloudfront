@@ -8,6 +8,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { SelectButton } from "primereact/selectbutton";
+import { Tag } from "primereact/tag";
 
 import "primeicons/primeicons.css";
 import "../../styles/WorkTimeCalculator.css";
@@ -40,11 +41,7 @@ const parsePersistedTime = (value) => {
 
 const normalizeDuration = (value) => {
   const numeric = Number(value);
-  return durationOptions.some((opt) => opt.value === numeric)
-    ? numeric
-    : isFriday()
-      ? 6
-      : 8.5;
+  return durationOptions.some((opt) => opt.value === numeric) ? numeric : isFriday() ? 6 : 8.5;
 };
 
 const calculateWorkedMinutes = ({ entry, lunchOut, lunchIn, exit }) => {
@@ -67,6 +64,12 @@ export default function WorkTimeCalculator() {
     () => ({ entryTime, lunchOutTime, lunchInTime, exitTime }),
     [entryTime, lunchOutTime, lunchInTime, exitTime]
   );
+
+  const completion = useMemo(() => {
+    const requiredCount = timeFields.filter((field) => field.required).length;
+    const completed = timeFields.filter((field) => field.required && isValidDayjs(timeState[field.key])).length;
+    return `${completed}/${requiredCount}`;
+  }, [timeState]);
 
   const showToast = useCallback((summary, detail, severity = "success") => {
     toast.current?.show({ severity, summary, detail, life: 3000 });
@@ -190,8 +193,18 @@ export default function WorkTimeCalculator() {
   return (
     <div className="work-time-calculator">
       <Toast ref={toast} />
-      <h2>Calculadora de Jornada Laboral</h2>
+
+      <div className="work-time-header">
+        <h2>Calculadora de Jornada Laboral</h2>
+        <p>Calcula salida estimada y total trabajado en segundos.</p>
+      </div>
+
       <Card className="main-card">
+        <div className="work-time-hero">
+          <Tag value={`Jornada ${jobDuration}h`} icon="pi pi-briefcase" severity="info" />
+          <Tag value={`Campos completos ${completion}`} icon="pi pi-check-circle" severity="success" />
+        </div>
+
         <div className="p-field job-duration-selector">
           <label className="section-title">Duración de la jornada</label>
           <SelectButton
@@ -220,9 +233,7 @@ export default function WorkTimeCalculator() {
                         required: field.required,
                         InputProps: {
                           startAdornment: (
-                            <span
-                              style={{ marginRight: 8, color: value ? "#624de6" : "#999" }}
-                            >
+                            <span style={{ marginRight: 8, color: value ? "#624de6" : "#999" }}>
                               <i className={`pi ${field.icon}`}></i>
                             </span>
                           ),
