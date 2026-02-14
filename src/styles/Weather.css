@@ -1,0 +1,47 @@
+.weather-page {
+  padding: 1.2rem;
+}
+
+.weather-shell {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+}
+
+.weather-header {
+  padding: 1rem 1rem 0.25rem;
+}
+
+.weather-header h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.weather-header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+}
+
+.weather-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  padding: 0.6rem 1rem 0;
+}
+
+.weather-input-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+}
+
+.weather-quick-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.weather-results {
+  margin-top: 1rem;
+}

@@ -1,14 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
+import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import Config from "../components/features/Config";
 import ClienteDialog from "../pages/ClienteDialog";
 import ComprobantePDF from "./ComprobantePDF";
+import "../styles/Clientes.css";
 
 const initialClienteState = {
   idcliente: null,
@@ -19,6 +23,24 @@ const initialClienteState = {
   email: "",
 };
 
+const getClientesPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.clientes)) return payload.clientes;
+  return [];
+};
+
+const getApiMessage = (error, fallbackMessage) => {
+  return (
+    error?.response?.data?.error ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallbackMessage
+  );
+};
+
+const CLIENTES_ENDPOINT = "/api/clientes";
+
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
   const [clienteDialog, setClienteDialog] = useState(false);
@@ -28,22 +50,39 @@ const Clientes = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showComprobante, setShowComprobante] = useState(null);
-  const [autoGeneratePDF, setAutoGeneratePDF] = useState(false); // Estado para auto-generar PDF
-  const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
+  const [autoGeneratePDF, setAutoGeneratePDF] = useState(false);
+  const [nombreArchivo, setNombreArchivo] = useState(null);
+  const [globalFilter, setGlobalFilter] = useState("");
   const toast = useRef(null);
 
-  const fetchClientes = async () => {
+  const requestClientes = useCallback(async (method, payload = null, id = null) => {
+    const url = `${Config.apiUrl}${CLIENTES_ENDPOINT}${id ? `/${id}` : ""}`;
+
+    if (method === "get") return await axios.get(url);
+    if (method === "post") return await axios.post(url, payload);
+    if (method === "put") return await axios.put(url, payload);
+    if (method === "delete") return await axios.delete(url);
+
+    throw new Error(`Método no soportado: ${method}`);
+  }, []);
+
+  const fetchClientes = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${Config.apiUrl}/api/clientes`);
-      setClientes(response.data);
-      setLoading(false);
-      console.log("Clientes recuperados:", response.data);
+      const response = await requestClientes("get");
+      setClientes(getClientesPayload(response.data));
     } catch (error) {
       console.error("Error recuperando clientes", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudieron recuperar los clientes"),
+        life: 5000,
+      });
+    } finally {
       setLoading(false);
     }
-  };
+  }, [requestClientes]);
 
   const openNew = () => {
     setCliente(initialClienteState);
@@ -64,90 +103,82 @@ const Clientes = () => {
     setSubmitted(true);
 
     if (cliente.nombres && cliente.email) {
-      let _clientes = [...clientes];
       try {
+        setLoading(true);
+
         if (cliente.idcliente) {
-          setLoading(true);
-          const response = await axios.put(
-            `${Config.apiUrl}/api/clientes/${cliente.idcliente}`,
-            cliente
-          );
-          const index = _clientes.findIndex(
-            (c) => c.idcliente === cliente.idcliente
-          );
-          setLoading(false);
-          _clientes[index] = response.data;
+          await requestClientes("put", cliente, cliente.idcliente);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Cliente Actualizado",
+            detail: "Cliente actualizado",
             life: 3000,
           });
-          console.log("Cliente actualizado:", response.data);
         } else {
-          console.log("cliente: ", cliente);
-          const response = await axios.post(
-            `${Config.apiUrl}/api/clientes`,
-            cliente
-          );
-          _clientes.push(response.data);
+          await requestClientes("post", cliente);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Cliente Creado",
+            detail: "Cliente creado",
             life: 3000,
           });
-          console.log("Cliente creado:", response.data);
         }
 
-        // setClientes(_clientes);
         setClienteDialog(false);
         setCliente(initialClienteState);
-        setLoading(false);
         fetchClientes();
       } catch (error) {
-        console.error("Error guardando cliente:", error.response.data.error);
+        console.error("Error guardando cliente:", error);
+        toast.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: getApiMessage(error, "No se pudo guardar el cliente"),
+          life: 5000,
+        });
+      } finally {
         setLoading(false);
       }
     }
   };
 
-  const editCliente = (cliente) => {
-    setCliente({ ...cliente });
+  const editCliente = (rowCliente) => {
+    setCliente({ ...rowCliente });
     setClienteDialog(true);
   };
 
-  const confirmDeleteCliente = (cliente) => {
-    setCliente(cliente);
+  const confirmDeleteCliente = (rowCliente) => {
+    setCliente(rowCliente);
     setDeleteClienteDialog(true);
   };
 
   const deleteCliente = async () => {
     try {
-      await axios.delete(`${Config.apiUrl}/api/clientes/${cliente.idcliente}`);
-      let _clientes = clientes.filter(
-        (val) => val.idcliente !== cliente.idcliente
+      await requestClientes("delete", null, cliente.idcliente);
+      setClientes((prev) =>
+        prev.filter((rowCliente) => rowCliente.idcliente !== cliente.idcliente)
       );
-      setClientes(_clientes);
       setDeleteClienteDialog(false);
       setCliente(initialClienteState);
       toast.current.show({
         severity: "success",
         summary: "Realizado",
-        detail: "Cliente Eliminado",
+        detail: "Cliente eliminado",
         life: 3000,
       });
-      console.log("Cliente eliminado:", cliente);
     } catch (error) {
       console.error("Error eliminando cliente:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudo eliminar el cliente"),
+        life: 5000,
+      });
     }
   };
 
-  const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || "";
-    let _cliente = { ...cliente };
-    _cliente[`${name}`] = val;
-    setCliente(_cliente);
+  const onInputChange = (event, name) => {
+    const value = (event.target && event.target.value) || "";
+    setCliente((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleWhatsAppClick = (phone) => {
@@ -159,67 +190,35 @@ const Clientes = () => {
   };
 
   const onPhoneChange = (value, name) => {
-    let _cliente = { ...cliente };
-    _cliente[`${name}`] = value;
-    setCliente(_cliente);
+    setCliente((prev) => ({ ...prev, [name]: value }));
   };
 
-  //Para mostrar el dialogo del comprobante
-  const handleShowComprobante = (cliente, autoGenerate = false) => {
-    // console.log("quotation:", quotation);
-    // Datos ficticios de productos
+  const handleShowComprobante = (rowCliente, autoGenerate = false) => {
     const productosFicticios = [
-      {
-        nombre: "Producto 1",
-        referencia: "REF001",
-        precio: 10.0,
-        cantidad: 2,
-        total: 20.0,
-      },
-      {
-        nombre: "Producto 2",
-        referencia: "REF002",
-        precio: 15.0,
-        cantidad: 1,
-        total: 15.0,
-      },
-      {
-        nombre: "Producto 3",
-        referencia: "REF003",
-        precio: 5.0,
-        cantidad: 5,
-        total: 25.0,
-      },
+      { nombre: "Producto 1", referencia: "REF001", precio: 10.0, cantidad: 2, total: 20.0 },
+      { nombre: "Producto 2", referencia: "REF002", precio: 15.0, cantidad: 1, total: 15.0 },
+      { nombre: "Producto 3", referencia: "REF003", precio: 5.0, cantidad: 5, total: 25.0 },
     ];
 
-    //Se construye el objeto para enviarlo al dialogo
     const datosCli = {
-      numerocotizacion: cliente.idcliente || "",
-      fecha: cliente.fechacotizacion || "",
+      numerocotizacion: rowCliente.idcliente || "",
+      fecha: rowCliente.fechacotizacion || "",
       cliente: {
-        nombre: cliente.nombres || "",
-        identidad: cliente.identidad || "",
-        direccion: cliente.direccion || "",
-        telmovil: cliente.telefono || "",
-        email: cliente.email || "",
-        notas: cliente.notas || "Prueba de notas",
+        nombre: rowCliente.nombres || "",
+        identidad: rowCliente.identidad || "",
+        direccion: rowCliente.direccion || "",
+        telmovil: rowCliente.telefono || "",
+        email: rowCliente.email || "",
+        notas: rowCliente.notas || "Prueba de notas",
       },
-      productos: productosFicticios.map((producto) => ({
-        nombre: producto.nombre,
-        referencia: producto.referencia,
-        precio: producto.precio,
-        cantidad: producto.cantidad,
-        total: producto.total,
-      })),
-      total: cliente.idcliente,
+      productos: productosFicticios,
+      total: rowCliente.idcliente,
     };
-    console.log("datosCli:", datosCli);
 
-    // Restablecer el estado antes de actualizarlo
     setAutoGeneratePDF(false);
     setShowComprobante(null);
-    setNombreArchivo(cliente.nombres + "-" + cliente.identidad);
-    // Usar un timeout para asegurar que el estado se restablezca antes de actualizarlo
+    setNombreArchivo(`${rowCliente.nombres}-${rowCliente.identidad}`);
+
     setTimeout(() => {
       setAutoGeneratePDF(autoGenerate);
       setShowComprobante(datosCli);
@@ -227,41 +226,45 @@ const Clientes = () => {
   };
 
   useEffect(() => {
+    fetchClientes();
+  }, [fetchClientes]);
+
+  useEffect(() => {
     if (autoGeneratePDF && showComprobante) {
-      // Aquí puedes manejar la lógica para generar el PDF automáticamente
-      // Por ejemplo, llamar a una función en ComprobantePDF para generar el PDF
+      // hook reservado para acciones adicionales al autogenerar PDF
     }
   }, [autoGeneratePDF, showComprobante]);
 
-  const leftToolbarTemplate = () => {
-    return (
-      <React.Fragment>
-        <Button
-          label="Nuevo"
-          icon="pi pi-plus"
-          className="p-button-success mr-2"
-          onClick={openNew}
+  const tableHeader = (
+    <div className="clientes-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          placeholder="Buscar por nombre, identidad, teléfono o email"
         />
-        <Button
-          label="Mostrar"
-          icon="pi pi-refresh"
-          className="p-button-help"
-          onClick={fetchClientes}
-          loading={loading}
-        />
-      </React.Fragment>
-    );
-  };
+      </IconField>
+      <span>{clientes.length} registros</span>
+    </div>
+  );
+
+  const kpis = useMemo(
+    () => [
+      { label: "Total clientes", value: clientes.length },
+      { label: "Seleccionados", value: selectedClientes?.length || 0 },
+      {
+        label: "Con correo",
+        value: clientes.filter((rowCliente) => !!rowCliente.email).length,
+      },
+    ],
+    [clientes, selectedClientes]
+  );
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          text
-          onClick={() => editCliente(rowData)}
-        />
+      <>
+        <Button icon="pi pi-pencil" rounded text onClick={() => editCliente(rowData)} />
         <Button
           icon="pi pi-trash"
           rounded
@@ -297,12 +300,12 @@ const Clientes = () => {
           className="p-button-danger"
           onClick={() => handleShowComprobante(rowData, true)}
         />
-      </React.Fragment>
+      </>
     );
   };
 
   const deleteClienteDialogFooter = (
-    <React.Fragment>
+    <>
       <Button
         label="No"
         icon="pi pi-times"
@@ -315,21 +318,41 @@ const Clientes = () => {
         className="p-button-text"
         onClick={deleteCliente}
       />
-    </React.Fragment>
+    </>
   );
 
   return (
-    <div className="flex-column">
-      <h1>Clientes</h1>
-      <Toast ref={toast} />
-      <div className="card">
-        <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
+    <div className="clientes-page">
+      <div className="clientes-header">
+        <h1>Clientes</h1>
+        <div className="clientes-actions">
+          <Button label="Nuevo" icon="pi pi-plus" onClick={openNew} />
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchClientes}
+            loading={loading}
+          />
+        </div>
       </div>
-      <div className="card">
+
+      <div className="clientes-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="clientes-kpi">
+            <p className="clientes-kpi-label">{kpi.label}</p>
+            <p className="clientes-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      <Toast ref={toast} />
+
+      <Card className="clientes-table-card">
         <DataTable
           value={clientes}
           selection={selectedClientes}
-          onSelectionChange={(e) => setSelectedClientes(e.value)}
+          onSelectionChange={(event) => setSelectedClientes(event.value)}
           dataKey="idcliente"
           paginator
           rows={10}
@@ -338,22 +361,20 @@ const Clientes = () => {
           size="small"
           loading={loading}
           emptyMessage="No hay registros"
+          header={tableHeader}
+          globalFilter={globalFilter}
+          globalFilterFields={["nombres", "identidad", "direccion", "telefono", "email"]}
         >
+          <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
           <Column field="idcliente" header="ID" hidden />
-          <Column
-            field="nombres"
-            header="Nombre"
-            frozen
-            alignFrozen="left"
-            sortable
-          />
+          <Column field="nombres" header="Nombre" frozen alignFrozen="left" sortable />
           <Column field="identidad" header="Identidad" sortable />
           <Column field="direccion" header="Dirección" sortable />
           <Column field="telefono" header="Teléfono" sortable />
           <Column field="email" header="Email" sortable />
           <Column body={actionBodyTemplate} frozen alignFrozen="right" />
         </DataTable>
-      </div>
+      </Card>
 
       <ClienteDialog
         visible={clienteDialog}
@@ -375,10 +396,7 @@ const Clientes = () => {
         onHide={hideDeleteClienteDialog}
       >
         <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
+          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
           {cliente && (
             <span>
               Esta seguro que desea eliminar <b>{cliente.nombres}</b>?
@@ -386,7 +404,7 @@ const Clientes = () => {
           )}
         </div>
       </Dialog>
-      {/* Diálogo para mostrar el comprobante */}
+
       <Dialog
         visible={!!showComprobante && !autoGeneratePDF}
         onHide={() => setShowComprobante(null)}
@@ -394,14 +412,10 @@ const Clientes = () => {
         style={{ width: "80vw", minHeight: "60vh" }}
       >
         {showComprobante && (
-          <ComprobantePDF
-            datos={showComprobante}
-            autoGenerate={autoGeneratePDF}
-          />
+          <ComprobantePDF datos={showComprobante} autoGenerate={autoGeneratePDF} />
         )}
       </Dialog>
 
-      {/* Componente oculto para generar PDF automáticamente */}
       {autoGeneratePDF && (
         <ComprobantePDF
           datos={showComprobante}

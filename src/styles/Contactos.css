@@ -1,0 +1,72 @@
+.contactos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contactos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.contactos-header h1 {
+  margin: 0;
+}
+
+.contactos-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.contactos-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.contactos-kpi {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.contactos-kpi .p-card-body {
+  padding: 0.9rem;
+}
+
+.contactos-kpi-label {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.contactos-kpi-value {
+  margin: 0.2rem 0 0;
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.contactos-table-card {
+  border-radius: 16px;
+}
+
+.contactos-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.contactos-table-header .p-icon-field {
+  width: min(100%, 360px);
+}
+
+.contactos-table-header .p-inputtext {
+  width: 100%;
+}
