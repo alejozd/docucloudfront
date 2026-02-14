@@ -17,94 +17,10 @@ const getNormalizedData = (payload) => {
   return [];
 };
 
-const normalizeText = (value) =>
-  String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-
-const getStatusCandidate = (row) => {
-  if (!row || typeof row !== "object") return null;
-
-  const directCandidates = [
-    row?.synced,
-    row?.sincronizado,
-    row?.isSynced,
-    row?.is_sync,
-    row?.status,
-    row?.estado,
-    row?.syncStatus,
-    row?.estadoSincronizacion,
-    row?.sync_result,
-  ];
-
-  const firstDirectValue = directCandidates.find(
-    (value) => value !== undefined && value !== null && value !== ""
-  );
-
-  if (firstDirectValue !== undefined) return firstDirectValue;
-
-  // Fallback: buscar cualquier campo cuyo nombre sugiera "estado/sync"
-  const dynamicKey = Object.keys(row).find((key) => {
-    const normalizedKey = normalizeText(key);
-    return (
-      normalizedKey.includes("status") ||
-      normalizedKey.includes("estado") ||
-      normalizedKey.includes("sync") ||
-      normalizedKey.includes("sincron")
-    );
-  });
-
-  return dynamicKey ? row[dynamicKey] : null;
-};
-
 const parseSyncStatus = (row) => {
-  const statusValue = getStatusCandidate(row);
-
-  if (typeof statusValue === "boolean") {
-    return statusValue ? "Sincronizado" : "Pendiente";
-  }
-
-  if (typeof statusValue === "number") {
-    if (statusValue === 1) return "Sincronizado";
-    if (statusValue === 0) return "Pendiente";
-    if (statusValue < 0) return "Error";
-  }
-
-  if (typeof statusValue === "string") {
-    const normalized = normalizeText(statusValue);
-    if (
-      [
-        "sync",
-        "synced",
-        "ok",
-        "success",
-        "sincronizado",
-        "enviado",
-        "completado",
-      ].includes(normalized)
-    ) {
-      return "Sincronizado";
-    }
-    if (
-      ["pending", "pendiente", "in_progress", "processing", "en cola"].includes(
-        normalized
-      )
-    ) {
-      return "Pendiente";
-    }
-    if (["error", "failed", "fallo", "fallido", "rechazado"].includes(normalized)) {
-      return "Error";
-    }
-  }
-
-  // Heurísticas por presencia de campos comunes cuando no hay un estado explícito.
-  if (row?.error || row?.errorMessage || row?.mensajeError) return "Error";
-  if (row?.syncedAt || row?.fechaSincronizacion || row?.fecha_sync) {
-    return "Sincronizado";
-  }
-
+  // El endpoint /api/toma-tension/sync no devuelve un campo de estado.
+  // Regla funcional acordada: si el registro existe en la respuesta, está sincronizado.
+  if (row && typeof row === "object") return "Sincronizado";
   return "Desconocido";
 };
 
@@ -164,16 +80,15 @@ const TomaTensionDashboard = () => {
 
   const totalRegistros = registros.length;
 
-  const statusStats = useMemo(() => {
-    return registros.reduce(
-      (acc, registro) => {
-        const status = parseSyncStatus(registro);
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      },
-      { Sincronizado: 0, Pendiente: 0, Error: 0, Desconocido: 0 }
-    );
-  }, [registros]);
+  const statusStats = useMemo(
+    () => ({
+      Sincronizado: totalRegistros,
+      Pendiente: 0,
+      Error: 0,
+      Desconocido: 0,
+    }),
+    [totalRegistros]
+  );
 
   const statusBodyTemplate = (rowData) => {
     const status = parseSyncStatus(rowData);
