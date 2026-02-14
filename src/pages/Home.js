@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"; //
 import { Card } from "primereact/card";
+import Config from "../components/features/Config";
 
 const normalizePhrasePayload = (payload) => {
   if (!payload) return null;
@@ -50,7 +51,7 @@ const Home = () => {
     const fetchPhrase = async () => {
       try {
         setError(null);
-        const response = await axios.get("/api/proxy-phrase");
+        const response = await axios.get(`${Config.apiUrl}/api/proxy-phrase`);
         const normalizedPhrase = normalizePhrasePayload(response.data);
 
         if (!normalizedPhrase?.phrase) {
@@ -62,7 +63,11 @@ const Home = () => {
         setSource(normalizedPhrase.source || "");
       } catch (error) {
         console.error("Error fetching the phrase of the day", error);
-        setError(error.message);
+        setError(
+          error?.response?.data?.message ||
+            error?.response?.data?.error ||
+            error.message
+        );
       } finally {
         setLoading(false);
       }
