@@ -128,7 +128,9 @@ const TomaTensionDashboard = () => {
       }
     });
 
-    return Array.from(uniqueFields);
+    return Array.from(uniqueFields).filter(
+      (field) => field?.toLowerCase() !== "created_at",
+    );
   }, [registros]);
 
   const totalRegistros = pagination.total;
