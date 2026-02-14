@@ -313,12 +313,13 @@ const TomaTensionDashboard = () => {
               icon="pi pi-filter-slash"
               severity="secondary"
               outlined
-              onClick={() =>
+              onClick={() => {
                 setFilters((prev) => ({
                   ...prev,
                   ...defaultDateRange,
                   page: 1,
                 }));
+                setSelectedPreset(DEFAULT_PRESET_DAYS);
               }}
             />
           </div>
