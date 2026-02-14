@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
@@ -12,8 +12,9 @@ import { SelectButton } from "primereact/selectbutton";
 import "primeicons/primeicons.css";
 import "../../styles/WorkTimeCalculator.css";
 
-const isValidDayjs = (value) =>
-  value && dayjs.isDayjs(value) && value.isValid();
+const LOCAL_STORAGE_KEY = "workHours";
+
+const isValidDayjs = (value) => value && dayjs.isDayjs(value) && value.isValid();
 const isFriday = () => dayjs().day() === 5;
 
 const durationOptions = [
@@ -22,67 +23,115 @@ const durationOptions = [
   { label: "8.5h", value: 8.5 },
 ];
 
+const timeFields = [
+  { key: "entryTime", label: "Hora de entrada", icon: "pi-sign-in", required: true },
+  { key: "lunchOutTime", label: "Salida almuerzo", icon: "pi-apple", required: true },
+  { key: "lunchInTime", label: "Regreso almuerzo", icon: "pi-history", required: true },
+  { key: "exitTime", label: "Salida real (opcional)", icon: "pi-sign-out", required: false },
+];
+
+const formatTimeTo12Hour = (date) => (date ? dayjs(date).format("hh:mm A") : "");
+
+const parsePersistedTime = (value) => {
+  if (!value) return null;
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed : null;
+};
+
+const normalizeDuration = (value) => {
+  const numeric = Number(value);
+  return durationOptions.some((opt) => opt.value === numeric)
+    ? numeric
+    : isFriday()
+      ? 6
+      : 8.5;
+};
+
+const calculateWorkedMinutes = ({ entry, lunchOut, lunchIn, exit }) => {
+  return (exit.getTime() - entry.getTime() - (lunchIn.getTime() - lunchOut.getTime())) / (1000 * 60);
+};
+
 export default function WorkTimeCalculator() {
   const [entryTime, setEntryTime] = useState(null);
   const [lunchOutTime, setLunchOutTime] = useState(null);
   const [lunchInTime, setLunchInTime] = useState(null);
   const [exitTime, setExitTime] = useState(null);
-  const [jobDuration, setJobDuration] = useState(isFriday() ? 6.0 : 8.5);
+  const [jobDuration, setJobDuration] = useState(isFriday() ? 6 : 8.5);
   const [estimatedExit, setEstimatedExit] = useState("");
   const [totalTime, setTotalTime] = useState("");
   const [error, setError] = useState("");
 
-  const toast = React.useRef(null);
+  const toast = useRef(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("workHours");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setEntryTime(parsed.entryTime ? dayjs(parsed.entryTime) : null);
-        setLunchOutTime(
-          parsed.lunchOutTime ? dayjs(parsed.lunchOutTime) : null
-        );
-        setLunchInTime(parsed.lunchInTime ? dayjs(parsed.lunchInTime) : null);
-        setExitTime(parsed.exitTime ? dayjs(parsed.exitTime) : null);
-        if (parsed.jobDuration) setJobDuration(parsed.jobDuration);
-      }
-    } catch (e) {
-      console.error("Error al cargar localStorage", e);
-    }
+  const timeState = useMemo(
+    () => ({ entryTime, lunchOutTime, lunchInTime, exitTime }),
+    [entryTime, lunchOutTime, lunchInTime, exitTime]
+  );
+
+  const showToast = useCallback((summary, detail, severity = "success") => {
+    toast.current?.show({ severity, summary, detail, life: 3000 });
   }, []);
 
+  const hydrateFromLocalStorage = useCallback(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!saved) return;
+
+      const parsed = JSON.parse(saved);
+      setEntryTime(parsePersistedTime(parsed.entryTime));
+      setLunchOutTime(parsePersistedTime(parsed.lunchOutTime));
+      setLunchInTime(parsePersistedTime(parsed.lunchInTime));
+      setExitTime(parsePersistedTime(parsed.exitTime));
+      setJobDuration(normalizeDuration(parsed.jobDuration));
+    } catch (storageError) {
+      console.error("Error al cargar localStorage", storageError);
+      showToast("Advertencia", "No se pudieron cargar datos guardados.", "warn");
+    }
+  }, [showToast]);
+
   useEffect(() => {
-    const dataToSave = {
+    hydrateFromLocalStorage();
+  }, [hydrateFromLocalStorage]);
+
+  useEffect(() => {
+    const payload = {
       entryTime: isValidDayjs(entryTime) ? entryTime.toISOString() : null,
-      lunchOutTime: isValidDayjs(lunchOutTime)
-        ? lunchOutTime.toISOString()
-        : null,
+      lunchOutTime: isValidDayjs(lunchOutTime) ? lunchOutTime.toISOString() : null,
       lunchInTime: isValidDayjs(lunchInTime) ? lunchInTime.toISOString() : null,
       exitTime: isValidDayjs(exitTime) ? exitTime.toISOString() : null,
       jobDuration,
     };
-    localStorage.setItem("workHours", JSON.stringify(dataToSave));
+
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
   }, [entryTime, lunchOutTime, lunchInTime, exitTime, jobDuration]);
 
-  const formatTimeTo12Hour = (date) => {
-    if (!date) return "";
-    return dayjs(date).format("hh:mm A");
-  };
+  const validateTimes = () => {
+    if (!isValidDayjs(entryTime) || !isValidDayjs(lunchOutTime) || !isValidDayjs(lunchInTime)) {
+      return "Completa hora de entrada, salida y regreso de almuerzo.";
+    }
 
-  const showToast = (summary, detail, severity = "success") => {
-    toast.current.show({ severity, summary, detail, life: 3000 });
+    const entry = entryTime.toDate();
+    const lunchOut = lunchOutTime.toDate();
+    const lunchIn = lunchInTime.toDate();
+
+    if (lunchOut <= entry) return "La salida a almuerzo debe ser después de la entrada.";
+    if (lunchIn <= lunchOut) return "El regreso de almuerzo debe ser posterior a la salida.";
+
+    if (isValidDayjs(exitTime)) {
+      const exit = exitTime.toDate();
+      if (exit <= lunchIn) return "La salida real debe ser posterior al regreso de almuerzo.";
+    }
+
+    return "";
   };
 
   const calculate = () => {
     setError("");
-    if (
-      !isValidDayjs(entryTime) ||
-      !isValidDayjs(lunchOutTime) ||
-      !isValidDayjs(lunchInTime)
-    ) {
-      setError("Faltan campos obligatorios.");
-      showToast("Error", "Completa la entrada y el almuerzo.", "error");
+    const validationError = validateTimes();
+
+    if (validationError) {
+      setError(validationError);
+      showToast("Error", validationError, "error");
       return;
     }
 
@@ -90,29 +139,32 @@ export default function WorkTimeCalculator() {
     const lunchOut = lunchOutTime.toDate();
     const lunchIn = lunchInTime.toDate();
 
-    const workBeforeLunch =
-      (lunchOut.getTime() - entry.getTime()) / (1000 * 60 * 60);
-    const workAfterLunch = jobDuration - workBeforeLunch;
+    const workBeforeLunchHours = (lunchOut.getTime() - entry.getTime()) / (1000 * 60 * 60);
+    const pendingHours = jobDuration - workBeforeLunchHours;
 
-    const estExit = new Date(
-      lunchIn.getTime() + workAfterLunch * 60 * 60 * 1000
-    );
-    setEstimatedExit(formatTimeTo12Hour(estExit));
+    if (pendingHours < 0) {
+      const message = "Ya superaste la duración seleccionada antes del almuerzo.";
+      setError(message);
+      setEstimatedExit(formatTimeTo12Hour(lunchIn));
+      setTotalTime("");
+      showToast("Aviso", message, "warn");
+      return;
+    }
+
+    const estimatedExitDate = new Date(lunchIn.getTime() + pendingHours * 60 * 60 * 1000);
+    setEstimatedExit(formatTimeTo12Hour(estimatedExitDate));
 
     if (isValidDayjs(exitTime)) {
       const exit = exitTime.toDate();
-      const totalMinutes =
-        (exit.getTime() -
-          entry.getTime() -
-          (lunchIn.getTime() - lunchOut.getTime())) /
-        (1000 * 60);
+      const totalMinutes = calculateWorkedMinutes({ entry, lunchOut, lunchIn, exit });
       const hours = Math.floor(totalMinutes / 60);
       const minutes = Math.round(totalMinutes % 60);
       setTotalTime(`${hours}h ${minutes}m`);
     } else {
       setTotalTime("");
     }
-    showToast("Éxito", "Cálculo realizado.");
+
+    showToast("Éxito", "Cálculo realizado correctamente.");
   };
 
   const handleReset = () => {
@@ -123,8 +175,16 @@ export default function WorkTimeCalculator() {
     setEstimatedExit("");
     setTotalTime("");
     setError("");
-    localStorage.removeItem("workHours");
+    setJobDuration(isFriday() ? 6 : 8.5);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
     showToast("Info", "Datos limpiados", "info");
+  };
+
+  const fieldSetters = {
+    entryTime: setEntryTime,
+    lunchOutTime: setLunchOutTime,
+    lunchInTime: setLunchInTime,
+    exitTime: setExitTime,
   };
 
   return (
@@ -137,70 +197,46 @@ export default function WorkTimeCalculator() {
           <SelectButton
             value={jobDuration}
             options={durationOptions}
-            onChange={(e) => setJobDuration(e.value)}
+            onChange={(event) => setJobDuration(event.value)}
             className="custom-segmented-control"
           />
         </div>
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div className="time-pickers-container">
-            {[
-              {
-                label: "Hora de entrada",
-                val: entryTime,
-                set: setEntryTime,
-                icon: "pi-sign-in",
-              },
-              {
-                label: "Salida almuerzo",
-                val: lunchOutTime,
-                set: setLunchOutTime,
-                icon: "pi-apple",
-              },
-              {
-                label: "Regreso almuerzo",
-                val: lunchInTime,
-                set: setLunchInTime,
-                icon: "pi-history",
-              },
-              {
-                label: "Salida real (opcional)",
-                val: exitTime,
-                set: setExitTime,
-                icon: "pi-sign-out",
-              },
-            ].map((field, idx) => (
-              <div className="p-field" key={idx}>
-                <TimePicker
-                  label={field.label}
-                  value={field.val}
-                  onChange={(v) => field.set(v)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      InputProps: {
-                        startAdornment: (
-                          <span
-                            style={{
-                              marginRight: 8,
-                              color: field.val ? "#624de6" : "#999",
-                            }}
-                          >
-                            <i className={`pi ${field.icon}`}></i>
-                          </span>
-                        ),
+            {timeFields.map((field) => {
+              const value = timeState[field.key];
+              const setValue = fieldSetters[field.key];
+
+              return (
+                <div className="p-field" key={field.key}>
+                  <TimePicker
+                    label={field.label}
+                    value={value}
+                    onChange={(newValue) => setValue(newValue)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        required: field.required,
+                        InputProps: {
+                          startAdornment: (
+                            <span
+                              style={{ marginRight: 8, color: value ? "#624de6" : "#999" }}
+                            >
+                              <i className={`pi ${field.icon}`}></i>
+                            </span>
+                          ),
+                        },
                       },
-                    },
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": { borderRadius: "12px" },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#e0e0e0",
-                    },
-                  }}
-                />
-              </div>
-            ))}
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": { borderRadius: "12px" },
+                      "& .MuiOutlinedInput-notchedOutline": { borderColor: "#e0e0e0" },
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           <div className="button-group">
@@ -241,10 +277,7 @@ export default function WorkTimeCalculator() {
                   </div>
                 )}
 
-                {/* Divisor visual si ambos existen */}
-                {estimatedExit && totalTime && (
-                  <div className="result-divider"></div>
-                )}
+                {estimatedExit && totalTime && <div className="result-divider"></div>}
 
                 {totalTime && (
                   <div className="result-block">
