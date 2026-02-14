@@ -1,16 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
+import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import Config from "./../components/features/Config";
 import ContactoDialog from "././ContactoDialog";
 import ComprobantePDF from "././ComprobantePDF";
-// import "./Clientes.css"; // Importa el archivo CSS
+import "../styles/Contactos.css";
 
 const initialContactoState = {
   idcontacto: null,
@@ -19,8 +22,26 @@ const initialContactoState = {
   direccionca: "",
   telefonoca: "",
   emailca: "",
-  segmento: null, // Añadir el campo para el segmento
+  segmento: null,
 };
+
+const getContactosPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.contactos)) return payload.contactos;
+  return [];
+};
+
+const getApiMessage = (error, fallbackMessage) => {
+  return (
+    error?.response?.data?.error ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallbackMessage
+  );
+};
+
+const CONTACTOS_ENDPOINT = "/api/contactos";
 
 const Contactos = () => {
   const [contactos, setContactos] = useState([]);
@@ -31,33 +52,49 @@ const Contactos = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showComprobante, setShowComprobante] = useState(null);
-  const [autoGeneratePDF, setAutoGeneratePDF] = useState(false); // Estado para auto-generar PDF
-  const [nombreArchivo, setNombreArchivo] = useState(null); //nombre del archivo a generar
+  const [autoGeneratePDF, setAutoGeneratePDF] = useState(false);
+  const [nombreArchivo, setNombreArchivo] = useState(null);
   const [segmentos, setSegmentos] = useState([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const toast = useRef(null);
 
-  const fetchContactos = async () => {
+  const requestContactos = useCallback(async (method, payload = null, id = null) => {
+    const url = `${Config.apiUrl}${CONTACTOS_ENDPOINT}${id ? `/${id}` : ""}`;
+
+    if (method === "get") return await axios.get(url);
+    if (method === "post") return await axios.post(url, payload);
+    if (method === "put") return await axios.put(url, payload);
+    if (method === "delete") return await axios.delete(url);
+
+    throw new Error(`Método no soportado: ${method}`);
+  }, []);
+
+  const fetchContactos = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${Config.apiUrl}/api/contactos`);
-      setContactos(response.data);
-      setLoading(false);
-      console.log("Contactos recuperados:", response.data);
+      const response = await requestContactos("get");
+      setContactos(getContactosPayload(response.data));
     } catch (error) {
       console.error("Error recuperando contactos", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudieron recuperar los contactos"),
+        life: 5000,
+      });
+    } finally {
       setLoading(false);
     }
-  };
+  }, [requestContactos]);
 
-  const fetchSegmentos = async () => {
+  const fetchSegmentos = useCallback(async () => {
     try {
       const response = await axios.get(`${Config.apiUrl}/api/segmentos`);
-      // console.log("Segmentos recuperados:", response.data);
       setSegmentos(response.data);
     } catch (error) {
       console.error("Error recuperando segmentos", error);
     }
-  };
+  }, []);
 
   const openNew = () => {
     setContacto(initialContactoState);
@@ -78,104 +115,91 @@ const Contactos = () => {
     setSubmitted(true);
 
     if (contacto.nombresca && contacto.emailca) {
-      let _contactos = [...contactos];
       try {
+        setLoading(true);
+
         if (contacto.idcontacto) {
-          console.log("contacto actaulizar: ", contacto);
-          setLoading(true);
-          const response = await axios.put(
-            `${Config.apiUrl}/api/contactos/${contacto.idcontacto}`,
-            contacto
-          );
-          const index = _contactos.findIndex(
-            (c) => c.idcontacto === contacto.idcontacto
-          );
-          setLoading(false);
-          _contactos[index] = response.data;
+          await requestContactos("put", contacto, contacto.idcontacto);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Contacto Actualizado",
+            detail: "Contacto actualizado",
             life: 3000,
           });
-          console.log("Contacto actualizado:", response.data);
         } else {
-          console.log("contacto crear: ", contacto);
-          const response = await axios.post(
-            `${Config.apiUrl}/api/contactos`,
-            contacto
-          );
-          _contactos.push(response.data);
+          await requestContactos("post", contacto);
           toast.current.show({
             severity: "success",
             summary: "Realizado",
-            detail: "Contacto Creado",
+            detail: "Contacto creado",
             life: 3000,
           });
-          console.log("Contacto creado:", response.data);
         }
 
-        // setContactos(_contactos);
         setContactoDialog(false);
         setContacto(initialContactoState);
-        setLoading(false);
         fetchContactos();
       } catch (error) {
-        console.error("Error guardando contacto:", error.response.data.error);
+        console.error("Error guardando contacto:", error);
+        toast.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: getApiMessage(error, "No se pudo guardar el contacto"),
+          life: 5000,
+        });
+      } finally {
         setLoading(false);
       }
     }
   };
 
-  const editContacto = (contacto) => {
-    setContacto({ ...contacto });
+  const editContacto = (rowContacto) => {
+    setContacto({ ...rowContacto });
     setContactoDialog(true);
   };
 
-  const confirmDeleteContacto = (contacto) => {
-    setContacto(contacto);
+  const confirmDeleteContacto = (rowContacto) => {
+    setContacto(rowContacto);
     setDeleteContactoDialog(true);
   };
 
   const deleteContacto = async () => {
     try {
-      await axios.delete(
-        `${Config.apiUrl}/api/contacto/${contacto.idcontacto}`
+      await requestContactos("delete", null, contacto.idcontacto);
+      setContactos((prev) =>
+        prev.filter((rowContacto) => rowContacto.idcontacto !== contacto.idcontacto)
       );
-      let _contactos = contacto.filter(
-        (val) => val.idcontacto !== contacto.idcontacto
-      );
-      setContactos(_contactos);
       setDeleteContactoDialog(false);
       setContacto(initialContactoState);
       toast.current.show({
         severity: "success",
         summary: "Realizado",
-        detail: "Contacto Eliminado",
+        detail: "Contacto eliminado",
         life: 3000,
       });
-      console.log("Contacto eliminado:", contacto);
     } catch (error) {
       console.error("Error eliminando contacto:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: getApiMessage(error, "No se pudo eliminar el contacto"),
+        life: 5000,
+      });
     }
   };
 
-  const onInputChange = (e, name) => {
+  const onInputChange = (event, name) => {
     if (name === "idsegmento") {
-      // Si es el campo idsegmento, extraemos el idsegmento del objeto
-      const selectedSegmento = e.value;
-      setContacto((prevContacto) => ({
-        ...prevContacto,
+      const selectedSegmento = event.value;
+      setContacto((prev) => ({
+        ...prev,
         idsegmento: selectedSegmento ? selectedSegmento.idsegmento : null,
       }));
-    } else {
-      // Para otros campos, simplemente actualizamos con el valor del campo
-      const val = e.target.value;
-      setContacto((prevContacto) => ({
-        ...prevContacto,
-        [name]: val,
-      }));
+      return;
     }
+
+    const value = (event.target && event.target.value) || "";
+    setContacto((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleWhatsAppClick = (phone) => {
@@ -187,67 +211,35 @@ const Contactos = () => {
   };
 
   const onPhoneChange = (value, name) => {
-    let _contacto = { ...contacto };
-    _contacto[`${name}`] = value;
-    setContacto(_contacto);
+    setContacto((prev) => ({ ...prev, [name]: value }));
   };
 
-  //Para mostrar el dialogo del comprobante
-  const handleShowComprobante = (contacto, autoGenerate = false) => {
-    // console.log("quotation:", quotation);
-    // Datos ficticios de productos
+  const handleShowComprobante = (rowContacto, autoGenerate = false) => {
     const productosFicticios = [
-      {
-        nombre: "Producto 1",
-        referencia: "REF001",
-        precio: 10.0,
-        cantidad: 2,
-        total: 20.0,
-      },
-      {
-        nombre: "Producto 2",
-        referencia: "REF002",
-        precio: 15.0,
-        cantidad: 1,
-        total: 15.0,
-      },
-      {
-        nombre: "Producto 3",
-        referencia: "REF003",
-        precio: 5.0,
-        cantidad: 5,
-        total: 25.0,
-      },
+      { nombre: "Producto 1", referencia: "REF001", precio: 10.0, cantidad: 2, total: 20.0 },
+      { nombre: "Producto 2", referencia: "REF002", precio: 15.0, cantidad: 1, total: 15.0 },
+      { nombre: "Producto 3", referencia: "REF003", precio: 5.0, cantidad: 5, total: 25.0 },
     ];
 
-    //Se construye el objeto para enviarlo al dialogo
     const datosContacto = {
-      numerocotizacion: contacto.idcontacto || "",
-      fecha: contacto.fechacotizacion || "",
+      numerocotizacion: rowContacto.idcontacto || "",
+      fecha: rowContacto.fechacotizacion || "",
       contacto: {
-        nombre: contacto.nombresca || "",
-        identidad: contacto.identidadca || "",
-        direccion: contacto.direccionca || "",
-        telmovil: contacto.telefonoca || "",
-        email: contacto.emailca || "",
-        notas: contacto.notas || "Prueba de notas",
+        nombre: rowContacto.nombresca || "",
+        identidad: rowContacto.identidadca || "",
+        direccion: rowContacto.direccionca || "",
+        telmovil: rowContacto.telefonoca || "",
+        email: rowContacto.emailca || "",
+        notas: rowContacto.notas || "Prueba de notas",
       },
-      productos: productosFicticios.map((producto) => ({
-        nombre: producto.nombre,
-        referencia: producto.referencia,
-        precio: producto.precio,
-        cantidad: producto.cantidad,
-        total: producto.total,
-      })),
-      total: contacto.idcontacto,
+      productos: productosFicticios,
+      total: rowContacto.idcontacto,
     };
-    console.log("datosCli:", datosContacto);
 
-    // Restablecer el estado antes de actualizarlo
     setAutoGeneratePDF(false);
     setShowComprobante(null);
-    setNombreArchivo(contacto.nombresca + "-" + contacto.identidadca);
-    // Usar un timeout para asegurar que el estado se restablezca antes de actualizarlo
+    setNombreArchivo(`${rowContacto.nombresca}-${rowContacto.identidadca}`);
+
     setTimeout(() => {
       setAutoGeneratePDF(autoGenerate);
       setShowComprobante(datosContacto);
@@ -255,66 +247,66 @@ const Contactos = () => {
   };
 
   useEffect(() => {
-    if (autoGeneratePDF && showComprobante) {
-      // Aquí puedes manejar la lógica para generar el PDF automáticamente
-      // Por ejemplo, llamar a una función en ComprobantePDF para generar el PDF
-    }
+    fetchContactos();
     fetchSegmentos();
+  }, [fetchContactos, fetchSegmentos]);
+
+  useEffect(() => {
+    if (autoGeneratePDF && showComprobante) {
+      // hook reservado para acciones adicionales al autogenerar PDF
+    }
   }, [autoGeneratePDF, showComprobante]);
 
   const segmentoFilterTemplate = (options) => {
     return (
       <MultiSelect
         value={options.value}
-        options={segmentos} // Usamos los segmentos recuperados del backend
-        onChange={(e) => options.filterApplyCallback(e.value)}
-        optionLabel="nombresegmento" // Campo a mostrar en el dropdown
+        options={segmentos}
+        onChange={(event) => options.filterApplyCallback(event.value)}
+        optionLabel="nombresegmento"
         placeholder="Seleccionar Segmento"
         className="p-column-filter"
         showClear
-        style={{ minWidth: "14px" }}
+        style={{ minWidth: "14rem" }}
       />
     );
   };
 
   const customFilter = (value, filter) => {
-    // console.log("value:", value);
-    // console.log("filter:", filter);
-    if (!filter || filter.length === 0) {
-      return true; // No hay filtro aplicado
-    }
+    if (!filter || filter.length === 0) return true;
     return filter.some((segmento) => segmento.nombresegmento === value);
   };
 
-  const leftToolbarTemplate = () => {
-    return (
-      <React.Fragment>
-        <Button
-          label="Nuevo"
-          icon="pi pi-plus"
-          className="p-button-success mr-2"
-          onClick={openNew}
+  const tableHeader = (
+    <div className="contactos-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          placeholder="Buscar por nombre, identidad, teléfono, email o segmento"
         />
-        <Button
-          label="Mostrar"
-          icon="pi pi-refresh"
-          className="p-button-help"
-          onClick={fetchContactos}
-          loading={loading}
-        />
-      </React.Fragment>
-    );
-  };
+      </IconField>
+      <span>{contactos.length} registros</span>
+    </div>
+  );
+
+  const kpis = useMemo(
+    () => [
+      { label: "Total contactos", value: contactos.length },
+      { label: "Seleccionados", value: selectedContactos?.length || 0 },
+      {
+        label: "Con segmento",
+        value: contactos.filter((rowContacto) => !!rowContacto.nombresegmento).length,
+      },
+    ],
+    [contactos, selectedContactos]
+  );
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          text
-          onClick={() => editContacto(rowData)}
-        />
+      <>
+        <Button icon="pi pi-pencil" rounded text onClick={() => editContacto(rowData)} />
         <Button
           icon="pi pi-trash"
           rounded
@@ -350,12 +342,12 @@ const Contactos = () => {
           className="p-button-danger"
           onClick={() => handleShowComprobante(rowData, true)}
         />
-      </React.Fragment>
+      </>
     );
   };
 
   const deleteContactoDialogFooter = (
-    <React.Fragment>
+    <>
       <Button
         label="No"
         icon="pi pi-times"
@@ -368,21 +360,41 @@ const Contactos = () => {
         className="p-button-text"
         onClick={deleteContacto}
       />
-    </React.Fragment>
+    </>
   );
 
   return (
-    <div className="flex-column">
-      <h1>Contactos</h1>
-      <Toast ref={toast} />
-      <div className="card">
-        <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
+    <div className="contactos-page">
+      <div className="contactos-header">
+        <h1>Contactos</h1>
+        <div className="contactos-actions">
+          <Button label="Nuevo" icon="pi pi-plus" onClick={openNew} />
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchContactos}
+            loading={loading}
+          />
+        </div>
       </div>
-      <div className="card">
+
+      <div className="contactos-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="contactos-kpi">
+            <p className="contactos-kpi-label">{kpi.label}</p>
+            <p className="contactos-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      <Toast ref={toast} />
+
+      <Card className="contactos-table-card">
         <DataTable
           value={contactos}
           selection={selectedContactos}
-          onSelectionChange={(e) => setSelectedContactos(e.value)}
+          onSelectionChange={(event) => setSelectedContactos(event.value)}
           dataKey="idcontacto"
           paginator
           rows={10}
@@ -392,15 +404,20 @@ const Contactos = () => {
           loading={loading}
           emptyMessage="No hay registros"
           filterDisplay="menu"
+          header={tableHeader}
+          globalFilter={globalFilter}
+          globalFilterFields={[
+            "nombresca",
+            "identidadca",
+            "direccionca",
+            "telefonoca",
+            "emailca",
+            "nombresegmento",
+          ]}
         >
+          <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
           <Column field="idcontacto" header="ID" hidden />
-          <Column
-            field="nombresca"
-            header="Nombre"
-            frozen
-            alignFrozen="left"
-            sortable
-          />
+          <Column field="nombresca" header="Nombre" frozen alignFrozen="left" sortable />
           <Column field="identidadca" header="Identidad" sortable />
           <Column field="direccionca" header="Dirección" sortable />
           <Column field="telefonoca" header="Teléfono" sortable />
@@ -412,10 +429,9 @@ const Contactos = () => {
             filterField="nombresegmento"
             filter
             filterElement={segmentoFilterTemplate}
-            showFilterMenuOptions={false} // No mostrar iconos de filtro
+            showFilterMenuOptions={false}
             filterMatchMode="custom"
             filterFunction={customFilter}
-            // showFilterMenu={false}  // No mostrar menu de filtro
             showClearButton={false}
             showApplyButton={false}
             showAddButton={false}
@@ -424,7 +440,7 @@ const Contactos = () => {
           />
           <Column body={actionBodyTemplate} frozen alignFrozen="right" />
         </DataTable>
-      </div>
+      </Card>
 
       <ContactoDialog
         visible={contactoDialog}
@@ -447,10 +463,7 @@ const Contactos = () => {
         onHide={hideDeleteContactoDialog}
       >
         <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
+          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
           {contacto && (
             <span>
               Esta seguro que desea eliminar <b>{contacto.nombresca}</b>?
@@ -458,7 +471,7 @@ const Contactos = () => {
           )}
         </div>
       </Dialog>
-      {/* Diálogo para mostrar el comprobante */}
+
       <Dialog
         visible={!!showComprobante && !autoGeneratePDF}
         onHide={() => setShowComprobante(null)}
@@ -466,14 +479,10 @@ const Contactos = () => {
         style={{ width: "80vw", minHeight: "60vh" }}
       >
         {showComprobante && (
-          <ComprobantePDF
-            datos={showComprobante}
-            autoGenerate={autoGeneratePDF}
-          />
+          <ComprobantePDF datos={showComprobante} autoGenerate={autoGeneratePDF} />
         )}
       </Dialog>
 
-      {/* Componente oculto para generar PDF automáticamente */}
       {autoGeneratePDF && (
         <ComprobantePDF
           datos={showComprobante}
