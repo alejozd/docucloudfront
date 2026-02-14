@@ -29,6 +29,33 @@
   gap: 1rem;
 }
 
+.kpi-card {
+  border-left: 5px solid transparent;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-card-total {
+  border-left-color: #3b82f6;
+}
+
+.kpi-card-sync {
+  border-left-color: #22c55e;
+}
+
+.kpi-card-pending {
+  border-left-color: #f59e0b;
+}
+
+.kpi-card-error {
+  border-left-color: #ef4444;
+}
+
 .kpi-card .p-card-body {
   text-align: center;
 }
