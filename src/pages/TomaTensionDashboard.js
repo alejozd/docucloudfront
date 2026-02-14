@@ -5,6 +5,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import { Calendar } from "primereact/calendar";
 import Config from "../components/features/Config";
 import "../styles/TomaTensionDashboard.css";
 
@@ -33,9 +34,14 @@ const formatDate = (value) => {
   });
 };
 
+const toIsoDate = (dateValue) => {
+  if (!dateValue) return "";
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+};
+
 const parseSyncStatus = (row) => {
-  // El endpoint /api/toma-tension/sync no devuelve un campo de estado.
-  // Regla funcional acordada: si el registro existe en la respuesta, está sincronizado.
   if (row && typeof row === "object") return "Sincronizado";
   return "Desconocido";
 };
@@ -81,18 +87,12 @@ const TomaTensionDashboard = () => {
         limit: filters.limit,
       };
 
-      if (filters.fecha_inicio) {
-        queryParams.fecha_inicio = filters.fecha_inicio;
-      }
+      if (filters.fecha_inicio) queryParams.fecha_inicio = filters.fecha_inicio;
+      if (filters.fecha_fin) queryParams.fecha_fin = filters.fecha_fin;
 
-      if (filters.fecha_fin) {
-        queryParams.fecha_fin = filters.fecha_fin;
-      }
-
-      const response = await axios.get(
-        `${Config.apiUrl}/api/toma-tension/sync`,
-        { params: queryParams },
-      );
+      const response = await axios.get(`${Config.apiUrl}/api/toma-tension/sync`, {
+        params: queryParams,
+      });
 
       const data = getNormalizedData(response.data);
       const serverPagination = response?.data?.pagination;
@@ -213,59 +213,44 @@ const TomaTensionDashboard = () => {
         />
       </div>
 
-      <Card title="Filtros">
+      <Card title="Filtros" className="toma-tension-filters-card">
         <div className="toma-tension-filters">
           <div className="filter-field">
             <label htmlFor="fecha_inicio">Fecha inicio</label>
-            <input
-              id="fecha_inicio"
-              type="date"
-              value={filters.fecha_inicio}
+            <Calendar
+              inputId="fecha_inicio"
+              value={filters.fecha_inicio ? new Date(filters.fecha_inicio) : null}
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
-                  fecha_inicio: event.target.value,
+                  fecha_inicio: toIsoDate(event.value),
                   page: 1,
                 }))
               }
+              dateFormat="yy-mm-dd"
+              showIcon
+              placeholder="YYYY-MM-DD"
+              maxDate={filters.fecha_fin ? new Date(filters.fecha_fin) : undefined}
             />
           </div>
 
           <div className="filter-field">
             <label htmlFor="fecha_fin">Fecha fin</label>
-            <input
-              id="fecha_fin"
-              type="date"
-              value={filters.fecha_fin}
+            <Calendar
+              inputId="fecha_fin"
+              value={filters.fecha_fin ? new Date(filters.fecha_fin) : null}
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
-                  fecha_fin: event.target.value,
+                  fecha_fin: toIsoDate(event.value),
                   page: 1,
                 }))
               }
+              dateFormat="yy-mm-dd"
+              showIcon
+              placeholder="YYYY-MM-DD"
+              minDate={filters.fecha_inicio ? new Date(filters.fecha_inicio) : undefined}
             />
-          </div>
-
-          <div className="filter-field">
-            <label htmlFor="limit">Registros por página</label>
-            <select
-              id="limit"
-              value={filters.limit}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  limit: Number(event.target.value),
-                  page: 1,
-                }))
-              }
-            >
-              {[10, 20, 50, 100].map((limitOption) => (
-                <option key={limitOption} value={limitOption}>
-                  {limitOption}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="filter-actions">
@@ -275,12 +260,12 @@ const TomaTensionDashboard = () => {
               severity="secondary"
               outlined
               onClick={() =>
-                setFilters({
+                setFilters((prev) => ({
+                  ...prev,
                   fecha_inicio: "",
                   fecha_fin: "",
                   page: 1,
-                  limit: 20,
-                })
+                }))
               }
             />
           </div>
@@ -293,12 +278,6 @@ const TomaTensionDashboard = () => {
         <Card title="Total de registros" className="kpi-card kpi-card-total">
           <span>{totalRegistros}</span>
         </Card>
-        {/* <Card title="Sincronizados" className="kpi-card kpi-card-sync">
-          <span>{statusStats.Sincronizado}</span>
-        </Card>
-        <Card title="Pendientes" className="kpi-card kpi-card-pending">
-          <span>{statusStats.Pendiente}</span>
-        </Card> */}
         <Card title="Errores" className="kpi-card kpi-card-error">
           <span>{statusStats.Error}</span>
         </Card>
@@ -309,10 +288,7 @@ const TomaTensionDashboard = () => {
             <p>Ritmo: {averages.ritmoCardiaco}</p>
           </div>
         </Card>
-        <Card
-          title="Extremos de Sístole"
-          className="kpi-card kpi-card-extremes"
-        >
+        <Card title="Extremos de Sístole" className="kpi-card kpi-card-extremes">
           <div className="kpi-multiline">
             <p>
               Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})
@@ -333,14 +309,16 @@ const TomaTensionDashboard = () => {
           first={(pagination.page - 1) * pagination.limit}
           rows={pagination.limit}
           totalRecords={pagination.total}
+          rowsPerPageOptions={[10, 20, 50, 100]}
+          paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
           onPage={(event) => {
             setFilters((prev) => ({
               ...prev,
-              page: Math.floor(event.first / event.rows) + 1,
+              page: event.page + 1,
               limit: event.rows,
             }));
           }}
-          rowsPerPageOptions={[10, 20, 50, 100]}
           emptyMessage="No hay registros disponibles"
           responsiveLayout="scroll"
           sortMode="multiple"
