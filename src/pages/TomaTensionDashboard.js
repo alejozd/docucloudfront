@@ -119,20 +119,6 @@ const TomaTensionDashboard = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  const columns = useMemo(() => {
-    const uniqueFields = new Set();
-
-    registros.forEach((registro) => {
-      if (registro && typeof registro === "object") {
-        Object.keys(registro).forEach((field) => uniqueFields.add(field));
-      }
-    });
-
-    return Array.from(uniqueFields).filter(
-      (field) => field?.toLowerCase() !== "created_at",
-    );
-  }, [registros]);
-
   const totalRegistros = pagination.total;
 
   const statusStats = useMemo(
@@ -332,16 +318,62 @@ const TomaTensionDashboard = () => {
             alignFrozen="left"
             style={{ minWidth: "11rem" }}
           />
-          {columns.map((field) => (
-            <Column
-              key={field}
-              field={field}
-              header={field}
-              sortable
-              style={{ minWidth: "12rem" }}
-              body={(rowData) => formatValue(rowData[field])}
-            />
-          ))}
+          <Column
+            field="id"
+            header="ID"
+            sortable
+            style={{ minWidth: "8rem" }}
+            body={(rowData) => formatValue(rowData.id)}
+          />
+          <Column
+            field="paciente"
+            header="Paciente"
+            sortable
+            style={{ minWidth: "14rem" }}
+            body={(rowData) => formatValue(rowData.paciente)}
+          />
+          <Column
+            field="documento"
+            header="Documento"
+            sortable
+            style={{ minWidth: "12rem" }}
+            body={(rowData) => formatValue(rowData.documento)}
+          />
+          <Column
+            field="sistole"
+            header="Sístole"
+            sortable
+            style={{ minWidth: "10rem" }}
+            body={(rowData) => formatValue(rowData.sistole)}
+          />
+          <Column
+            field="diastole"
+            header="Diástole"
+            sortable
+            style={{ minWidth: "10rem" }}
+            body={(rowData) => formatValue(rowData.diastole)}
+          />
+          <Column
+            field="ritmoCardiaco"
+            header="Ritmo Cardíaco"
+            sortable
+            style={{ minWidth: "12rem" }}
+            body={(rowData) => formatValue(rowData.ritmoCardiaco)}
+          />
+          <Column
+            field="fecha_registro"
+            header="Fecha registro"
+            sortable
+            style={{ minWidth: "12rem" }}
+            body={(rowData) => formatDate(rowData.fecha_registro)}
+          />
+          <Column
+            field="updated_at"
+            header="Actualizado"
+            sortable
+            style={{ minWidth: "12rem" }}
+            body={(rowData) => formatDate(rowData.updated_at)}
+          />
         </DataTable>
       </Card>
     </div>
