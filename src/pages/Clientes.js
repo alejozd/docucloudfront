@@ -35,7 +35,7 @@ const getApiMessage = (error, fallbackMessage) => {
   );
 };
 
-const CLIENTES_ENDPOINTS = ["/api/clientes", "/clientes"];
+const CLIENTES_ENDPOINT = "/api/clientes";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -51,38 +51,25 @@ const Clientes = () => {
   const toast = useRef(null);
 
   const requestClientes = async (method, payload = null, id = null) => {
-    let latestError;
+    const url = `${Config.apiUrl}${CLIENTES_ENDPOINT}${id ? `/${id}` : ""}`;
 
-    for (const endpoint of CLIENTES_ENDPOINTS) {
-      const url = `${Config.apiUrl}${endpoint}${id ? `/${id}` : ""}`;
-
-      try {
-        if (method === "get") {
-          return await axios.get(url);
-        }
-
-        if (method === "post") {
-          return await axios.post(url, payload);
-        }
-
-        if (method === "put") {
-          return await axios.put(url, payload);
-        }
-
-        if (method === "delete") {
-          return await axios.delete(url);
-        }
-      } catch (error) {
-        latestError = error;
-
-        const status = error?.response?.status;
-        if (status && status < 500 && status !== 404) {
-          break;
-        }
-      }
+    if (method === "get") {
+      return await axios.get(url);
     }
 
-    throw latestError;
+    if (method === "post") {
+      return await axios.post(url, payload);
+    }
+
+    if (method === "put") {
+      return await axios.put(url, payload);
+    }
+
+    if (method === "delete") {
+      return await axios.delete(url);
+    }
+
+    throw new Error(`Método no soportado: ${method}`);
   };
 
   const fetchClientes = async () => {
@@ -95,6 +82,14 @@ const Clientes = () => {
       console.log("Clientes recuperados:", payload);
     } catch (error) {
       console.error("Error recuperando clientes", error);
+      console.error(
+        "Diagnóstico fetchClientes:",
+        {
+          url: `${Config.apiUrl}${CLIENTES_ENDPOINT}`,
+          status: error?.response?.status,
+          data: error?.response?.data,
+        }
+      );
       toast.current?.show({
         severity: "error",
         summary: "Error",
