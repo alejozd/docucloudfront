@@ -41,6 +41,20 @@ const toIsoDate = (dateValue) => {
   return date.toISOString().slice(0, 10);
 };
 
+const getRangeFromToday = (days) => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - (days - 1));
+
+  return {
+    fecha_inicio: toIsoDate(startDate),
+    fecha_fin: toIsoDate(endDate),
+  };
+};
+
+const DEFAULT_PRESET_DAYS = 7;
+const DATE_PRESETS = [7, 15, 30, 90];
+
 const parseSyncStatus = (row) => {
   if (row && typeof row === "object") return "Sincronizado";
   return "Desconocido";
@@ -61,13 +75,18 @@ const formatValue = (value) => {
 };
 
 const TomaTensionDashboard = () => {
+  const defaultDateRange = useMemo(
+    () => getRangeFromToday(DEFAULT_PRESET_DAYS),
+    [],
+  );
   const [registros, setRegistros] = useState([]);
   const [filters, setFilters] = useState({
-    fecha_inicio: "",
-    fecha_fin: "",
+    fecha_inicio: defaultDateRange.fecha_inicio,
+    fecha_fin: defaultDateRange.fecha_fin,
     page: 1,
     limit: 20,
   });
+  const [selectedPreset, setSelectedPreset] = useState(DEFAULT_PRESET_DAYS);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -213,13 +232,31 @@ const TomaTensionDashboard = () => {
               value={
                 filters.fecha_inicio ? new Date(filters.fecha_inicio) : null
               }
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  fecha_inicio: toIsoDate(event.value),
-                  page: 1,
-                }))
-              }
+              onChange={(event) => {
+                setSelectedPreset(null);
+                setFilters((prev) => {
+                  const nextStartDate = toIsoDate(event.value);
+
+                  if (
+                    prev.fecha_fin &&
+                    nextStartDate &&
+                    nextStartDate > prev.fecha_fin
+                  ) {
+                    return {
+                      ...prev,
+                      fecha_inicio: nextStartDate,
+                      fecha_fin: nextStartDate,
+                      page: 1,
+                    };
+                  }
+
+                  return {
+                    ...prev,
+                    fecha_inicio: nextStartDate,
+                    page: 1,
+                  };
+                });
+              }}
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
@@ -234,13 +271,31 @@ const TomaTensionDashboard = () => {
             <Calendar
               inputId="fecha_fin"
               value={filters.fecha_fin ? new Date(filters.fecha_fin) : null}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  fecha_fin: toIsoDate(event.value),
-                  page: 1,
-                }))
-              }
+              onChange={(event) => {
+                setSelectedPreset(null);
+                setFilters((prev) => {
+                  const nextEndDate = toIsoDate(event.value);
+
+                  if (
+                    prev.fecha_inicio &&
+                    nextEndDate &&
+                    nextEndDate < prev.fecha_inicio
+                  ) {
+                    return {
+                      ...prev,
+                      fecha_inicio: nextEndDate,
+                      fecha_fin: nextEndDate,
+                      page: 1,
+                    };
+                  }
+
+                  return {
+                    ...prev,
+                    fecha_fin: nextEndDate,
+                    page: 1,
+                  };
+                });
+              }}
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
@@ -258,15 +313,39 @@ const TomaTensionDashboard = () => {
               icon="pi pi-filter-slash"
               severity="secondary"
               outlined
-              onClick={() =>
+              onClick={() => {
                 setFilters((prev) => ({
                   ...prev,
-                  fecha_inicio: "",
-                  fecha_fin: "",
+                  ...defaultDateRange,
                   page: 1,
-                }))
-              }
+                }));
+                setSelectedPreset(DEFAULT_PRESET_DAYS);
+              }}
             />
+          </div>
+
+          <div className="filter-field filter-presets">
+            <label>Filtros rápidos</label>
+            <div className="preset-buttons">
+              {DATE_PRESETS.map((days) => (
+                <Button
+                  key={days}
+                  type="button"
+                  label={`Últimos ${days} días`}
+                  size="small"
+                  outlined={selectedPreset !== days}
+                  severity={selectedPreset === days ? "primary" : "secondary"}
+                  onClick={() => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      ...getRangeFromToday(days),
+                      page: 1,
+                    }));
+                    setSelectedPreset(days);
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </Card>
@@ -275,12 +354,21 @@ const TomaTensionDashboard = () => {
 
       <div className="toma-tension-kpis">
         <Card title="Total de registros" className="kpi-card kpi-card-total">
-          <span>{totalRegistros}</span>
+          <div className="kpi-card-content">
+            <i className="pi pi-database kpi-icon" aria-hidden="true" />
+            <span>{totalRegistros}</span>
+          </div>
         </Card>
         <Card title="Errores" className="kpi-card kpi-card-error">
-          <span>{statusStats.Error}</span>
+          <div className="kpi-card-content">
+            <i className="pi pi-exclamation-circle kpi-icon" aria-hidden="true" />
+            <span>{statusStats.Error}</span>
+          </div>
         </Card>
         <Card title="Promedios" className="kpi-card kpi-card-avg">
+          <div className="kpi-card-content">
+            <i className="pi pi-chart-line kpi-icon" aria-hidden="true" />
+          </div>
           <div className="kpi-multiline">
             <p>Sístole: {averages.sistole}</p>
             <p>Diástole: {averages.diastole}</p>
@@ -291,6 +379,9 @@ const TomaTensionDashboard = () => {
           title="Extremos de Sístole"
           className="kpi-card kpi-card-extremes"
         >
+          <div className="kpi-card-content">
+            <i className="pi pi-sort-alt kpi-icon" aria-hidden="true" />
+          </div>
           <div className="kpi-multiline">
             <p>
               Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})

@@ -58,54 +58,80 @@
   align-items: end;
 }
 
+.filter-presets {
+  grid-column: 1 / -1;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .toma-tension-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
 .kpi-card {
-  border-left: 5px solid transparent;
-  border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  height: 4px;
 }
 
 .kpi-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14);
 }
 
-.kpi-card-total {
-  border-left-color: #3b82f6;
+.kpi-card-total::before {
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
 }
 
-.kpi-card-sync {
-  border-left-color: #22c55e;
+.kpi-card-error::before {
+  background: linear-gradient(90deg, #dc2626, #fb7185);
 }
 
-.kpi-card-pending {
-  border-left-color: #f59e0b;
+.kpi-card-avg::before {
+  background: linear-gradient(90deg, #7c3aed, #c084fc);
 }
 
-.kpi-card-error {
-  border-left-color: #ef4444;
+.kpi-card-extremes::before {
+  background: linear-gradient(90deg, #0891b2, #22d3ee);
 }
 
 .kpi-card .p-card-body {
   text-align: center;
+  padding-top: 1rem;
+}
+
+.kpi-card-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kpi-icon {
+  font-size: 1.35rem;
+  color: #334155;
 }
 
 .kpi-card span {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 700;
-}
-
-.kpi-card-avg {
-  border-left-color: #8b5cf6;
-}
-
-.kpi-card-extremes {
-  border-left-color: #06b6d4;
+  color: #0f172a;
 }
 
 .kpi-multiline {
@@ -115,6 +141,8 @@
   gap: 0.2rem;
   font-size: 0.95rem;
   font-weight: 600;
+  color: #334155;
+  margin-top: 0.45rem;
 }
 
 .kpi-multiline p {
