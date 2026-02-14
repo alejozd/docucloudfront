@@ -21,10 +21,38 @@ const normalizePhrasePayload = (payload) => {
   return null;
 };
 
+const translateToSpanish = async (text) => {
+  if (!text) return "";
+
+  const response = await axios.get(
+    "https://translate.googleapis.com/translate_a/single",
+    {
+      params: {
+        client: "gtx",
+        sl: "en",
+        tl: "es",
+        dt: "t",
+        q: text,
+      },
+    }
+  );
+
+  const translatedChunks = response?.data?.[0];
+  if (!Array.isArray(translatedChunks)) return text;
+
+  const translated = translatedChunks
+    .map((chunk) => (Array.isArray(chunk) ? chunk[0] : ""))
+    .join("")
+    .trim();
+
+  return translated || text;
+};
+
 const Home = () => {
   const [phrase, setPhrase] = useState("");
   const [author, setAuthor] = useState("");
   const [source, setSource] = useState("");
+  const [originalPhrase, setOriginalPhrase] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -58,9 +86,20 @@ const Home = () => {
           throw new Error("La respuesta de frase no tiene el formato esperado.");
         }
 
-        setPhrase(normalizedPhrase.phrase);
+        setOriginalPhrase(normalizedPhrase.phrase);
         setAuthor(normalizedPhrase.author || "Autor desconocido");
         setSource(normalizedPhrase.source || "");
+
+        try {
+          const translated = await translateToSpanish(normalizedPhrase.phrase);
+          setPhrase(translated);
+        } catch (translationError) {
+          console.warn(
+            "No se pudo traducir la frase. Se mostrará el texto original.",
+            translationError
+          );
+          setPhrase(normalizedPhrase.phrase);
+        }
       } catch (error) {
         console.error("Error fetching the phrase of the day", error);
         setError(
@@ -104,6 +143,11 @@ const Home = () => {
             key={author}
           >
             <p style={{ fontSize: "1.5em" }}>{phrase}</p>
+            {originalPhrase && originalPhrase !== phrase && (
+              <p style={{ opacity: 0.75 }}>
+                <strong>Original:</strong> {originalPhrase}
+              </p>
+            )}
             {source && <p>Fuente: {source}</p>}
             {error && <p>{error}</p>}
           </Card>
