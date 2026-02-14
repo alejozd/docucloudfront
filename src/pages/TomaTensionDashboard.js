@@ -17,8 +17,6 @@ const getNormalizedData = (payload) => {
   return [];
 };
 
-
-
 const toNumber = (value) => {
   const num = Number(value);
   return Number.isFinite(num) ? num : null;
@@ -66,13 +64,15 @@ const TomaTensionDashboard = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(`${Config.apiUrl}/api/toma-tension/sync`);
+      const response = await axios.get(
+        `${Config.apiUrl}/api/toma-tension/sync`,
+      );
       const data = getNormalizedData(response.data);
       setRegistros(data);
     } catch (requestError) {
       setError(
         requestError?.response?.data?.message ||
-          "No se pudo cargar la información de sincronización de toma de tensión."
+          "No se pudo cargar la información de sincronización de toma de tensión.",
       );
       setRegistros([]);
     } finally {
@@ -105,7 +105,7 @@ const TomaTensionDashboard = () => {
       Error: 0,
       Desconocido: 0,
     }),
-    [totalRegistros]
+    [totalRegistros],
   );
 
   const statusBodyTemplate = (rowData) => {
@@ -152,10 +152,10 @@ const TomaTensionDashboard = () => {
     }
 
     const maxRow = rowsWithSistole.reduce((max, row) =>
-      row.sistole > max.sistole ? row : max
+      row.sistole > max.sistole ? row : max,
     );
     const minRow = rowsWithSistole.reduce((min, row) =>
-      row.sistole < min.sistole ? row : min
+      row.sistole < min.sistole ? row : min,
     );
 
     return {
@@ -184,12 +184,12 @@ const TomaTensionDashboard = () => {
         <Card title="Total de registros" className="kpi-card kpi-card-total">
           <span>{totalRegistros}</span>
         </Card>
-        <Card title="Sincronizados" className="kpi-card kpi-card-sync">
+        {/* <Card title="Sincronizados" className="kpi-card kpi-card-sync">
           <span>{statusStats.Sincronizado}</span>
         </Card>
         <Card title="Pendientes" className="kpi-card kpi-card-pending">
           <span>{statusStats.Pendiente}</span>
-        </Card>
+        </Card> */}
         <Card title="Errores" className="kpi-card kpi-card-error">
           <span>{statusStats.Error}</span>
         </Card>
@@ -200,10 +200,17 @@ const TomaTensionDashboard = () => {
             <p>Ritmo: {averages.ritmoCardiaco}</p>
           </div>
         </Card>
-        <Card title="Extremos de Sístole" className="kpi-card kpi-card-extremes">
+        <Card
+          title="Extremos de Sístole"
+          className="kpi-card kpi-card-extremes"
+        >
           <div className="kpi-multiline">
-            <p>Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})</p>
-            <p>Más baja: {sistoleExtremes.min} ({sistoleExtremes.minValue})</p>
+            <p>
+              Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})
+            </p>
+            <p>
+              Más baja: {sistoleExtremes.min} ({sistoleExtremes.minValue})
+            </p>
           </div>
         </Card>
       </div>
