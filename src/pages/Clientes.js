@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -53,7 +53,7 @@ const Clientes = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const toast = useRef(null);
 
-  const requestClientes = async (method, payload = null, id = null) => {
+  const requestClientes = useCallback(async (method, payload = null, id = null) => {
     const url = `${Config.apiUrl}${CLIENTES_ENDPOINT}${id ? `/${id}` : ""}`;
 
     if (method === "get") return await axios.get(url);
@@ -62,9 +62,9 @@ const Clientes = () => {
     if (method === "delete") return await axios.delete(url);
 
     throw new Error(`Método no soportado: ${method}`);
-  };
+  }, []);
 
-  const fetchClientes = async () => {
+  const fetchClientes = useCallback(async () => {
     try {
       setLoading(true);
       const response = await requestClientes("get");
@@ -80,7 +80,7 @@ const Clientes = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [requestClientes]);
 
   const openNew = () => {
     setCliente(initialClienteState);
@@ -225,7 +225,7 @@ const Clientes = () => {
 
   useEffect(() => {
     fetchClientes();
-  }, []);
+  }, [fetchClientes]);
 
   useEffect(() => {
     if (autoGeneratePDF && showComprobante) {
