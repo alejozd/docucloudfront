@@ -1,8 +1,11 @@
 // Home.js
 import React, { useState, useEffect } from "react";
-import axios from "axios"; //
+import axios from "axios";
 import { Card } from "primereact/card";
+import { ProgressSpinner } from "primereact/progressspinner";
 import Config from "../components/features/Config";
+import OpenWeatherMapComponent from "./OpenWeatherMapComponent";
+import "../styles/Home.css";
 
 const normalizePhrasePayload = (payload) => {
   if (!payload) return null;
@@ -56,25 +59,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   axios
-  //     // .get("/api/phrase")
-  //     .get("https://frasedeldia.azurewebsites.net/api/phrase", {
-  //       headers: { "Access-Control-Allow-Origin": "*" },
-  //     })
-  //     .then((response) => {
-  //       console.log("response.data", response.data);
-  //       setPhrase(response.data.phrase);
-  //       setAuthor(response.data.author);
-  //       setLoading(false);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching the phrase of the day", error);
-  //       setError(error.message);
-  //       setLoading(false);
-  //     });
-  // }, []);
-
   useEffect(() => {
     const fetchPhrase = async () => {
       try {
@@ -100,58 +84,60 @@ const Home = () => {
           );
           setPhrase(normalizedPhrase.phrase);
         }
-      } catch (error) {
-        console.error("Error fetching the phrase of the day", error);
+      } catch (requestError) {
+        console.error("Error fetching the phrase of the day", requestError);
         setError(
-          error?.response?.data?.message ||
-            error?.response?.data?.error ||
-            error.message
+          requestError?.response?.data?.message ||
+            requestError?.response?.data?.error ||
+            requestError.message
         );
       } finally {
         setLoading(false);
       }
     };
 
-    // const fetchPhrase = async () => {
-    //   try {
-    //     setPhrase("Esta es una prueba...");
-    //     setAuthor("Prueba");
-    //   } catch (error) {
-    //     console.error("Error fetching the phrase of the day", error);
-    //     setError(error.message);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-
     fetchPhrase();
   }, []);
 
   return (
-    <div>
-      <div>
-        <h1>Bienvenido a Docucloud, una aplicación hecha por Alejo.</h1>
-        <p>¡Aquí realizo pruebas de diferentes proyectos!...</p>
-      </div>
-      <div className="card flex justify-content-center">
-        {loading ? (
-          <p>Cargando...</p>
-        ) : (
-          <Card
-            title="Frase del día"
-            subTitle={"Autor: " + author}
-            key={author}
-          >
-            <p style={{ fontSize: "1.5em" }}>{phrase}</p>
-            {originalPhrase && originalPhrase !== phrase && (
-              <p style={{ opacity: 0.75 }}>
-                <strong>Original:</strong> {originalPhrase}
-              </p>
-            )}
-            {source && <p>Fuente: {source}</p>}
-            {error && <p>{error}</p>}
-          </Card>
-        )}
+    <div className="home-page">
+      <section className="home-hero">
+        <h1>Bienvenido a Docucloud</h1>
+        <p>
+          Panel principal con resumen diario: frase inspiracional traducida al
+          español y estado del clima en tiempo real.
+        </p>
+      </section>
+
+      <div className="home-grid">
+        <Card
+          className="home-card"
+          title="Frase del día"
+          subTitle={`Autor: ${author || "-"}`}
+        >
+          {loading ? (
+            <ProgressSpinner style={{ width: "45px", height: "45px" }} />
+          ) : (
+            <>
+              <p className="home-phrase">{phrase || "Sin frase disponible"}</p>
+              {originalPhrase && originalPhrase !== phrase && (
+                <p className="home-meta">
+                  <strong>Original:</strong> {originalPhrase}
+                </p>
+              )}
+              {source && (
+                <p className="home-meta">
+                  <strong>Fuente:</strong> {source}
+                </p>
+              )}
+              {error && <p className="home-meta">{error}</p>}
+            </>
+          )}
+        </Card>
+
+        <div className="home-card">
+          <OpenWeatherMapComponent city="Bogotá" />
+        </div>
       </div>
     </div>
   );
