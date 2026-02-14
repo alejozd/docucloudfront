@@ -3,9 +3,27 @@ import React, { useState, useEffect } from "react";
 import axios from "axios"; //
 import { Card } from "primereact/card";
 
+const normalizePhrasePayload = (payload) => {
+  if (!payload) return null;
+
+  if (Array.isArray(payload)) {
+    return payload[0] || null;
+  }
+
+  if (payload?.data) {
+    if (Array.isArray(payload.data)) return payload.data[0] || null;
+    if (typeof payload.data === "object") return payload.data;
+  }
+
+  if (typeof payload === "object") return payload;
+
+  return null;
+};
+
 const Home = () => {
   const [phrase, setPhrase] = useState("");
   const [author, setAuthor] = useState("");
+  const [source, setSource] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,9 +49,17 @@ const Home = () => {
   useEffect(() => {
     const fetchPhrase = async () => {
       try {
+        setError(null);
         const response = await axios.get("/api/proxy-phrase");
-        setPhrase(response.data.phrase);
-        setAuthor(response.data.author);
+        const normalizedPhrase = normalizePhrasePayload(response.data);
+
+        if (!normalizedPhrase?.phrase) {
+          throw new Error("La respuesta de frase no tiene el formato esperado.");
+        }
+
+        setPhrase(normalizedPhrase.phrase);
+        setAuthor(normalizedPhrase.author || "Autor desconocido");
+        setSource(normalizedPhrase.source || "");
       } catch (error) {
         console.error("Error fetching the phrase of the day", error);
         setError(error.message);
@@ -73,7 +99,8 @@ const Home = () => {
             key={author}
           >
             <p style={{ fontSize: "1.5em" }}>{phrase}</p>
-            <p>{error}</p>
+            {source && <p>Fuente: {source}</p>}
+            {error && <p>{error}</p>}
           </Card>
         )}
       </div>
