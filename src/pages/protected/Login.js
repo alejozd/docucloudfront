@@ -6,6 +6,7 @@ import { Card } from "primereact/card";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
 import Config from "../../components/features/Config";
+import "../../styles/Login.css";
 
 const DEFAULT_REDIRECT_PATH = "/serial-reportes";
 const TOAST_LIFE = 3000;
@@ -72,23 +73,13 @@ const Login = ({ onLogin }) => {
 
   return (
     <div
-      className="flex align-items-start justify-content-center px-3 pt-6 pb-4"
-      style={{
-        minHeight: "calc(100vh - 4rem)",
-        background:
-          "radial-gradient(circle at top left, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%)",
-      }}
+      className="login-page flex align-items-start justify-content-center px-3 pt-6 pb-4"
+      
     >
       <Toast ref={toastRef} />
 
       <Card
-        className="w-full"
-        style={{
-          maxWidth: "460px",
-          borderRadius: "18px",
-          boxShadow: "0 20px 45px rgba(15, 23, 42, 0.14)",
-          border: "1px solid #e2e8f0",
-        }}
+        className="login-card w-full"
       >
         <div className="text-center mb-4">
           <div
@@ -114,7 +105,7 @@ const Login = ({ onLogin }) => {
             Contraseña
           </label>
 
-          <div className="w-full">
+          <div className="login-password-wrapper w-full">
             <Password
               inputId="password"
               value={password}
@@ -128,10 +119,8 @@ const Login = ({ onLogin }) => {
               toggleMask
               disabled={loading}
               autoComplete="current-password"
-              className="w-full"
+              className="login-password w-full"
               inputClassName="w-full"
-              style={{ width: "100%" }}
-              inputStyle={{ width: "100%" }}
             />
           </div>
 
