@@ -1,5 +1,5 @@
 // src/pages/VideosPage.js
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
 import { Card } from "primereact/card";
 import { Chip } from "primereact/chip";
@@ -17,12 +17,33 @@ import "../../styles/VideosPage.css";
 const VideoThumbnail = ({ src, title, onClick }) => {
   const [hasFrame, setHasFrame] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [shouldLoadPreview, setShouldLoadPreview] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const target = wrapperRef.current;
+    if (!target || shouldLoadPreview) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting) {
+          setShouldLoadPreview(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "180px" }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [shouldLoadPreview]);
 
   const handleLoadedData = (event) => {
     const video = event.currentTarget;
     if (hasFrame || hasError) return;
 
-    const targetTime = Math.min(1, Math.max(0, (video.duration || 0) / 4));
+    const targetTime = Math.min(0.2, Math.max(0, (video.duration || 0) / 10));
     if (targetTime > 0) {
       video.currentTime = targetTime;
     } else {
@@ -41,8 +62,8 @@ const VideoThumbnail = ({ src, title, onClick }) => {
   };
 
   return (
-    <button className="video-thumb-button" type="button" onClick={onClick}>
-      {!hasError ? (
+    <button className="video-thumb-button" type="button" onClick={onClick} ref={wrapperRef}>
+      {shouldLoadPreview && !hasError ? (
         <video
           className="video-thumb-preview"
           src={src}
