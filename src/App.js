@@ -55,12 +55,6 @@ function App() {
   );
 
   useEffect(() => {
-    if (!jwtToken) {
-      console.warn("No se encontró ningún token JWT en sessionStorage.");
-    } else {
-      console.log("Token JWT cargado correctamente:");
-    }
-
     const expirationTime = getTokenExpiration(jwtToken);
     if (!expirationTime) return;
 
