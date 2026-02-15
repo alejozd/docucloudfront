@@ -12,7 +12,6 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(duration || 0); // Usar la duración de props si existe
-  const [isSeeking, setIsSeeking] = useState(false);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false); // Estado para el modo pantalla completa nativo
@@ -49,14 +48,6 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
     setShowFullControls(true); // Mostrar controles al hacer clic
   };
 
-  const handleSeek = (e) => {
-    if (isSeeking && videoRef.current) {
-      const newTime = (e.value * videoDuration) / 100;
-      videoRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
-  };
-
   const onLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
       setVideoDuration(videoRef.current.duration);
@@ -81,10 +72,10 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
   }, [volume]);
 
   const onTimeUpdate = useCallback(() => {
-    if (videoRef.current && !isSeeking) {
+    if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime);
     }
-  }, [isSeeking]);
+  }, []);
 
   const onEnded = useCallback(() => {
     setIsPlaying(false);
@@ -300,11 +291,6 @@ const VideoPlayer = ({ src, title, artist, year, genre, duration }) => {
                     videoRef.current.currentTime = newTime;
                     setCurrentTime(newTime);
                   }
-                }}
-                onSlideStart={() => setIsSeeking(true)}
-                onSlideEnd={(e) => {
-                  setIsSeeking(false);
-                  handleSeek(e); // Aplicar el valor final al soltar
                 }}
                 className="time-slider"
                 step={0.1}

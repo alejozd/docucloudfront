@@ -1,5 +1,5 @@
 // ClavesGeneradas.js
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { DataTable } from "primereact/datatable";
@@ -9,73 +9,118 @@ import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { Toast } from "primereact/toast";
+import { Card } from "primereact/card";
 
 const ClavesGeneradas = ({ jwtToken }) => {
   const [claves, setClaves] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState(""); // Estado para el filtro global
+  const [globalFilter, setGlobalFilter] = useState("");
   const toast = useRef(null);
-  const dt = useRef(null); // Referencia al DataTable
 
-  // Función para cargar las claves generadas desde el backend
+  const authHeaders = useMemo(
+    () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
+    [jwtToken]
+  );
+
+  const notify = useCallback((severity, detail) => {
+    toast.current?.show({
+      severity,
+      summary: severity === "success" ? "Éxito" : "Error",
+      detail,
+      life: 3000,
+    });
+  }, []);
+
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) return "-";
+    return parsedDate.toLocaleString();
+  };
+
   const fetchClaves = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(
         `${Config.apiUrl}/api/claves-medios-generadas`,
-        {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        }
+        authHeaders
       );
+
       const transformedData = response.data.map((item) => ({
         ...item,
-        serial_erp: item.serial?.serial_erp || "N/A", // Transformar los datos
+        serial_erp: item.serial?.serial_erp || "N/A",
+        cliente_nombre: item.serial?.cliente?.nombre_completo || "Sin cliente",
       }));
+
       setClaves(transformedData);
     } catch (err) {
       console.error(err);
       setError("Error al cargar las claves generadas.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar las claves generadas",
-        life: 3000,
-      });
+      notify("error", "Error al cargar las claves generadas");
     } finally {
       setLoading(false);
     }
-  }, [jwtToken]);
+  }, [authHeaders, notify]);
 
-  // Cargar las claves al iniciar el componente
   useEffect(() => {
     fetchClaves();
   }, [fetchClaves]);
 
-  // Renderizar el DataTable
-  const renderDataTable = () => {
-    return (
-      <div className="card">
-        {/* Campo de filtro global */}
-        <div
-          className="flex flex-wrap gap-2 justify-content-between align-items-center"
-          style={{ marginBottom: "15px" }}
-        >
-          <h4 className="m-0">Buscar por Serial ERP, MAC o IP-Origen</h4>
-          <IconField iconPosition="left">
-            <InputIcon className="pi pi-search" />
-            <InputText
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Busqueda Global"
-            />
-          </IconField>
-        </div>
+  const kpis = useMemo(
+    () => [
+      { label: "Total", value: claves.length },
+      { label: "Con serial", value: claves.filter((item) => item.serial_erp !== "N/A").length },
+      { label: "Con cliente", value: claves.filter((item) => item.cliente_nombre !== "Sin cliente").length },
+    ],
+    [claves]
+  );
 
-        {/* DataTable */}
+  const tableHeader = (
+    <div className="clientes-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Buscar por serial, cliente, MAC, IP o clave"
+        />
+      </IconField>
+      <span>{claves.length} registros</span>
+    </div>
+  );
+
+  return (
+    <div className="clientes-page">
+      <Toast ref={toast} />
+
+      <div className="clientes-header">
+        <h2>Claves Generadas</h2>
+        <div className="clientes-actions">
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchClaves}
+            loading={loading}
+          />
+        </div>
+      </div>
+
+      <div className="clientes-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="clientes-kpi">
+            <p className="clientes-kpi-label">{kpi.label}</p>
+            <p className="clientes-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      {error && <p style={{ color: "red", marginBottom: "12px" }}>{error}</p>}
+
+      <Card className="clientes-table-card">
         <DataTable
-          ref={dt}
           value={claves}
           loading={loading}
           paginator
@@ -83,56 +128,33 @@ const ClavesGeneradas = ({ jwtToken }) => {
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron claves generadas."
           stripedRows
-          globalFilter={globalFilter} // Vincular el filtro global
+          globalFilter={globalFilter}
+          header={tableHeader}
+          dataKey="id"
+          sortOrder={-1}
+          sortField="generado_en"
           globalFilterFields={[
             "serial_erp",
+            "cliente_nombre",
             "mac_servidor",
             "iporigen",
             "clave_generada",
           ]}
-          filterMatchMode="contains"
-          sortOrder={-1}
-          sortField="generado_en"
         >
-          <Column field="id" header="ID" />
-          <Column field="serial_erp" header="Serial ERP" />
-          <Column field="serial.cliente.nombre_completo" header="Cliente" />
-          <Column field="mac_servidor" header="MAC" />
-          <Column field="iporigen" header="IP-Origen" />
+          <Column field="id" header="ID" hidden />
+          <Column field="serial_erp" header="Serial ERP" sortable />
+          <Column field="cliente_nombre" header="Cliente" sortable />
+          <Column field="mac_servidor" header="MAC" sortable />
+          <Column field="iporigen" header="IP-Origen" sortable />
           <Column field="clave_generada" header="Clave" />
           <Column
             field="generado_en"
             header="Fecha de Generación"
-            body={(rowData) => new Date(rowData.generado_en).toLocaleString()}
+            body={(rowData) => formatDate(rowData.generado_en)}
             sortable
           />
         </DataTable>
-      </div>
-    );
-  };
-
-  return (
-    <div>
-      {/* Componente Toast para notificaciones */}
-      <Toast ref={toast} />
-
-      <div className="card">
-        <h2>Claves Generadas</h2>
-
-        {/* Botón para refrescar la lista */}
-        <Button
-          label="Refrescar"
-          icon="pi pi-refresh"
-          onClick={fetchClaves}
-          className="p-button-raised p-button-secondary"
-          style={{ marginBottom: "20px" }}
-        />
-
-        {/* Mostrar mensaje de error si ocurre uno */}
-        {error && <p style={{ color: "red", marginBottom: "12px" }}>{error}</p>}
-      </div>
-      {/* Renderizar el DataTable */}
-      {renderDataTable()}
+      </Card>
     </div>
   );
 };
