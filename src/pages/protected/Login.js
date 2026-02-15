@@ -100,8 +100,8 @@ const Login = ({ onLogin }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-column gap-3">
-          <label htmlFor="password" className="font-medium text-700">
+        <form onSubmit={handleSubmit} className="login-form flex flex-column gap-3">
+          <label htmlFor="password" className="login-field-width font-medium text-700 text-left">
             Contraseña
           </label>
 
@@ -124,7 +124,7 @@ const Login = ({ onLogin }) => {
             />
           </div>
 
-          <small className="text-500 block">
+          <small className="login-field-width text-500 block text-left">
             Tu sesión se inicia de forma segura con token JWT.
           </small>
 
@@ -133,7 +133,7 @@ const Login = ({ onLogin }) => {
             label={loading ? "Autenticando..." : "Ingresar"}
             icon={loading ? "pi pi-spin pi-spinner" : "pi pi-arrow-right"}
             disabled={loading}
-            className="w-full mt-2"
+            className="login-field-width mt-2"
             severity="primary"
             size="large"
           />
