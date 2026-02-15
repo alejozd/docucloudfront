@@ -1,5 +1,5 @@
 // SerialesERP.js
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { DataTable } from "primereact/datatable";
@@ -14,67 +14,87 @@ import { InputIcon } from "primereact/inputicon";
 import { FilterMatchMode } from "primereact/api";
 import { Toast } from "primereact/toast";
 
+const INITIAL_SERIAL = {
+  id: null,
+  serial_erp: "",
+  ano_medios: "",
+  cliente_id: "",
+  activo: true,
+};
+
+const INITIAL_FILTERS = {
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+};
+
 const SerialesERP = ({ jwtToken }) => {
   const [seriales, setSeriales] = useState([]);
-  const [serial, setSerial] = useState({
-    id: null,
-    serial_erp: "",
-    ano_medios: "",
-    cliente_id: "",
-    activo: true,
-  });
+  const [serial, setSerial] = useState(INITIAL_SERIAL);
   const [showDialog, setShowDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  const [filters, setFilters] = useState({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const toast = React.useRef(null);
+  const authHeaders = useMemo(
+    () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
+    [jwtToken]
+  );
+
+  const notify = useCallback((severity, detail) => {
+    toast.current?.show({
+      severity,
+      summary: severity === "success" ? "Éxito" : "Error",
+      detail,
+      life: 3000,
+    });
+  }, []);
+
+  const normalizeSerial = useCallback(
+    (serialData = INITIAL_SERIAL) => ({
+      id: serialData.id ?? null,
+      serial_erp: serialData.serial_erp ?? "",
+      ano_medios: serialData.ano_medios ?? "",
+      cliente_id: serialData.cliente_id ?? "",
+      activo: serialData.activo ?? true,
+    }),
+    []
+  );
 
   // Función para cargar seriales desde el backend
   const fetchSeriales = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/seriales-erp`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(
+        `${Config.apiUrl}/api/seriales-erp`,
+        authHeaders
+      );
       setSeriales(response.data);
     } catch (err) {
       console.error(err);
       setError("Error al cargar los seriales ERP.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los seriales ERP",
-        life: 3000,
-      });
+      notify("error", "Error al cargar los seriales ERP");
     } finally {
       setLoading(false);
     }
-  }, [jwtToken]);
+  }, [authHeaders, notify]);
 
   // Función para cargar clientes desde el backend
   const fetchClientes = useCallback(async () => {
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/clientes-medios`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(
+        `${Config.apiUrl}/api/clientes-medios`,
+        authHeaders
+      );
       setClientes(response.data);
     } catch (err) {
       console.error("Error al cargar los clientes:", err.message);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los clientes",
-        life: 3000,
-      });
+      notify("error", "Error al cargar los clientes");
     }
-  }, [jwtToken]);
+  }, [authHeaders, notify]);
 
   // Cargar seriales y clientes al iniciar el componente
   useEffect(() => {
@@ -85,10 +105,13 @@ const SerialesERP = ({ jwtToken }) => {
   // Manejo del filtro global
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
-    let _filters = { ...filters };
-    _filters["global"].value = value;
-
-    setFilters(_filters);
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      global: {
+        ...currentFilters.global,
+        value,
+      },
+    }));
     setGlobalFilterValue(value);
   };
 
@@ -113,25 +136,20 @@ const SerialesERP = ({ jwtToken }) => {
   // Función para abrir el diálogo de creación/edición
   const openDialog = (serialSeleccionado = null) => {
     if (serialSeleccionado) {
-      setSerial(serialSeleccionado);
+      setSerial(normalizeSerial(serialSeleccionado));
       setIsEditMode(true);
     } else {
-      setSerial({
-        id: null,
-        serial_erp: "",
-        ano_medios: "",
-        cliente_id: "",
-        activo: true,
-      });
+      setSerial(INITIAL_SERIAL);
       setIsEditMode(false);
     }
+    setError(null);
     setShowDialog(true);
   };
 
   // Función para cerrar el diálogo
   const closeDialog = () => {
     setShowDialog(false);
-    setSerial({ id: null, serial_erp: "", ano_medios: "" });
+    setSerial(INITIAL_SERIAL);
   };
 
   // Función para guardar un serial ERP
@@ -151,29 +169,12 @@ const SerialesERP = ({ jwtToken }) => {
     try {
       if (isEditMode) {
         // Actualizar serial ERP existente
-        await axios.put(
-          `${Config.apiUrl}/api/seriales-erp/${serial.id}`,
-          serial,
-          { headers: { Authorization: `Bearer ${jwtToken}` } }
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Serial ERP actualizado exitosamente",
-          life: 3000,
-        });
+        await axios.put(`${Config.apiUrl}/api/seriales-erp/${serial.id}`, serial, authHeaders);
+        notify("success", "Serial ERP actualizado exitosamente");
       } else {
         // Crear nuevo serial ERP
-        console.log("Serial a guardar:", serial);
-        await axios.post(`${Config.apiUrl}/api/seriales-erp`, serial, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Serial ERP creado exitosamente",
-          life: 3000,
-        });
+        await axios.post(`${Config.apiUrl}/api/seriales-erp`, serial, authHeaders);
+        notify("success", "Serial ERP creado exitosamente");
       }
 
       closeDialog();
@@ -181,12 +182,7 @@ const SerialesERP = ({ jwtToken }) => {
     } catch (err) {
       console.error(err);
       setError("Error al guardar el serial ERP.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al guardar el serial ERP",
-        life: 3000,
-      });
+      notify("error", "Error al guardar el serial ERP");
     } finally {
       setLoading(false);
     }
@@ -199,25 +195,13 @@ const SerialesERP = ({ jwtToken }) => {
       setError(null);
 
       try {
-        await axios.delete(`${Config.apiUrl}/api/seriales-erp/${id}`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Serial ERP eliminado exitosamente",
-          life: 3000,
-        });
+        await axios.delete(`${Config.apiUrl}/api/seriales-erp/${id}`, authHeaders);
+        notify("success", "Serial ERP eliminado exitosamente");
         fetchSeriales(); // Recargar la lista de seriales ERP
       } catch (err) {
         console.error(err);
         setError("Error al eliminar el serial ERP.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Error al eliminar el serial ERP",
-          life: 3000,
-        });
+        notify("error", "Error al eliminar el serial ERP");
       } finally {
         setLoading(false);
       }
@@ -335,7 +319,7 @@ const SerialesERP = ({ jwtToken }) => {
           <Column
             field="nombre_completo"
             header="Cliente"
-            body={(rowData) => <span>{rowData.cliente.nombre_completo}</span>}
+            body={(rowData) => <span>{rowData.cliente?.nombre_completo ?? "-"}</span>}
             sortable
           />
           <Column
