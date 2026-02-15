@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
+import { Password } from "primereact/password";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { Card } from "primereact/card";
@@ -215,26 +216,33 @@ const AutorizacionPage = () => {
           modal
           className="p-fluid"
         >
-          <div style={{ marginBottom: "16px" }}>
-            <label htmlFor="clave-acceso" style={{ display: "block", marginBottom: "8px" }}>
-              Ingresa la clave de acceso
+          <div style={{ marginBottom: "4px" }}>
+            <p style={{ marginTop: 0, color: "#6b7280", marginBottom: "14px" }}>
+              Esta sección está protegida. Ingresa la clave para continuar.
+            </p>
+            <label htmlFor="clave-acceso" style={{ display: "block", marginBottom: "8px", fontWeight: 600 }}>
+              Clave de acceso
             </label>
-            <InputText
+            <Password
               id="clave-acceso"
-              type="password"
               value={claveIngresada}
               onChange={(e) => setClaveIngresada(e.target.value)}
               onKeyDown={handleAccessKeyDown}
-              placeholder="Clave"
+              placeholder="Ingresa tu clave"
+              feedback={false}
+              toggleMask
+              inputStyle={{ width: "100%" }}
               style={{ width: "100%", marginBottom: "16px" }}
             />
-            <Button
-              label={loading ? "Verificando..." : "Ingresar"}
-              onClick={verificarClave}
-              icon={loading ? "pi pi-spin pi-spinner" : "pi pi-sign-in"}
-              severity="success"
-              disabled={loading}
-            />
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                label={loading ? "Verificando..." : "Ingresar"}
+                onClick={verificarClave}
+                icon={loading ? "pi pi-spin pi-spinner" : "pi pi-lock-open"}
+                severity="success"
+                disabled={loading}
+              />
+            </div>
           </div>
         </Dialog>
       </div>
