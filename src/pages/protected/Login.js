@@ -114,23 +114,26 @@ const Login = ({ onLogin }) => {
             Contraseña
           </label>
 
-          <Password
-            inputId="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Ingresa tu contraseña"
-            promptLabel="Escribe la contraseña"
-            weakLabel="Muy simple"
-            mediumLabel="Complejidad promedio"
-            strongLabel="Complejidad alta"
-            feedback={false}
-            toggleMask
-            disabled={loading}
-            autoComplete="current-password"
-            className="w-full"
-            inputClassName="w-full"
-            style={{ width: "100%" }}
-          />
+          <div className="w-full">
+            <Password
+              inputId="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Ingresa tu contraseña"
+              promptLabel="Escribe la contraseña"
+              weakLabel="Muy simple"
+              mediumLabel="Complejidad promedio"
+              strongLabel="Complejidad alta"
+              feedback={false}
+              toggleMask
+              disabled={loading}
+              autoComplete="current-password"
+              className="w-full"
+              inputClassName="w-full"
+              style={{ width: "100%" }}
+              inputStyle={{ width: "100%" }}
+            />
+          </div>
 
           <small className="text-500 block">
             Tu sesión se inicia de forma segura con token JWT.
