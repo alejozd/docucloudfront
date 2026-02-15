@@ -1,5 +1,5 @@
 // Ventas.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { DataTable } from "primereact/datatable";
@@ -10,381 +10,260 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { convertToLocalDate } from "./../../utils/dateUtils";
-import { formatDate } from "./../../utils/dateUtils";
+import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { Card } from "primereact/card";
+import { convertToLocalDate, formatDate } from "./../../utils/dateUtils";
+
+const INITIAL_VENTA = {
+  id: null,
+  vendedor_id: "",
+  cliente_medio_id: "",
+  fecha_venta: new Date(),
+  valor_total: null,
+  estado_pago: "pendiente",
+  estado_instalacion: "pendiente",
+};
+
+const OPCIONES_ESTADO_PAGO = [
+  { label: "Pendiente", value: "pendiente" },
+  { label: "Parcial", value: "parcial" },
+  { label: "Completo", value: "completo" },
+];
+
+const OPCIONES_ESTADO_INSTALACION = [
+  { label: "Pendiente", value: "pendiente" },
+  { label: "Instalado", value: "instalado" },
+];
 
 const Ventas = ({ jwtToken }) => {
   const [ventas, setVentas] = useState([]);
-  const [venta, setVenta] = useState({
-    id: null,
-    vendedor_id: "",
-    cliente_medio_id: "",
-    fecha_venta: new Date().toISOString().split("T")[0],
-    valor_total: "",
-    estado_pago: "pendiente",
-    estado_instalacion: "pendiente",
-  });
+  const [venta, setVenta] = useState(INITIAL_VENTA);
   const [showDialog, setShowDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [clientesMedios, setClientesMedios] = useState([]);
   const [vendedores, setVendedores] = useState([]);
-  const opcionesEstadoPago = [
-    { label: "Pendiente", value: "pendiente" },
-    { label: "Parcial", value: "parcial" },
-    { label: "Completo", value: "completo" },
-  ];
-
-  const opcionesEstadoInstalacion = [
-    { label: "Pendiente", value: "pendiente" },
-    { label: "Instalado", value: "instalado" },
-  ];
+  const [globalFilter, setGlobalFilter] = useState("");
   const toast = React.useRef(null);
 
-  // Cargar ventas, clientes medios y vendedores al iniciar el componente
-  useEffect(() => {
-    fetchVentas();
-    fetchClientesMedios();
-    fetchVendedores();
+  const authHeaders = useMemo(
+    () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
+    [jwtToken]
+  );
+
+  const notify = useCallback((severity, detail) => {
+    const summary =
+      severity === "success"
+        ? "Éxito"
+        : severity === "warn"
+          ? "Advertencia"
+          : "Error";
+
+    toast.current?.show({
+      severity,
+      summary,
+      detail,
+      life: 3000,
+    });
   }, []);
 
-  // Función para cargar ventas desde el backend
-  const fetchVentas = async () => {
+  const fetchVentas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/ventas`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(`${Config.apiUrl}/api/ventas`, authHeaders);
       setVentas(response.data);
     } catch (err) {
       console.error(err);
       setError("Error al cargar las ventas.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar las ventas",
-        life: 3000,
-      });
+      notify("error", "Error al cargar las ventas");
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders, notify]);
 
-  // Función para cargar clientes medios desde el backend
-  const fetchClientesMedios = async () => {
+  const fetchClientesMedios = useCallback(async () => {
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/clientes-medios`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(`${Config.apiUrl}/api/clientes-medios`, authHeaders);
       setClientesMedios(response.data);
     } catch (err) {
       console.error("Error al cargar los clientes medios:", err.message);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los clientes medios",
-        life: 3000,
-      });
+      notify("error", "Error al cargar los clientes medios");
     }
-  };
+  }, [authHeaders, notify]);
 
-  // Función para cargar vendedores desde el backend
-  const fetchVendedores = async () => {
+  const fetchVendedores = useCallback(async () => {
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, authHeaders);
       setVendedores(response.data);
     } catch (err) {
       console.error("Error al cargar los vendedores:", err.message);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los vendedores",
-        life: 3000,
-      });
+      notify("error", "Error al cargar los vendedores");
     }
-  };
+  }, [authHeaders, notify]);
 
-  // Función para abrir el diálogo de creación/edición
+  useEffect(() => {
+    fetchVentas();
+    fetchClientesMedios();
+    fetchVendedores();
+  }, [fetchVentas, fetchClientesMedios, fetchVendedores]);
+
   const openDialog = (ventaSeleccionada = null) => {
     if (ventaSeleccionada) {
-      // Convertir la fecha UTC/ISO a una fecha local
-      const fechaLocal = convertToLocalDate(ventaSeleccionada.fecha_venta);
-
       setVenta({
+        ...INITIAL_VENTA,
         ...ventaSeleccionada,
-        fecha_venta: fechaLocal,
+        fecha_venta: convertToLocalDate(ventaSeleccionada.fecha_venta),
       });
       setIsEditMode(true);
     } else {
-      setVenta({
-        id: null,
-        vendedor_id: "",
-        cliente_medio_id: "",
-        fecha_venta: new Date(),
-        valor_total: "",
-        estado_pago: "pendiente",
-        estado_instalacion: "pendiente",
-      });
+      setVenta(INITIAL_VENTA);
       setIsEditMode(false);
     }
+    setError(null);
     setShowDialog(true);
   };
 
-  // Función para cerrar el diálogo
   const closeDialog = () => {
     setShowDialog(false);
-    setVenta({
-      id: null,
-      vendedor_id: "",
-      cliente_medio_id: "",
-      fecha_venta: new Date().toISOString().split("T")[0],
-      valor_total: "",
-      estado_pago: "pendiente",
-      estado_instalacion: "pendiente",
-    });
+    setVenta(INITIAL_VENTA);
   };
 
-  // Función para guardar una venta
+  const toDateOnlyISO = (dateValue) => {
+    if (!dateValue) return null;
+    const date = new Date(dateValue);
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split("T")[0];
+  };
+
   const saveVenta = async () => {
     if (
       !venta.vendedor_id ||
       !venta.cliente_medio_id ||
       !venta.fecha_venta ||
-      !venta.valor_total ||
+      venta.valor_total === null ||
+      venta.valor_total === undefined ||
       !venta.estado_pago ||
       !venta.estado_instalacion
     ) {
       setError("Por favor ingresa todos los campos obligatorios.");
+      notify("warn", "Completa los campos obligatorios");
       return;
     }
+
     setLoading(true);
     setError(null);
 
-    const fechaVentaISO = venta.fecha_venta
-      ? new Date(
-          venta.fecha_venta.getTime() -
-            venta.fecha_venta.getTimezoneOffset() * 60000
-        ) // Ajusta la zona horaria
-          .toISOString()
-          .split("T")[0]
-      : null;
-
     const ventaParaEnviar = {
       ...venta,
-      fecha_venta: fechaVentaISO,
+      fecha_venta: toDateOnlyISO(venta.fecha_venta),
     };
+
     try {
       if (isEditMode) {
-        // Actualizar venta existente
-        console.log("ventaParaEnviar", ventaParaEnviar);
-        await axios.put(
-          `${Config.apiUrl}/api/ventas/${venta.id}`,
-          ventaParaEnviar,
-          {
-            headers: { Authorization: `Bearer ${jwtToken}` },
-          }
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Venta actualizada exitosamente",
-          life: 3000,
-        });
+        await axios.put(`${Config.apiUrl}/api/ventas/${venta.id}`, ventaParaEnviar, authHeaders);
+        notify("success", "Venta actualizada exitosamente");
       } else {
-        // Crear nueva venta
-        await axios.post(`${Config.apiUrl}/api/ventas`, ventaParaEnviar, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Venta creada exitosamente",
-          life: 3000,
-        });
+        await axios.post(`${Config.apiUrl}/api/ventas`, ventaParaEnviar, authHeaders);
+        notify("success", "Venta creada exitosamente");
       }
+
       closeDialog();
-      fetchVentas(); // Recargar la lista de ventas
+      fetchVentas();
     } catch (err) {
       console.error(err);
       setError("Error al guardar la venta.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al guardar la venta",
-        life: 3000,
-      });
+      notify("error", "Error al guardar la venta");
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para eliminar una venta
   const deleteVenta = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar esta venta?")) {
       setLoading(true);
       setError(null);
       try {
-        await axios.delete(`${Config.apiUrl}/api/ventas/${id}`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Venta eliminada exitosamente",
-          life: 3000,
-        });
-        fetchVentas(); // Recargar la lista de ventas
+        await axios.delete(`${Config.apiUrl}/api/ventas/${id}`, authHeaders);
+        notify("success", "Venta eliminada exitosamente");
+        fetchVentas();
       } catch (err) {
         console.error(err);
         setError("Error al eliminar la venta.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Error al eliminar la venta",
-          life: 3000,
-        });
+        notify("error", "Error al eliminar la venta");
       } finally {
         setLoading(false);
       }
     }
   };
 
-  // Renderizar el diálogo de creación/edición
-  const renderDialog = () => {
-    return (
-      <Dialog
-        visible={showDialog}
-        header={isEditMode ? "Editar Venta" : "Nueva Venta"}
-        onHide={closeDialog}
-        style={{ width: "400px" }}
-      >
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="fecha_venta"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Fecha de Venta:
-          </label>
-          <Calendar
-            id="fecha_venta"
-            value={venta.fecha_venta}
-            onChange={(e) => setVenta({ ...venta, fecha_venta: e.value })}
-            dateFormat="dd/mm/yy" // Formato de fecha personalizado
-            showIcon // Muestra el icono de calendario
-            placeholder="Selecciona una fecha"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="valor_total"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Valor Total:
-          </label>
-          <InputNumber
-            id="valor_total"
-            value={venta.valor_total}
-            onValueChange={(e) => setVenta({ ...venta, valor_total: e.value })}
-            mode="currency"
-            currency="COP"
-            locale="es-CO"
-            minFractionDigits={0}
-            maxFractionDigits={0}
-            placeholder="Ingrese el valor total"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="cliente_medio_id"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Cliente Medio:
-          </label>
-          <Dropdown
-            id="cliente_medio_id"
-            value={venta.cliente_medio_id}
-            options={clientesMedios}
-            onChange={(e) => setVenta({ ...venta, cliente_medio_id: e.value })}
-            optionLabel="nombre_completo"
-            optionValue="id"
-            placeholder="Selecciona un cliente medio"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="vendedor_id"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Vendedor:
-          </label>
-          <Dropdown
-            id="vendedor_id"
-            value={venta.vendedor_id}
-            options={vendedores}
-            onChange={(e) => setVenta({ ...venta, vendedor_id: e.value })}
-            optionLabel="nombre"
-            optionValue="id"
-            placeholder="Selecciona un vendedor"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="estado_pago"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Estado de Pago:
-          </label>
-          <Dropdown
-            id="estado_pago"
-            value={venta.estado_pago}
-            options={opcionesEstadoPago}
-            onChange={(e) => setVenta({ ...venta, estado_pago: e.value })}
-            placeholder="Selecciona un estado de pago"
-            style={{ width: "100%" }}
-          />
-        </div>
+  const kpis = useMemo(
+    () => [
+      { label: "Total", value: ventas.length },
+      {
+        label: "Valor total",
+        value: new Intl.NumberFormat("es-CO", {
+          style: "currency",
+          currency: "COP",
+          maximumFractionDigits: 0,
+        }).format(ventas.reduce((acc, item) => acc + Number(item.valor_total || 0), 0)),
+      },
+      {
+        label: "Pagos completos",
+        value: ventas.filter((item) => item.estado_pago === "completo").length,
+      },
+    ],
+    [ventas]
+  );
 
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="estado_instalacion"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Estado de Instalación:
-          </label>
-          <Dropdown
-            id="estado_instalacion"
-            value={venta.estado_instalacion}
-            options={opcionesEstadoInstalacion}
-            onChange={(e) =>
-              setVenta({ ...venta, estado_instalacion: e.value })
-            }
-            placeholder="Selecciona un estado de instalación"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <Button
-          label="Guardar"
-          onClick={saveVenta}
-          disabled={loading}
-          className="p-button-raised p-button-primary"
+  const tableHeader = (
+    <div className="clientes-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Buscar por cliente, vendedor o estado"
         />
-        {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
-      </Dialog>
-    );
-  };
+      </IconField>
+      <span>{ventas.length} registros</span>
+    </div>
+  );
 
-  // Renderizar el DataTable
-  const renderDataTable = () => {
-    return (
-      <div className="card">
+  return (
+    <div className="clientes-page">
+      <Toast ref={toast} />
+
+      <div className="clientes-header">
+        <h2>Ventas</h2>
+        <div className="clientes-actions">
+          <Button label="Agregar" icon="pi pi-plus" onClick={() => openDialog()} />
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchVentas}
+            loading={loading}
+          />
+        </div>
+      </div>
+
+      <div className="clientes-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="clientes-kpi">
+            <p className="clientes-kpi-label">{kpi.label}</p>
+            <p className="clientes-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+
+      <Card className="clientes-table-card">
         <DataTable
           value={ventas}
           loading={loading}
@@ -392,38 +271,45 @@ const Ventas = ({ jwtToken }) => {
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron ventas."
+          stripedRows
+          dataKey="id"
+          globalFilter={globalFilter}
+          globalFilterFields={[
+            "cliente_medio.nombre_completo",
+            "vendedor.nombre",
+            "estado_pago",
+            "estado_instalacion",
+          ]}
+          header={tableHeader}
         >
-          <Column field="id" header="ID" />
+          <Column field="id" header="ID" hidden />
           <Column
             field="fecha_venta"
             header="Fecha de Venta"
-            body={(rowData) => {
-              const fechaLocal = convertToLocalDate(rowData.fecha_venta);
-              return formatDate(fechaLocal);
-            }}
+            body={(rowData) => formatDate(convertToLocalDate(rowData.fecha_venta))}
+            sortable
           />
           <Column
             field="valor_total"
             header="Valor Total"
-            body={(rowData) => {
-              const formattedValue = new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-              }).format(rowData.valor_total);
-              return <span>{formattedValue}</span>;
-            }}
+            body={(rowData) =>
+              new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(
+                rowData.valor_total || 0
+              )
+            }
+            sortable
           />
           <Column
             field="cliente_medio.nombre_completo"
             header="Cliente Medio"
-            body={(rowData) =>
-              rowData.cliente_medio?.nombre_completo || "Sin cliente"
-            }
+            body={(rowData) => rowData.cliente_medio?.nombre_completo || "Sin cliente"}
+            sortable
           />
           <Column
             field="vendedor.nombre"
             header="Vendedor"
             body={(rowData) => rowData.vendedor?.nombre || "Sin vendedor"}
+            sortable
           />
           <Column
             field="estado_pago"
@@ -432,12 +318,18 @@ const Ventas = ({ jwtToken }) => {
               <span
                 style={{
                   color:
-                    rowData.estado_pago === "completo" ? "#28a745" : "#dc3545",
+                    rowData.estado_pago === "completo"
+                      ? "#28a745"
+                      : rowData.estado_pago === "parcial"
+                        ? "#f59e0b"
+                        : "#dc3545",
+                  fontWeight: "bold",
                 }}
               >
                 {rowData.estado_pago}
               </span>
             )}
+            sortable
           />
           <Column
             field="estado_instalacion"
@@ -445,27 +337,20 @@ const Ventas = ({ jwtToken }) => {
             body={(rowData) => (
               <span
                 style={{
-                  color:
-                    rowData.estado_instalacion === "instalado"
-                      ? "#28a745"
-                      : "#dc3545",
+                  color: rowData.estado_instalacion === "instalado" ? "#28a745" : "#dc3545",
+                  fontWeight: "bold",
                 }}
               >
                 {rowData.estado_instalacion}
               </span>
             )}
+            sortable
           />
           <Column
             header="Acciones"
             body={(rowData) => (
               <div style={{ display: "flex", gap: "8px" }}>
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  text
-                  severity="info"
-                  onClick={() => openDialog(rowData)}
-                />
+                <Button icon="pi pi-pencil" rounded text severity="info" onClick={() => openDialog(rowData)} />
                 <Button
                   icon="pi pi-trash"
                   rounded
@@ -477,26 +362,100 @@ const Ventas = ({ jwtToken }) => {
             )}
           />
         </DataTable>
-      </div>
-    );
-  };
+      </Card>
 
-  return (
-    <div>
-      <div className="card">
-        <h2>Ventas</h2>
-        <Button
-          label="Agregar Venta"
-          icon="pi pi-plus"
-          onClick={() => openDialog()}
-          className="p-button-raised p-button-success"
-          style={{ marginBottom: "20px" }}
-        />
-      </div>
-      {renderDataTable()}
-      {renderDialog()}
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
-      <Toast ref={toast} />
+      <Dialog
+        visible={showDialog}
+        header={isEditMode ? "Editar Venta" : "Nueva Venta"}
+        onHide={closeDialog}
+        style={{ width: "430px" }}
+        modal
+      >
+        <div className="p-fluid">
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="fecha_venta">Fecha de Venta *</label>
+            <Calendar
+              id="fecha_venta"
+              value={venta.fecha_venta}
+              onChange={(e) => setVenta({ ...venta, fecha_venta: e.value })}
+              dateFormat="dd/mm/yy"
+              showIcon
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="valor_total">Valor Total *</label>
+            <InputNumber
+              id="valor_total"
+              value={venta.valor_total}
+              onValueChange={(e) => setVenta({ ...venta, valor_total: e.value })}
+              mode="currency"
+              currency="COP"
+              locale="es-CO"
+              minFractionDigits={0}
+              maxFractionDigits={0}
+              placeholder="Ingrese el valor total"
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="cliente_medio_id">Cliente Medio *</label>
+            <Dropdown
+              id="cliente_medio_id"
+              value={venta.cliente_medio_id}
+              options={clientesMedios}
+              onChange={(e) => setVenta({ ...venta, cliente_medio_id: e.value })}
+              optionLabel="nombre_completo"
+              optionValue="id"
+              placeholder="Selecciona un cliente medio"
+              filter
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="vendedor_id">Vendedor *</label>
+            <Dropdown
+              id="vendedor_id"
+              value={venta.vendedor_id}
+              options={vendedores}
+              onChange={(e) => setVenta({ ...venta, vendedor_id: e.value })}
+              optionLabel="nombre"
+              optionValue="id"
+              placeholder="Selecciona un vendedor"
+              filter
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="estado_pago">Estado de Pago *</label>
+            <Dropdown
+              id="estado_pago"
+              value={venta.estado_pago}
+              options={OPCIONES_ESTADO_PAGO}
+              onChange={(e) => setVenta({ ...venta, estado_pago: e.value })}
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="estado_instalacion">Estado de Instalación *</label>
+            <Dropdown
+              id="estado_instalacion"
+              value={venta.estado_instalacion}
+              options={OPCIONES_ESTADO_INSTALACION}
+              onChange={(e) => setVenta({ ...venta, estado_instalacion: e.value })}
+            />
+          </div>
+
+          <Button
+            label={loading ? "Guardando..." : "Guardar"}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-save"}
+            onClick={saveVenta}
+            disabled={loading}
+            className="p-button-raised p-button-primary"
+          />
+          {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+        </div>
+      </Dialog>
     </div>
   );
 };
