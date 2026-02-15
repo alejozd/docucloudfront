@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import axios from "axios";
-import Config from "../../components/features/Config"; // Asegúrate de importar tu configuración de API
+import Config from "../../components/features/Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -9,340 +9,360 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
+import { Password } from "primereact/password";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { Card } from "primereact/card";
+
+const ACCESS_KEY = process.env.REACT_APP_ACCESS_KEY;
+
+const ESTADOS = [
+  { label: "Autorizado", value: "autorizado" },
+  { label: "No Autorizado", value: "no_autorizado" },
+  { label: "Bloqueado", value: "bloqueado" },
+];
+
+const INITIAL_AUTORIZACION = {
+  estado: "no_autorizado",
+  intentos_envio: 0,
+};
 
 const AutorizacionPage = () => {
   const [autorizaciones, setAutorizaciones] = useState([]);
   const [selectedAutorizacion, setSelectedAutorizacion] = useState(null);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [nuevoEstado, setNuevoEstado] = useState("");
-  const [nuevaAutorizacion, setNuevaAutorizacion] = useState({
-    estado: "no_autorizado",
-  });
+  const [nuevaAutorizacion, setNuevaAutorizacion] = useState(INITIAL_AUTORIZACION);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [accessGranted, setAccessGranted] = useState(false); // Estado para verificar acceso
-  const [claveIngresada, setClaveIngresada] = useState(""); // Estado para la clave ingresada
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [claveIngresada, setClaveIngresada] = useState("");
   const [loading, setLoading] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [error, setError] = useState(null);
   const toast = useRef(null);
 
-  // Clave de acceso válida (puedes cambiarla según tus necesidades)
-  //   const CLAVE_ACCESO_VALIDA = "clave-secreta";
-  const CLAVE_ACCESO_VALIDA = process.env.REACT_APP_ACCESS_KEY;
+  const notify = useCallback((severity, detail) => {
+    const summary =
+      severity === "success"
+        ? "Éxito"
+        : severity === "warn"
+          ? "Advertencia"
+          : "Error";
 
-  // Estados posibles para el dropdown
-  const estados = [
-    { label: "Autorizado", value: "autorizado" },
-    { label: "No Autorizado", value: "no_autorizado" },
-    { label: "Bloqueado", value: "bloqueado" },
-  ];
+    toast.current?.show({
+      severity,
+      summary,
+      detail,
+      life: 3000,
+    });
+  }, []);
 
-  // Manejador de eventos para detectar la tecla Enter
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      verificarClave(); // Ejecutar la función de verificación
+  const fetchAutorizaciones = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${Config.apiUrl}/api/autorizacion/listado`);
+      setAutorizaciones(response.data?.autorizaciones || []);
+    } catch (fetchError) {
+      console.error("Error al cargar autorizaciones:", fetchError);
+      setError("No se pudieron cargar las autorizaciones.");
+      notify("error", "No se pudieron cargar las autorizaciones");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [notify]);
 
-  // Verificar la clave de acceso
-  const verificarClave = () => {
+  useEffect(() => {
+    if (!accessGranted) return;
+    fetchAutorizaciones();
+  }, [accessGranted, fetchAutorizaciones]);
+
+  const verificarClave = useCallback(() => {
     setLoading(true);
     try {
-      if (claveIngresada === CLAVE_ACCESO_VALIDA) {
+      if (!ACCESS_KEY) {
+        notify("warn", "No hay clave de acceso configurada en el entorno");
+        return;
+      }
+
+      if (claveIngresada.trim() === ACCESS_KEY) {
         setAccessGranted(true);
+        setClaveIngresada("");
+        notify("success", "Acceso concedido");
       } else {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Clave de acceso incorrecta",
-        });
+        notify("error", "Clave de acceso incorrecta");
       }
     } finally {
       setLoading(false);
     }
+  }, [claveIngresada, notify]);
+
+  const handleAccessKeyDown = (event) => {
+    if (event.key === "Enter") {
+      verificarClave();
+    }
   };
 
-  // Cargar el listado de autorizaciones
-  useEffect(() => {
-    if (!accessGranted) return; // No cargar datos si no se ha otorgado acceso
-
-    const fetchAutorizaciones = async () => {
-      try {
-        const response = await axios.get(
-          `${Config.apiUrl}/api/autorizacion/listado`
-        );
-        setAutorizaciones(response.data.autorizaciones);
-      } catch (error) {
-        console.error("Error al cargar autorizaciones:", error);
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar las autorizaciones",
-        });
-      }
-    };
-    fetchAutorizaciones();
-  }, [accessGranted]);
-
-  // Acción para abrir el diálogo de edición
   const editarAutorizacion = (autorizacion) => {
     setSelectedAutorizacion(autorizacion);
-    setNuevoEstado(autorizacion.estado); // Actualizar el estado
+    setNuevoEstado(autorizacion.estado || "no_autorizado");
     setNuevaAutorizacion({
-      ...nuevaAutorizacion,
-      estado: autorizacion.estado,
-      intentos_envio: autorizacion.intentos_envio || 0, // Asegurar que tenga un valor predeterminado
+      estado: autorizacion.estado || "no_autorizado",
+      intentos_envio: autorizacion.intentos_envio ?? 0,
     });
     setIsEditMode(true);
     setDialogVisible(true);
   };
 
-  // Acción para guardar cambios en una autorización
-  const guardarCambios = async () => {
-    try {
-      const datosActualizados = isEditMode
-        ? {
-            nuevo_estado: nuevoEstado,
-            nuevos_intentos: nuevaAutorizacion.intentos_envio,
-          }
-        : nuevaAutorizacion;
-
-      if (isEditMode) {
-        await axios.put(
-          `${Config.apiUrl}/api/autorizacion/cambiar-estado/${selectedAutorizacion.idautorizacion}`, // Usar idautorizacion
-          datosActualizados
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Estado actualizado correctamente",
-        });
-      } else {
-        await axios.post(
-          `${Config.apiUrl}/api/autorizacion`,
-          datosActualizados
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Autorización creada correctamente",
-        });
-      }
-      setDialogVisible(false);
-      // Recargar los datos después de guardar
-      const response = await axios.get(
-        `${Config.apiUrl}/api/autorizacion/listado`
-      );
-      setAutorizaciones(response.data.autorizaciones);
-    } catch (error) {
-      console.error("Error al guardar cambios:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Ocurrió un error al guardar los cambios",
-      });
-    }
-  };
-
-  // Acción para crear una nueva autorización
   const crearNuevaAutorizacion = () => {
     setSelectedAutorizacion(null);
-    setNuevaAutorizacion({ estado: "no_autorizado" });
+    setNuevoEstado("no_autorizado");
+    setNuevaAutorizacion(INITIAL_AUTORIZACION);
     setIsEditMode(false);
+    setError(null);
     setDialogVisible(true);
   };
 
-  // Renderizar el footer del diálogo
-  const renderDialogFooter = () => (
-    <div>
-      <Button
-        label="Cancelar"
-        icon="pi pi-times"
-        onClick={() => setDialogVisible(false)}
-        outlined
-        severity="danger"
-      />
-      <Button
-        label="Guardar"
-        icon="pi pi-check"
-        onClick={guardarCambios}
-        severity="success"
-      />
-    </div>
-  );
-
-  // Renderizar el cuerpo del diálogo
-  const renderDialogContent = () => (
-    <div className="p-fluid">
-      {isEditMode ? (
-        <>
-          <Dropdown
-            value={nuevoEstado}
-            options={estados}
-            onChange={(e) => setNuevoEstado(e.value)}
-            placeholder="Seleccionar estado"
-            style={{ width: "100%", marginBottom: "16px" }}
-          />
-          {/* InputNumber para modificar los intentos */}
-          <div className="pfluid">
-            <label
-              htmlFor="intentos-envio"
-              style={{ display: "block", marginBottom: "8px" }}
-            >
-              Intentos de Envío:
-            </label>
-            <InputNumber
-              id="intentos-envio"
-              value={nuevaAutorizacion.intentos_envio}
-              onValueChange={(e) =>
-                setNuevaAutorizacion({
-                  ...nuevaAutorizacion,
-                  intentos_envio: e.value,
-                })
-              }
-              min={0} // Los intentos no pueden ser negativos
-              placeholder="Ingresa los intentos"
-              style={{ width: "100%" }}
-            />
-          </div>
-        </>
-      ) : (
-        <>
-          <Dropdown
-            value={nuevaAutorizacion.estado}
-            options={estados}
-            onChange={(e) =>
-              setNuevaAutorizacion({ ...nuevaAutorizacion, estado: e.value })
-            }
-            placeholder="Seleccionar estado"
-            style={{ width: "100%" }}
-          />
-          {/* InputNumber para modificar los intentos */}
-          <label
-            htmlFor="intentos-envio"
-            style={{ display: "block", marginBottom: "8px" }}
-          >
-            Intentos de Envío:
-          </label>
-          <InputNumber
-            id="intentos-envio"
-            value={nuevaAutorizacion.intentos_envio}
-            onValueChange={(e) =>
-              setNuevaAutorizacion({
-                ...nuevaAutorizacion,
-                intentos_envio: e.value,
-              })
-            }
-            min={0} // Los intentos no pueden ser negativos
-            placeholder="Ingresa los intentos"
-            style={{ width: "100%" }}
-          />
-        </>
-      )}
-    </div>
-  );
-
-  const cerrarDialog = () => {
-    setClaveIngresada(""); // Limpiar la clave ingresada
+  const closeFormDialog = () => {
+    setDialogVisible(false);
+    setSelectedAutorizacion(null);
+    setNuevoEstado("");
+    setNuevaAutorizacion(INITIAL_AUTORIZACION);
   };
 
-  // Diálogo para ingresar la clave de acceso
-  const renderAccessDialog = () => (
-    <Dialog
-      header="Acceso Restringido"
-      visible={!accessGranted}
-      onHide={cerrarDialog}
-      style={{ width: "100%", maxWidth: "400px" }}
-      closable={true}
-      modal={false}
-      className="p-fluid"
-    >
-      <div style={{ marginBottom: "16px" }}>
-        <label
-          htmlFor="clave-acceso"
-          style={{ display: "block", marginBottom: "8px" }}
-        >
-          Ingresa la clave de acceso:
-        </label>
-        <InputText
-          id="clave-acceso"
-          type="password"
-          value={claveIngresada}
-          onChange={(e) => setClaveIngresada(e.target.value)}
-          onKeyDown={handleKeyPress} // Agregar el manejador de eventos
-          style={{ width: "100%", marginBottom: "16px" }}
-        />
-        <div className="flex justify-content-end gap-2">
-          <Button
-            label="Cancelar"
-            onClick={cerrarDialog}
-            severity="danger"
-            outlined
-          />
-          <Button
-            label={loading ? "Autenticando..." : "Ingresar"}
-            onClick={verificarClave}
-            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-sign-in"}
-            severity="success"
-            disabled={loading}
-          />
-        </div>
-      </div>
-    </Dialog>
+  const guardarCambios = async () => {
+    const intentos = Number(nuevaAutorizacion.intentos_envio ?? 0);
+
+    if ((isEditMode && !nuevoEstado) || (!isEditMode && !nuevaAutorizacion.estado)) {
+      notify("warn", "Selecciona un estado válido");
+      return;
+    }
+
+    if (Number.isNaN(intentos) || intentos < 0) {
+      notify("warn", "Los intentos deben ser un número mayor o igual a cero");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isEditMode) {
+        await axios.put(
+          `${Config.apiUrl}/api/autorizacion/cambiar-estado/${selectedAutorizacion.idautorizacion}`,
+          {
+            nuevo_estado: nuevoEstado,
+            nuevos_intentos: intentos,
+          }
+        );
+        notify("success", "Estado actualizado correctamente");
+      } else {
+        await axios.post(`${Config.apiUrl}/api/autorizacion`, {
+          estado: nuevaAutorizacion.estado,
+          intentos_envio: intentos,
+        });
+        notify("success", "Autorización creada correctamente");
+      }
+
+      closeFormDialog();
+      fetchAutorizaciones();
+    } catch (saveError) {
+      console.error("Error al guardar cambios:", saveError);
+      setError("Ocurrió un error al guardar los cambios.");
+      notify("error", "Ocurrió un error al guardar los cambios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const kpis = useMemo(
+    () => [
+      { label: "Total", value: autorizaciones.length },
+      {
+        label: "Autorizados",
+        value: autorizaciones.filter((item) => item.estado === "autorizado").length,
+      },
+      {
+        label: "Bloqueados",
+        value: autorizaciones.filter((item) => item.estado === "bloqueado").length,
+      },
+    ],
+    [autorizaciones]
   );
 
-  // Mostrar el diálogo de acceso si no se ha otorgado acceso
+  const tableHeader = (
+    <div className="clientes-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          placeholder="Buscar por nombre o estado"
+        />
+      </IconField>
+      <span>{autorizaciones.length} registros</span>
+    </div>
+  );
+
   if (!accessGranted) {
     return (
-      <div>
+      <div className="clientes-page">
         <Toast ref={toast} />
-        {renderAccessDialog()}
+        <Dialog
+          header="Acceso Restringido"
+          visible
+          style={{ width: "100%", maxWidth: "420px" }}
+          closable={false}
+          modal
+          className="p-fluid"
+        >
+          <div style={{ marginBottom: "4px" }}>
+            <p style={{ marginTop: 0, color: "#6b7280", marginBottom: "14px" }}>
+              Esta sección está protegida. Ingresa la clave para continuar.
+            </p>
+            <label htmlFor="clave-acceso" style={{ display: "block", marginBottom: "8px", fontWeight: 600 }}>
+              Clave de acceso
+            </label>
+            <Password
+              id="clave-acceso"
+              value={claveIngresada}
+              onChange={(e) => setClaveIngresada(e.target.value)}
+              onKeyDown={handleAccessKeyDown}
+              placeholder="Ingresa tu clave"
+              feedback={false}
+              toggleMask
+              inputStyle={{ width: "100%" }}
+              style={{ width: "100%", marginBottom: "16px" }}
+            />
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                label={loading ? "Verificando..." : "Ingresar"}
+                onClick={verificarClave}
+                icon={loading ? "pi pi-spin pi-spinner" : "pi pi-lock-open"}
+                severity="success"
+                disabled={loading}
+              />
+            </div>
+          </div>
+        </Dialog>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="clientes-page">
       <Toast ref={toast} />
-      <h2>Gestión de Autorizaciones</h2>
 
-      <Button
-        label="Crear Nueva Autorización"
-        icon="pi pi-plus"
-        onClick={crearNuevaAutorizacion}
-        severity="primary"
-        style={{ marginBottom: "1rem" }}
-      />
+      <div className="clientes-header">
+        <h2>Gestión de Autorizaciones</h2>
+        <div className="clientes-actions">
+          <Button label="Crear" icon="pi pi-plus" onClick={crearNuevaAutorizacion} />
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchAutorizaciones}
+            loading={loading}
+          />
+        </div>
+      </div>
 
-      <DataTable value={autorizaciones} paginator rows={5}>
-        <Column
-          field="idautorizacion"
-          header="ID"
-          style={{ minWidth: "5rem" }}
-        />
-        <Column field="nombre" header="Nombre" style={{ minWidth: "10rem" }} />
-        <Column field="estado" header="Estado" style={{ minWidth: "10rem" }} />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <Button
-              icon="pi pi-pencil"
-              rounded
-              text
-              severity="info"
-              onClick={() => editarAutorizacion(rowData)}
-            />
-          )}
-          style={{ minWidth: "8rem" }}
-        />
-        <Column field="intentos_envio" header="Intentos" />
-      </DataTable>
+      <div className="clientes-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="clientes-kpi">
+            <p className="clientes-kpi-label">{kpi.label}</p>
+            <p className="clientes-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      {error && <p style={{ color: "red", marginBottom: "12px" }}>{error}</p>}
+
+      <Card className="clientes-table-card">
+        <DataTable
+          value={autorizaciones}
+          loading={loading}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          dataKey="idautorizacion"
+          emptyMessage="No se encontraron autorizaciones"
+          stripedRows
+          globalFilter={globalFilter}
+          globalFilterFields={["nombre", "estado"]}
+          header={tableHeader}
+        >
+          <Column field="idautorizacion" header="ID" sortable />
+          <Column field="nombre" header="Nombre" sortable />
+          <Column field="estado" header="Estado" sortable />
+          <Column field="intentos_envio" header="Intentos" sortable />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <Button
+                icon="pi pi-pencil"
+                rounded
+                text
+                severity="info"
+                onClick={() => editarAutorizacion(rowData)}
+              />
+            )}
+          />
+        </DataTable>
+      </Card>
 
       <Dialog
         header={isEditMode ? "Editar Autorización" : "Crear Nueva Autorización"}
         visible={dialogVisible}
-        onHide={() => setDialogVisible(false)}
-        footer={renderDialogFooter()}
+        onHide={closeFormDialog}
+        style={{ width: "430px" }}
+        modal
       >
-        {renderDialogContent()}
+        <div className="p-fluid">
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="estado">Estado *</label>
+            <Dropdown
+              id="estado"
+              value={isEditMode ? nuevoEstado : nuevaAutorizacion.estado}
+              options={ESTADOS}
+              onChange={(e) => {
+                if (isEditMode) {
+                  setNuevoEstado(e.value);
+                } else {
+                  setNuevaAutorizacion((prev) => ({ ...prev, estado: e.value }));
+                }
+              }}
+              placeholder="Seleccionar estado"
+            />
+          </div>
+
+          <div className="p-field" style={{ marginBottom: "14px" }}>
+            <label htmlFor="intentos-envio">Intentos de Envío *</label>
+            <InputNumber
+              id="intentos-envio"
+              value={nuevaAutorizacion.intentos_envio}
+              onValueChange={(e) =>
+                setNuevaAutorizacion((prev) => ({
+                  ...prev,
+                  intentos_envio: e.value,
+                }))
+              }
+              min={0}
+              placeholder="Ingresa los intentos"
+            />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+            <Button label="Cancelar" icon="pi pi-times" onClick={closeFormDialog} text severity="danger" />
+            <Button
+              label={loading ? "Guardando..." : "Guardar"}
+              icon={loading ? "pi pi-spin pi-spinner" : "pi pi-check"}
+              onClick={guardarCambios}
+              disabled={loading}
+              severity="success"
+            />
+          </div>
+        </div>
       </Dialog>
     </div>
   );
