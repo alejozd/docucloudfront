@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { Button } from "primereact/button";
@@ -16,45 +16,45 @@ const SerialesReportes = () => {
   const [copySuccess, setCopySuccess] = useState(null);
   const [error, setError] = useState(null);
   const toast = useRef(null);
+  const authHeaders = useMemo(
+    () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
+    [jwtToken]
+  );
+
+  const showToast = useCallback((severity, detail) => {
+    toast.current?.show({
+      severity,
+      summary: severity === "success" ? "Éxito" : "Error",
+      detail,
+      life: 3000,
+    });
+  }, []);
+
+  const clearFeedback = () => {
+    setError(null);
+    setCopySuccess(null);
+  };
 
   const authenticate = async () => {
-    if (password === "") {
-      toast.current.show({
-        severity: "warn",
-        summary: "Advertencia",
-        detail: "Por favor ingresa la contraseña",
-        life: 3000,
-      });
+    if (!password.trim()) {
+      showToast("warn", "Por favor ingresa la contraseña");
       return;
     }
+
     try {
       const response = await axios.post(`${Config.apiUrl}/api/login`, {
-        password,
+        password: password.trim(),
       });
+
       if (response.data && response.data.token) {
         sessionStorage.setItem("jwtToken", response.data.token);
         setJwtToken(response.data.token);
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Autenticación exitosa",
-          life: 3000,
-        });
+        showToast("success", "Autenticación exitosa");
       } else {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Contraseña incorrecta",
-          life: 3000,
-        });
+        showToast("error", "Contraseña incorrecta");
       }
     } catch (err) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al validar la contraseña",
-        life: 3000,
-      });
+      showToast("error", "Error al validar la contraseña");
       console.error(err);
     }
   };
@@ -62,66 +62,47 @@ const SerialesReportes = () => {
   const generateKey = async () => {
     if (!serial.trim()) {
       setError("Por favor ingresa un serial válido.");
-      toast.current.show({
-        severity: "warn",
-        summary: "Advertencia",
-        detail: "Por favor ingresa un serial válido",
-        life: 3000,
-      });
+      showToast("warn", "Por favor ingresa un serial válido");
       return;
     }
+
     setLoading(true);
-    setError(null);
+    clearFeedback();
+
     try {
       const response = await axios.post(
         `${Config.apiUrl}/api/generateReportKey`,
-        { serial },
-        { headers: { Authorization: `Bearer ${jwtToken}` } }
+        { serial: serial.trim() },
+        authHeaders
       );
       setResponseData(response.data);
-      toast.current.show({
-        severity: "success",
-        summary: "Éxito",
-        detail: "Clave generada exitosamente",
-        life: 3000,
-      });
+      showToast("success", "Clave generada exitosamente");
     } catch (err) {
       console.error(err);
       setError("Error al generar la clave. Verifica el serial o la conexión.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al generar la clave",
-        life: 3000,
-      });
+      showToast("error", "Error al generar la clave");
     } finally {
       setLoading(false);
     }
   };
 
-  const copyKey = () => {
+  const copyKey = async () => {
     if (responseData?.clave) {
-      navigator.clipboard
-        .writeText(responseData.clave)
-        .then(() => {
-          setCopySuccess("Clave copiada al portapapeles");
-          toast.current.show({
-            severity: "success",
-            summary: "Éxito",
-            detail: "Clave copiada al portapapeles",
-            life: 3000,
-          });
-        })
-        .catch(() => {
-          setCopySuccess("Error al copiar la clave");
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Error al copiar la clave",
-            life: 3000,
-          });
-        });
+      try {
+        await navigator.clipboard.writeText(responseData.clave);
+        setCopySuccess("Clave copiada al portapapeles");
+        showToast("success", "Clave copiada al portapapeles");
+      } catch {
+        setCopySuccess("Error al copiar la clave");
+        showToast("error", "Error al copiar la clave");
+      }
     }
+  };
+
+  const handleSerialChange = (e) => {
+    setSerial(e.target.value);
+    setError(null);
+    setCopySuccess(null);
   };
 
   return (
@@ -150,7 +131,7 @@ const SerialesReportes = () => {
             id="serial"
             rows="4"
             value={serial}
-            onChange={(e) => setSerial(e.target.value)}
+            onChange={handleSerialChange}
             placeholder="Ingresa el serial aquí..."
             style={{
               width: "100%",
@@ -227,7 +208,6 @@ const SerialesReportes = () => {
               <p>
                 <strong>Clave:</strong> {responseData.clave}
               </p>
-              {copySuccess && <p>{copySuccess}</p>}
             </div>
           )}
         </div>
