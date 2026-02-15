@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { Toast } from "primereact/toast";
@@ -9,14 +9,16 @@ import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import CarteraDialog from "./CarteraDialog";
 
+const INITIAL_VENDEDOR = {
+  id: null,
+  nombre: "",
+  telefono: "",
+  activo: true,
+};
+
 const Vendedores = ({ jwtToken }) => {
   const [vendedores, setVendedores] = useState([]);
-  const [vendedor, setVendedor] = useState({
-    id: null,
-    nombre: "",
-    telefono: "",
-    activo: true,
-  });
+  const [vendedor, setVendedor] = useState(INITIAL_VENDEDOR);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -24,48 +26,64 @@ const Vendedores = ({ jwtToken }) => {
   const [cartera, setCartera] = useState(null);
   const [showCarteraDialog, setShowCarteraDialog] = useState(false);
   const toast = React.useRef(null);
+  const authHeaders = useMemo(
+    () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
+    [jwtToken]
+  );
 
-  // Cargar vendedores al iniciar el componente
-  useEffect(() => {
-    fetchVendedores();
+  const notify = useCallback((severity, detail) => {
+    const summary =
+      severity === "success" ? "Éxito" : severity === "warn" ? "Advertencia" : "Error";
+
+    toast.current?.show({
+      severity,
+      summary,
+      detail,
+      life: 3000,
+    });
   }, []);
 
-  const fetchVendedores = async () => {
+  // Cargar vendedores al iniciar el componente
+  const fetchVendedores = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const response = await axios.get(`${Config.apiUrl}/api/vendedores`, authHeaders);
       setVendedores(response.data);
     } catch (err) {
       console.error(err);
       setError("Error al cargar los vendedores.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar los vendedores",
-        life: 3000,
-      });
+      notify("error", "Error al cargar los vendedores");
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders, notify]);
+
+  // Cargar vendedores al iniciar el componente
+  useEffect(() => {
+    fetchVendedores();
+  }, [fetchVendedores]);
 
   const openDialog = (vendedorSeleccionado = null) => {
     if (vendedorSeleccionado) {
-      setVendedor(vendedorSeleccionado);
+      setVendedor({
+        id: vendedorSeleccionado.id ?? null,
+        nombre: vendedorSeleccionado.nombre ?? "",
+        telefono: vendedorSeleccionado.telefono ?? "",
+        activo: vendedorSeleccionado.activo ?? true,
+      });
       setIsEditMode(true);
     } else {
-      setVendedor({ id: null, nombre: "", telefono: "", activo: true });
+      setVendedor(INITIAL_VENDEDOR);
       setIsEditMode(false);
     }
+    setError(null);
     setShowDialog(true);
   };
 
   const closeDialog = () => {
     setShowDialog(false);
-    setVendedor({ id: null, nombre: "", telefono: "", activo: true });
+    setVendedor(INITIAL_VENDEDOR);
   };
 
   const saveVendedor = async () => {
@@ -77,39 +95,18 @@ const Vendedores = ({ jwtToken }) => {
     setError(null);
     try {
       if (isEditMode) {
-        await axios.put(
-          `${Config.apiUrl}/api/vendedores/${vendedor.id}`,
-          vendedor,
-          { headers: { Authorization: `Bearer ${jwtToken}` } }
-        );
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor actualizado exitosamente",
-          life: 3000,
-        });
+        await axios.put(`${Config.apiUrl}/api/vendedores/${vendedor.id}`, vendedor, authHeaders);
+        notify("success", "Vendedor actualizado exitosamente");
       } else {
-        await axios.post(`${Config.apiUrl}/api/vendedores`, vendedor, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor creado exitosamente",
-          life: 3000,
-        });
+        await axios.post(`${Config.apiUrl}/api/vendedores`, vendedor, authHeaders);
+        notify("success", "Vendedor creado exitosamente");
       }
       closeDialog();
       fetchVendedores();
     } catch (err) {
       console.error(err);
       setError("Error al guardar el vendedor.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al guardar el vendedor",
-        life: 3000,
-      });
+      notify("error", "Error al guardar el vendedor");
     } finally {
       setLoading(false);
     }
@@ -120,25 +117,13 @@ const Vendedores = ({ jwtToken }) => {
       setLoading(true);
       setError(null);
       try {
-        await axios.delete(`${Config.apiUrl}/api/vendedores/${id}`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
-        toast.current.show({
-          severity: "success",
-          summary: "Éxito",
-          detail: "Vendedor eliminado exitosamente",
-          life: 3000,
-        });
+        await axios.delete(`${Config.apiUrl}/api/vendedores/${id}`, authHeaders);
+        notify("success", "Vendedor eliminado exitosamente");
         fetchVendedores();
       } catch (err) {
         console.error(err);
         setError("Error al eliminar el vendedor.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Error al eliminar el vendedor",
-          life: 3000,
-        });
+        notify("error", "Error al eliminar el vendedor");
       } finally {
         setLoading(false);
       }
@@ -151,19 +136,14 @@ const Vendedores = ({ jwtToken }) => {
     try {
       const response = await axios.get(
         `${Config.apiUrl}/api/vendedores/${vendedorId}/cartera`,
-        { headers: { Authorization: `Bearer ${jwtToken}` } }
+        authHeaders
       );
       setCartera({ ...response.data, nombre: vendedorNombre });
       setShowCarteraDialog(true);
     } catch (err) {
       console.error(err);
       setError("Error al cargar el detalle de cartera.");
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Error al cargar el detalle de cartera",
-        life: 3000,
-      });
+      notify("error", "Error al cargar el detalle de cartera");
     } finally {
       setLoading(false);
     }
