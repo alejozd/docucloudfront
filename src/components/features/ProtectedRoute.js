@@ -5,7 +5,6 @@ const ProtectedRoute = ({ isAuthenticated, jwtToken, children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    console.warn("Token no encontrado. Redirigiendo a /login...");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
