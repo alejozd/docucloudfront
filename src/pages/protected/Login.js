@@ -72,9 +72,9 @@ const Login = ({ onLogin }) => {
 
   return (
     <div
-      className="flex align-items-center justify-content-center px-3"
+      className="flex align-items-start justify-content-center px-3 pt-6 pb-4"
       style={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 4rem)",
         background:
           "radial-gradient(circle at top left, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%)",
       }}
@@ -126,8 +126,10 @@ const Login = ({ onLogin }) => {
             feedback={false}
             toggleMask
             disabled={loading}
-            inputProps={{ autoComplete: "current-password" }}
+            autoComplete="current-password"
             className="w-full"
+            inputClassName="w-full"
+            style={{ width: "100%" }}
           />
 
           <small className="text-500 block">
