@@ -71,40 +71,81 @@ const Login = ({ onLogin }) => {
   );
 
   return (
-    <Card
-      title="Inicio de Sesión"
-      subTitle="Ingresa tu contraseña"
-      className="card"
+    <div
+      className="flex align-items-center justify-content-center px-3"
+      style={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at top left, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%)",
+      }}
     >
       <Toast ref={toastRef} />
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex justify-content-center flex-wrap gap-2"
+      <Card
+        className="w-full"
+        style={{
+          maxWidth: "460px",
+          borderRadius: "18px",
+          boxShadow: "0 20px 45px rgba(15, 23, 42, 0.14)",
+          border: "1px solid #e2e8f0",
+        }}
       >
-        <Password
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Contraseña"
-          promptLabel="Escribe la contraseña"
-          weakLabel="Muy simple"
-          mediumLabel="Complejidad promedio"
-          strongLabel="Complejidad alta"
-          feedback={false}
-          toggleMask
-          disabled={loading}
-          inputProps={{ autoComplete: "current-password" }}
-        />
+        <div className="text-center mb-4">
+          <div
+            className="inline-flex align-items-center justify-content-center border-circle mb-3"
+            style={{
+              width: "56px",
+              height: "56px",
+              background: "linear-gradient(135deg, #1d4ed8, #06b6d4)",
+              color: "#ffffff",
+            }}
+          >
+            <i className="pi pi-lock text-xl" />
+          </div>
 
-        <Button
-          type="submit"
-          label={loading ? "Autenticando..." : "Ingresar"}
-          icon={loading ? "pi pi-spin pi-spinner" : "pi pi-sign-in"}
-          disabled={loading}
-          severity="primary"
-        />
-      </form>
-    </Card>
+          <h2 className="text-2xl font-semibold text-900 m-0">Bienvenido</h2>
+          <p className="text-600 mt-2 mb-0">
+            Inicia sesión para continuar a DocuCloud
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-column gap-3">
+          <label htmlFor="password" className="font-medium text-700">
+            Contraseña
+          </label>
+
+          <Password
+            inputId="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Ingresa tu contraseña"
+            promptLabel="Escribe la contraseña"
+            weakLabel="Muy simple"
+            mediumLabel="Complejidad promedio"
+            strongLabel="Complejidad alta"
+            feedback={false}
+            toggleMask
+            disabled={loading}
+            inputProps={{ autoComplete: "current-password" }}
+            className="w-full"
+          />
+
+          <small className="text-500 block">
+            Tu sesión se inicia de forma segura con token JWT.
+          </small>
+
+          <Button
+            type="submit"
+            label={loading ? "Autenticando..." : "Ingresar"}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-arrow-right"}
+            disabled={loading}
+            className="w-full mt-2"
+            severity="primary"
+            size="large"
+          />
+        </form>
+      </Card>
+    </div>
   );
 };
 
