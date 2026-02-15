@@ -7,6 +7,10 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { InputSwitch } from "primereact/inputswitch";
+import { Card } from "primereact/card";
 import CarteraDialog from "./CarteraDialog";
 
 const INITIAL_VENDEDOR = {
@@ -25,7 +29,9 @@ const Vendedores = ({ jwtToken }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [cartera, setCartera] = useState(null);
   const [showCarteraDialog, setShowCarteraDialog] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState("");
   const toast = React.useRef(null);
+
   const authHeaders = useMemo(
     () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
     [jwtToken]
@@ -33,7 +39,11 @@ const Vendedores = ({ jwtToken }) => {
 
   const notify = useCallback((severity, detail) => {
     const summary =
-      severity === "success" ? "Éxito" : severity === "warn" ? "Advertencia" : "Error";
+      severity === "success"
+        ? "Éxito"
+        : severity === "warn"
+          ? "Advertencia"
+          : "Error";
 
     toast.current?.show({
       severity,
@@ -43,7 +53,6 @@ const Vendedores = ({ jwtToken }) => {
     });
   }, []);
 
-  // Cargar vendedores al iniciar el componente
   const fetchVendedores = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -59,7 +68,6 @@ const Vendedores = ({ jwtToken }) => {
     }
   }, [authHeaders, notify]);
 
-  // Cargar vendedores al iniciar el componente
   useEffect(() => {
     fetchVendedores();
   }, [fetchVendedores]);
@@ -89,8 +97,10 @@ const Vendedores = ({ jwtToken }) => {
   const saveVendedor = async () => {
     if (!vendedor.nombre.trim()) {
       setError("Por favor ingresa todos los campos obligatorios.");
+      notify("warn", "El nombre del vendedor es obligatorio");
       return;
     }
+
     setLoading(true);
     setError(null);
     try {
@@ -149,25 +159,77 @@ const Vendedores = ({ jwtToken }) => {
     }
   };
 
-  return (
-    <div>
-      {/* Componente Toast para mostrar notificaciones */}
-      <Toast ref={toast} />
-      <div className="card">
-        <h2>Vendedores</h2>
+  const kpis = useMemo(
+    () => [
+      { label: "Total", value: vendedores.length },
+      { label: "Activos", value: vendedores.filter((row) => row.activo).length },
+      { label: "Inactivos", value: vendedores.filter((row) => !row.activo).length },
+    ],
+    [vendedores]
+  );
 
-        {/* Botón para agregar un nuevo vendedor */}
-        <Button
-          label="Agregar Vendedor"
-          icon="pi pi-plus"
-          onClick={() => openDialog()}
-          className="p-button-raised p-button-success"
-          style={{ marginBottom: "20px" }}
+  const tableHeader = (
+    <div className="clientes-table-header">
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          placeholder="Buscar vendedor"
         />
+      </IconField>
+      <span>{vendedores.length} registros</span>
+    </div>
+  );
+
+  const actionTemplate = (rowData) => (
+    <div style={{ display: "flex", gap: "8px" }}>
+      <Button icon="pi pi-pencil" rounded text severity="info" onClick={() => openDialog(rowData)} />
+      <Button
+        icon="pi pi-trash"
+        rounded
+        text
+        severity="danger"
+        onClick={() => deleteVendedor(rowData.id)}
+      />
+      <Button
+        icon="pi pi-eye"
+        rounded
+        text
+        severity="success"
+        onClick={() => viewCartera(rowData.id, rowData.nombre)}
+      />
+    </div>
+  );
+
+  return (
+    <div className="clientes-page">
+      <Toast ref={toast} />
+
+      <div className="clientes-header">
+        <h2>Vendedores</h2>
+        <div className="clientes-actions">
+          <Button label="Agregar" icon="pi pi-plus" onClick={() => openDialog()} />
+          <Button
+            label="Actualizar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={fetchVendedores}
+            loading={loading}
+          />
+        </div>
       </div>
 
-      {/* Tabla de vendedores */}
-      <div className="card">
+      <div className="clientes-kpis">
+        {kpis.map((kpi) => (
+          <Card key={kpi.label} className="clientes-kpi">
+            <p className="clientes-kpi-label">{kpi.label}</p>
+            <p className="clientes-kpi-value">{kpi.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="clientes-table-card">
         <DataTable
           value={vendedores}
           loading={loading}
@@ -175,124 +237,80 @@ const Vendedores = ({ jwtToken }) => {
           rows={10}
           rowsPerPageOptions={[5, 10, 20]}
           emptyMessage="No se encontraron vendedores."
+          stripedRows
+          dataKey="id"
+          header={tableHeader}
+          globalFilter={globalFilter}
+          globalFilterFields={["nombre", "telefono"]}
         >
-          <Column field="id" header="ID" />
+          <Column field="id" header="ID" hidden />
           <Column field="nombre" header="Nombre" sortable />
-          <Column
-            field="telefono"
-            header="Teléfono"
-            body={(rowData) => rowData.telefono || "N/A"}
-          />
+          <Column field="telefono" header="Teléfono" body={(rowData) => rowData.telefono || "N/A"} />
           <Column
             field="activo"
             header="Activo"
-            body={(rowData) => <span>{rowData.activo ? "Sí" : "No"}</span>}
-          />
-          <Column
-            header="Acciones"
             body={(rowData) => (
-              <div style={{ display: "flex", gap: "8px" }}>
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  text
-                  severity="info"
-                  onClick={() => openDialog(rowData)}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  text
-                  severity="danger"
-                  onClick={() => deleteVendedor(rowData.id)}
-                />
-                <Button
-                  icon="pi pi-eye"
-                  rounded
-                  text
-                  severity="success"
-                  onClick={() => viewCartera(rowData.id, rowData.nombre)}
-                />
-              </div>
+              <span style={{ color: rowData.activo ? "#28a745" : "#dc3545", fontWeight: "bold" }}>
+                {rowData.activo ? "Sí" : "No"}
+              </span>
             )}
           />
+          <Column header="Acciones" body={actionTemplate} />
         </DataTable>
-      </div>
+      </Card>
 
-      {/* Diálogo para crear/editar vendedores */}
       <Dialog
         visible={showDialog}
         header={isEditMode ? "Editar Vendedor" : "Nuevo Vendedor"}
         onHide={closeDialog}
-        style={{ width: "400px" }}
+        style={{ width: "420px" }}
+        modal
       >
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="nombre"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Nombre:
-          </label>
-          <InputText
-            id="nombre"
-            value={vendedor.nombre}
-            onChange={(e) =>
-              setVendedor({ ...vendedor, nombre: e.target.value })
-            }
-            placeholder="Nombre del vendedor"
-            style={{ width: "100%" }}
+        <div className="p-fluid">
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="nombre">Nombre *</label>
+            <InputText
+              id="nombre"
+              value={vendedor.nombre}
+              onChange={(e) => setVendedor({ ...vendedor, nombre: e.target.value })}
+              placeholder="Nombre del vendedor"
+            />
+          </div>
+          <div className="p-field" style={{ marginBottom: "12px" }}>
+            <label htmlFor="telefono">Teléfono</label>
+            <InputText
+              id="telefono"
+              value={vendedor.telefono}
+              onChange={(e) => setVendedor({ ...vendedor, telefono: e.target.value })}
+              placeholder="Teléfono del vendedor"
+            />
+          </div>
+          <div className="p-field" style={{ marginBottom: "14px" }}>
+            <label htmlFor="activo" style={{ marginRight: "10px" }}>
+              Activo
+            </label>
+            <InputSwitch
+              id="activo"
+              checked={vendedor.activo}
+              onChange={(e) => setVendedor({ ...vendedor, activo: e.value })}
+            />
+          </div>
+          <Button
+            label={loading ? "Guardando..." : "Guardar"}
+            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-save"}
+            onClick={saveVendedor}
+            disabled={loading}
+            className="p-button-raised p-button-primary"
           />
+          {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
         </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="telefono"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Teléfono:
-          </label>
-          <InputText
-            id="telefono"
-            value={vendedor.telefono}
-            onChange={(e) =>
-              setVendedor({ ...vendedor, telefono: e.target.value })
-            }
-            placeholder="Teléfono del vendedor"
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label
-            htmlFor="activo"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
-            Activo:
-          </label>
-          <input
-            type="checkbox"
-            checked={vendedor.activo}
-            onChange={(e) =>
-              setVendedor({ ...vendedor, activo: e.target.checked })
-            }
-          />
-        </div>
-        <Button
-          label="Guardar"
-          onClick={saveVendedor}
-          disabled={loading}
-          className="p-button-raised p-button-primary"
-        />
-        {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
       </Dialog>
 
-      {/* Diálogo para ver el detalle de cartera */}
       <CarteraDialog
         cartera={cartera}
         showCarteraDialog={showCarteraDialog}
         onClose={() => setShowCarteraDialog(false)}
       />
-
-      {/* Mensaje de error general */}
-      {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
     </div>
   );
 };
