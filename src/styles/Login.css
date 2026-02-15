@@ -1,0 +1,27 @@
+.login-page {
+  min-height: calc(100vh - 4rem);
+  background: radial-gradient(circle at top left, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%);
+}
+
+.login-card {
+  max-width: 460px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  border: 1px solid #e2e8f0;
+}
+
+.login-password-wrapper,
+.login-password,
+.login-password.p-password,
+.login-password .p-password-input,
+.login-password input {
+  width: 100% !important;
+}
+
+.login-password.p-password {
+  display: flex !important;
+}
+
+.login-password input {
+  box-sizing: border-box;
+}
