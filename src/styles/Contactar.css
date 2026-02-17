@@ -1,0 +1,42 @@
+.contactar-page {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.contactar-card {
+  width: min(100%, 720px);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.contactar-subtitle {
+  margin: 0 0 1rem;
+  color: #475569;
+}
+
+.contactar-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.contactar-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.contactar-label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.contactar-field .p-inputtext,
+.contactar-field .p-inputtextarea {
+  width: 100%;
+}
+
+.contactar-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
+}
