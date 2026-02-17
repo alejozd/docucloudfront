@@ -1,148 +1,167 @@
 import React, { useRef } from "react";
+import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
-import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
-import emailjs from "emailjs-com"; // Librería para enviar correos electrónicos automaticamente
+import { useFormik } from "formik";
+import emailjs from "emailjs-com";
+import "../styles/Contactar.css";
 
-// Utility function to show toast messages
-const showToast = (toast, severity, summary, detail) => {
-  toast.current.show({ severity, summary, detail });
+const EMAILJS_CONFIG = {
+  serviceId: "service_p1m3hb3",
+  templateId: "template_7gotzgk",
+  publicKey: "_wv37ukba9HbYShcd",
 };
 
-// Email service abstraction
-const sendEmail = (templateParams) => {
-  return emailjs.send(
-    "service_p1m3hb3",
-    "template_7gotzgk",
-    templateParams,
-    "_wv37ukba9HbYShcd"
-  );
+const INITIAL_VALUES = {
+  nombre: "",
+  telefono: "",
+  email: "",
+  mensaje: "",
 };
 
-// Form validation logic
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const validateForm = (values) => {
   const errors = {};
 
-  if (!values.nombre) {
+  if (!values.nombre.trim()) {
     errors.nombre = "El nombre es requerido.";
   }
 
-  if (!values.telefono) {
+  if (!values.telefono.trim()) {
     errors.telefono = "El teléfono es requerido.";
   }
 
-  if (!values.email) {
+  if (!values.email.trim()) {
     errors.email = "El correo electrónico es requerido.";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+  } else if (!EMAIL_REGEX.test(values.email)) {
     errors.email = "Correo electrónico inválido.";
   }
 
-  if (!values.mensaje) {
+  if (!values.mensaje.trim()) {
     errors.mensaje = "El mensaje es requerido.";
   }
 
   return errors;
 };
 
-// Form field component
-const FormField = ({ id, label, component: Component, formik, ...props }) => (
-  <>
-    <label htmlFor={id}>{label}</label>
-    <Component
-      id={id}
-      name={id}
-      value={formik.values[id]}
-      onChange={formik.handleChange}
-      className={formik.errors[id] ? "p-invalid" : ""}
-      {...props}
-    />
-    {formik.errors[id] && (
-      <small className="p-error">{formik.errors[id]}</small>
-    )}
-  </>
-);
+const buildTemplateParams = (values) => ({
+  from_name: values.nombre.trim(),
+  to_name: "Alejandro",
+  message: values.mensaje.trim(),
+  phone: values.telefono.trim(),
+  reply_to: values.email.trim(),
+});
+
+const sendEmail = async (templateParams) => {
+  return emailjs.send(
+    EMAILJS_CONFIG.serviceId,
+    EMAILJS_CONFIG.templateId,
+    templateParams,
+    EMAILJS_CONFIG.publicKey
+  );
+};
+
+const ContactField = ({ id, label, formik, as: Component = InputText, ...props }) => {
+  const hasError = Boolean(formik.touched[id] && formik.errors[id]);
+
+  return (
+    <div className="contactar-field">
+      <label htmlFor={id} className="contactar-label">
+        {label}
+      </label>
+      <Component
+        id={id}
+        name={id}
+        value={formik.values[id]}
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        className={hasError ? "p-invalid" : ""}
+        {...props}
+      />
+      {hasError && <small className="p-error">{formik.errors[id]}</small>}
+    </div>
+  );
+};
 
 const Contactar = () => {
   const toast = useRef(null);
 
   const formik = useFormik({
-    initialValues: {
-      nombre: "",
-      telefono: "",
-      email: "",
-      mensaje: "",
-    },
+    initialValues: INITIAL_VALUES,
     validate: validateForm,
-    onSubmit: (values, { resetForm }) => {
-      const templateParams = {
-        from_name: values.nombre,
-        to_name: "Alejandro",
-        message: values.mensaje,
-        phone: values.telefono,
-        reply_to: values.email,
-      };
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
+      try {
+        const templateParams = buildTemplateParams(values);
+        const response = await sendEmail(templateParams);
 
-      sendEmail(templateParams)
-        .then((response) => {
-          console.log(
-            "Correo enviado correctamente:",
-            response.status,
-            response.text
-          );
-          showToast(
-            toast,
-            "success",
-            "Formulario enviado",
-            "El mensaje ha sido enviado con éxito"
-          );
-          resetForm();
-        })
-        .catch((error) => {
-          console.error("Error al enviar el correo:", error);
-          showToast(toast, "error", "Error", error.text);
+        console.log("Correo enviado correctamente:", response.status, response.text);
+        toast.current?.show({
+          severity: "success",
+          summary: "Formulario enviado",
+          detail: "El mensaje ha sido enviado con éxito.",
         });
+
+        resetForm();
+      } catch (error) {
+        console.error("Error al enviar el correo:", error);
+        toast.current?.show({
+          severity: "error",
+          summary: "No fue posible enviar el formulario",
+          detail: error?.text || "Intenta nuevamente en unos minutos.",
+        });
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
   return (
-    <div className="card">
-      <h1>Contacto</h1>
-      <div className="card flex justify-content-center">
-        <Toast ref={toast} />
+    <div className="contactar-page">
+      <Toast ref={toast} />
 
-        <form onSubmit={formik.handleSubmit} className="flex flex-column gap-2">
-          <FormField
-            id="nombre"
-            label="Nombre"
-            component={InputText}
-            formik={formik}
-          />
-          <FormField
+      <Card className="contactar-card" title="Contáctanos">
+        <p className="contactar-subtitle">
+          Cuéntanos qué necesitas y te responderemos lo antes posible.
+        </p>
+
+        <form onSubmit={formik.handleSubmit} className="contactar-form" noValidate>
+          <ContactField id="nombre" label="Nombre" formik={formik} placeholder="Tu nombre" />
+          <ContactField
             id="telefono"
             label="Teléfono"
-            component={InputText}
             formik={formik}
+            placeholder="Tu teléfono"
+            keyfilter="pnum"
           />
-          <FormField
+          <ContactField
             id="email"
-            label="Correo Electrónico"
-            component={InputText}
+            label="Correo electrónico"
             formik={formik}
+            placeholder="tu@correo.com"
           />
-          <FormField
+          <ContactField
             id="mensaje"
             label="Mensaje"
-            component={InputTextarea}
             formik={formik}
-            rows={5}
+            as={InputTextarea}
+            placeholder="¿Cómo podemos ayudarte?"
+            rows={6}
             autoResize
           />
 
-          <Button type="submit" label="Enviar" />
+          <div className="contactar-actions">
+            <Button
+              type="submit"
+              label={formik.isSubmitting ? "Enviando..." : "Enviar mensaje"}
+              icon="pi pi-send"
+              loading={formik.isSubmitting}
+            />
+          </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };
