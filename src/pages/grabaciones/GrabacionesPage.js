@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
@@ -6,59 +6,61 @@ import { Slider } from "primereact/slider";
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
+import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import Config from "./../../components/features/Config";
-import "../../styles/GrabacionesPage.css"; // Opcional: estilos personalizados
-import AudioPlayer from "../../components/audio/AudioPlayer"; // Importa el nuevo componente
+import Config from "../../components/features/Config";
+import AudioPlayer from "../../components/audio/AudioPlayer";
+import "../../styles/GrabacionesPage.css";
+
+const DEFAULT_ERROR_MESSAGE = "No se pudieron cargar las grabaciones.";
+
+const toastSummaryBySeverity = {
+  success: "Éxito",
+  warn: "Advertencia",
+  error: "Error",
+};
+
+const getAudioSrc = (fecha, nombreArchivo) =>
+  `${Config.apiUrl}/grabaciones/${fecha.replace(/-/g, "/")}/${nombreArchivo}`;
+
+const normalizeText = (value) => (value || "").toString().toLowerCase();
 
 const GrabacionesPage = () => {
   const [grabaciones, setGrabaciones] = useState([]);
   const [activo, setActivo] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [globalVolume, setGlobalVolume] = useState(100);
   const [activeAudioRef, setActiveAudioRef] = useState(null);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const toast = useRef(null);
 
   const notify = useCallback((severity, detail) => {
-    const summary =
-      severity === "success"
-        ? "Éxito"
-        : severity === "warn"
-          ? "Advertencia"
-          : "Error";
-
     toast.current?.show({
       severity,
-      summary,
+      summary: toastSummaryBySeverity[severity] || "Información",
       detail,
       life: 3000,
     });
   }, []);
 
-  const getAudioSrc = useCallback(
-    (fecha, nombreArchivo) =>
-      `${Config.apiUrl}/grabaciones/${fecha.replace(/-/g, "/")}/${nombreArchivo}`,
-    []
-  );
-
-  // Cargar datos iniciales
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    setError("");
+
     try {
-      const [resEstado, resLista] = await Promise.all([
+      const [statusResponse, listResponse] = await Promise.all([
         axios.get(`${Config.apiUrl}/api/grabacion/estado`),
         axios.get(`${Config.apiUrl}/api/grabacion/lista`),
       ]);
 
-      setActivo(!!resEstado.data.activo);
-      setGrabaciones(resLista.data || []);
-    } catch (err) {
-      console.error("Error al cargar datos:", err);
-      setError("No se pudieron cargar las grabaciones.");
-      notify("error", "No se pudieron cargar las grabaciones");
+      setActivo(Boolean(statusResponse.data?.activo));
+      setGrabaciones(Array.isArray(listResponse.data) ? listResponse.data : []);
+    } catch (requestError) {
+      console.error("Error al cargar datos:", requestError);
+      setError(DEFAULT_ERROR_MESSAGE);
+      notify("error", DEFAULT_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }
@@ -68,138 +70,162 @@ const GrabacionesPage = () => {
     fetchData();
   }, [fetchData]);
 
-  // Efecto para aplicar el volumen global al audio activo
   useEffect(() => {
-    if (activeAudioRef && activeAudioRef.current) {
+    if (activeAudioRef?.current) {
       activeAudioRef.current.volume = globalVolume / 100;
     }
-  }, [globalVolume, activeAudioRef]); // Se ejecuta cuando el volumen o el audio activo cambian
+  }, [globalVolume, activeAudioRef]);
 
-  // Manejar cambio de estado
-  const cambiarEstado = async (nuevoEstado) => {
-    try {
-      await axios.post(`${Config.apiUrl}/api/grabacion/estado`, {
-        activo: nuevoEstado,
-      });
-      setActivo(nuevoEstado);
-      notify(
-        "success",
-        nuevoEstado
-          ? "Grabación automática activada"
-          : "Grabación automática desactivada"
-      );
-    } catch (err) {
-      console.error("Error al cambiar estado:", err);
-      notify("error", "No se pudo actualizar el estado de grabación");
-    }
-  };
+  const changeStatus = useCallback(
+    async (nextStatus) => {
+      setUpdatingStatus(true);
+      try {
+        await axios.post(`${Config.apiUrl}/api/grabacion/estado`, { activo: nextStatus });
+        setActivo(nextStatus);
+        notify(
+          "success",
+          nextStatus
+            ? "Grabación automática activada"
+            : "Grabación automática desactivada"
+        );
+      } catch (requestError) {
+        console.error("Error al cambiar estado:", requestError);
+        notify("error", "No se pudo actualizar el estado de grabación");
+      } finally {
+        setUpdatingStatus(false);
+      }
+    },
+    [notify]
+  );
 
-  // Función que el AudioPlayer llamará cuando empiece a reproducir
-  const handlePlay = (audioRef) => {
-    // Pausar cualquier otro audio que esté sonando
-    if (
-      activeAudioRef &&
-      activeAudioRef.current &&
-      activeAudioRef.current !== audioRef.current
-    ) {
-      activeAudioRef.current.pause();
-    }
-    setActiveAudioRef(audioRef); // Establecer el nuevo audio activo
-    audioRef.current.volume = globalVolume / 100; // Aplicar el volumen global al nuevo audio
-  };
+  const handlePlay = useCallback(
+    (audioRef) => {
+      if (
+        activeAudioRef?.current &&
+        activeAudioRef.current !== audioRef.current
+      ) {
+        activeAudioRef.current.pause();
+      }
+
+      setActiveAudioRef(audioRef);
+
+      if (audioRef?.current) {
+        audioRef.current.volume = globalVolume / 100;
+      }
+    },
+    [activeAudioRef, globalVolume]
+  );
 
   const filteredGrabaciones = useMemo(() => {
-    const search = globalFilter.trim().toLowerCase();
+    const search = normalizeText(globalFilter.trim());
     if (!search) return grabaciones;
 
     return grabaciones
-      .map((grupo) => ({
-        ...grupo,
-        archivos: (grupo.archivos || []).filter((archivo) => {
-          const title = archivo.titulo?.toLowerCase() || "";
-          const artist = archivo.artista?.toLowerCase() || "";
-          const fileName = archivo.nombreArchivo?.toLowerCase() || "";
+      .map((group) => {
+        const matchesDate = normalizeText(group.fecha).includes(search);
+        const archivos = (group.archivos || []).filter((archivo) => {
+          if (matchesDate) return true;
+
           return (
-            grupo.fecha?.toLowerCase().includes(search) ||
-            title.includes(search) ||
-            artist.includes(search) ||
-            fileName.includes(search)
+            normalizeText(archivo.titulo).includes(search) ||
+            normalizeText(archivo.artista).includes(search) ||
+            normalizeText(archivo.nombreArchivo).includes(search)
           );
-        }),
-      }))
-      .filter((grupo) => grupo.archivos.length > 0);
+        });
+
+        return {
+          ...group,
+          archivos,
+        };
+      })
+      .filter((group) => group.archivos.length > 0);
   }, [grabaciones, globalFilter]);
 
+  const totalFechas = grabaciones.length;
+
   const totalArchivos = useMemo(
-    () => grabaciones.reduce((acc, grupo) => acc + (grupo.archivos?.length || 0), 0),
+    () => grabaciones.reduce((total, group) => total + (group.archivos?.length || 0), 0),
     [grabaciones]
   );
 
-  if (loading) return <div>Cargando grabaciones...</div>;
-  if (error) return <div>{error}</div>;
+  const archivosFiltrados = useMemo(
+    () => filteredGrabaciones.reduce((total, group) => total + (group.archivos?.length || 0), 0),
+    [filteredGrabaciones]
+  );
+
+  if (loading) {
+    return <div className="loading-message">Cargando grabaciones...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="grabaciones-container">
+        <Card className="grabaciones-feedback-card">
+          <p className="error-message">{error}</p>
+          <div className="grabaciones-feedback-actions">
+            <Button label="Reintentar" icon="pi pi-refresh" onClick={fetchData} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grabaciones-container">
       <Toast ref={toast} />
+
       <Card title="Configuración de grabación" className="config-card">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <span className="status-text">
-            Estado actual:{" "}
-            <strong>
-              {activo
-                ? "Activado (la grabación automática está habilitada)"
-                : "Desactivado (la grabación automática no se iniciará a las 7pm)"}
-            </strong>
-          </span>
+        <div className="grabaciones-toolbar">
+          <div className="grabaciones-toolbar-status">
+            <p className="status-text">Estado actual</p>
+            <Tag
+              severity={activo ? "success" : "warning"}
+              value={activo ? "Activado" : "Desactivado"}
+            />
+          </div>
 
-          <Button
-            label={
-              activo
-                ? "Desactivar grabación automática"
-                : "Activar grabación automática"
-            }
-            icon={activo ? "pi pi-power-off" : "pi pi-power-on"}
-            className={activo ? "p-button-warning" : "p-button-success"}
-            onClick={() => cambiarEstado(!activo)}
-          />
-
-          <Button
-            label="Actualizar"
-            icon="pi pi-refresh"
-            severity="secondary"
-            onClick={fetchData}
-            loading={loading}
-          />
+          <div className="grabaciones-toolbar-actions">
+            <Button
+              label={activo ? "Desactivar" : "Activar"}
+              icon={activo ? "pi pi-power-off" : "pi pi-power-on"}
+              severity={activo ? "warning" : "success"}
+              onClick={() => changeStatus(!activo)}
+              loading={updatingStatus}
+            />
+            <Button
+              label="Actualizar"
+              icon="pi pi-refresh"
+              severity="secondary"
+              onClick={fetchData}
+              loading={loading}
+            />
+          </div>
         </div>
       </Card>
 
-      <Card className="global-volume-card">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
-          <span>
-            <strong>Grabaciones:</strong> {grabaciones.length} fechas / {totalArchivos} archivos
-          </span>
+      <Card className="grabaciones-kpi-card">
+        <div className="grabaciones-kpi-grid">
+          <div className="grabaciones-kpi-item">
+            <p className="grabaciones-kpi-label">Fechas</p>
+            <p className="grabaciones-kpi-value">{totalFechas}</p>
+          </div>
+          <div className="grabaciones-kpi-item">
+            <p className="grabaciones-kpi-label">Archivos totales</p>
+            <p className="grabaciones-kpi-value">{totalArchivos}</p>
+          </div>
+          <div className="grabaciones-kpi-item">
+            <p className="grabaciones-kpi-label">Resultados filtrados</p>
+            <p className="grabaciones-kpi-value">{archivosFiltrados}</p>
+          </div>
+        </div>
+
+        <div className="grabaciones-search-wrap">
           <IconField iconPosition="left">
             <InputIcon className="pi pi-search" />
             <InputText
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
-              placeholder="Buscar por fecha, título o artista"
+              placeholder="Buscar por fecha, título, artista o archivo"
             />
           </IconField>
         </div>
@@ -210,7 +236,7 @@ const GrabacionesPage = () => {
           <i className="pi pi-volume-up global-volume-icon" />
           <Slider
             value={globalVolume}
-            onChange={(e) => setGlobalVolume(e.value)}
+            onChange={(event) => setGlobalVolume(event.value)}
             min={0}
             max={100}
             step={1}
@@ -220,35 +246,42 @@ const GrabacionesPage = () => {
         </div>
       </Card>
 
-      <Card title="Programas Grabados" className="grabaciones-list-card">
+      <Card title="Programas grabados" className="grabaciones-list-card">
         {filteredGrabaciones.length === 0 ? (
-          <p>No hay grabaciones disponibles.</p>
+          <div className="grabaciones-empty-state">
+            <i className="pi pi-inbox" aria-hidden="true" />
+            <p>No hay grabaciones disponibles para el filtro actual.</p>
+          </div>
         ) : (
-          filteredGrabaciones.map((grupo, index) => (
-            <div key={index} className="grabaciones-bloque">
-              <h3>{grupo.fecha}</h3>
+          filteredGrabaciones.map((group) => (
+            <section key={group.fecha} className="grabaciones-bloque">
+              <h3>{group.fecha}</h3>
               <ul className="grabaciones-lista">
-                {grupo.archivos.map((archivo, idx) => (
-                  <li key={idx} className="grabaciones-item">
-                    <AudioPlayer
-                      // CAMBIO: Ahora archivo es un objeto, no solo un string
-                      title={archivo.titulo}
-                      artist={archivo.artista} // NUEVO PROP
-                      src={getAudioSrc(grupo.fecha, archivo.nombreArchivo)}
-                      globalVolume={globalVolume}
-                      onPlay={handlePlay}
-                      // Si la duración ya viene del backend, la puedes pasar aquí
-                      // durationFromBackend={archivo.duracion_segundos}
-                      isActive={
-                        activeAudioRef &&
-                        activeAudioRef.current &&
-                        activeAudioRef.current.src === getAudioSrc(grupo.fecha, archivo.nombreArchivo)
-                      }
-                    />
-                  </li>
-                ))}
+                {group.archivos.map((archivo) => {
+                  const src = getAudioSrc(group.fecha, archivo.nombreArchivo);
+                  const isActive = Boolean(
+                    activeAudioRef?.current?.src &&
+                      activeAudioRef.current.src.endsWith(src)
+                  );
+
+                  return (
+                    <li
+                      key={`${group.fecha}-${archivo.nombreArchivo}`}
+                      className="grabaciones-item"
+                    >
+                      <AudioPlayer
+                        title={archivo.titulo}
+                        artist={archivo.artista}
+                        src={src}
+                        globalVolume={globalVolume}
+                        onPlay={handlePlay}
+                        isActive={isActive}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
-            </div>
+            </section>
           ))
         )}
       </Card>

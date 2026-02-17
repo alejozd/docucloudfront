@@ -3,6 +3,7 @@ import axios from "axios";
 import { Card } from "primereact/card";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Panel } from "primereact/panel";
+import Config from "../components/features/Config";
 
 const AccuWeatherComponent = ({ city }) => {
   const [weatherData, setWeatherData] = useState(null);
@@ -10,21 +11,22 @@ const AccuWeatherComponent = ({ city }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const apiKey = "18b7S9OWWSNUdxY1sl150YeK3L28rz3n";
-
   useEffect(() => {
     const fetchCityId = () => {
       console.log("Fetching city ID...");
-      // const citySearchUrl = `/api/locations?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
-      const citySearchUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${city}&language=es-co&details=true`;
-
-      //http://dataservice.accuweather.com/locations/v1/cities/search
+      const citySearchUrl = `${Config.apiUrl}/api/locations`;
 
       setLoading(true);
       setError(null);
 
       axios
-        .get(citySearchUrl)
+        .get(citySearchUrl, {
+          params: {
+            q: city,
+            language: "es-co",
+            details: true,
+          },
+        })
         .then((response) => {
           console.log("City ID response:", response.data);
           if (response.data && response.data.length > 0) {
@@ -39,9 +41,9 @@ const AccuWeatherComponent = ({ city }) => {
         .catch((error) => {
           console.error("Error fetching city ID", error);
           if (error.response) {
-            setError(error.response.data.Message);
+            setError(error.response.data?.Message || "No se pudo consultar la ciudad");
           } else {
-            setError("Error al obtener ID de la ciudad");
+            setError("Error al obtener ID de la ciudad desde el servicio");
           }
           setLoading(false);
         });
@@ -54,13 +56,15 @@ const AccuWeatherComponent = ({ city }) => {
 
   const fetchWeather = (cityId) => {
     console.log("Fetching weather data...");
-    // const weatherUrl = `/api/currentconditions/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
-    const weatherUrl = `https://dataservice.accuweather.com/currentconditions/v1/${cityId}?apikey=${apiKey}&language=es-co&details=true`;
-
-    //http://dataservice.accuweather.com/forecasts/v1/daily/1day/107487
+    const weatherUrl = `${Config.apiUrl}/api/currentconditions/${cityId}`;
 
     axios
-      .get(weatherUrl)
+      .get(weatherUrl, {
+        params: {
+          language: "es-co",
+          details: true,
+        },
+      })
       .then((response) => {
         console.log("Weather data response:", response.data);
         setWeatherData(response.data[0]);
