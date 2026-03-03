@@ -27,10 +27,15 @@ const formatDate = (value) => {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleDateString("es-CO", {
+
+  // Cambiamos toLocaleDateString por toLocaleString
+  return date.toLocaleString("es-CO", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
+    hour: "2-digit", // Añadimos hora
+    minute: "2-digit", // Añadimos minutos
+    hour12: true, // Formato AM/PM
   });
 };
 
@@ -361,7 +366,10 @@ const TomaTensionDashboard = () => {
         </Card>
         <Card title="Errores" className="kpi-card kpi-card-error">
           <div className="kpi-card-content">
-            <i className="pi pi-exclamation-circle kpi-icon" aria-hidden="true" />
+            <i
+              className="pi pi-exclamation-circle kpi-icon"
+              aria-hidden="true"
+            />
             <span>{statusStats.Error}</span>
           </div>
         </Card>
@@ -463,7 +471,7 @@ const TomaTensionDashboard = () => {
             field="fecha_registro"
             header="Fecha registro"
             sortable
-            style={{ minWidth: "12rem" }}
+            style={{ minWidth: "16rem" }}
             body={(rowData) => formatDate(rowData.fecha_registro)}
           />
           <Column
