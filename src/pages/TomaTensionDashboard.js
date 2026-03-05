@@ -374,29 +374,50 @@ const TomaTensionDashboard = () => {
           </div>
         </Card>
         <Card title="Promedios" className="kpi-card kpi-card-avg">
-          <div className="kpi-card-content">
-            <i className="pi pi-chart-line kpi-icon" aria-hidden="true" />
+          <div className="kpi-card-header-container">
+            <i className="pi pi-chart-line kpi-icon" />
           </div>
-          <div className="kpi-multiline">
-            <p>Sístole: {averages.sistole}</p>
-            <p>Diástole: {averages.diastole}</p>
-            <p>Ritmo: {averages.ritmoCardiaco}</p>
+          <div className="kpi-grid-values">
+            <div className="kpi-stat">
+              <span className="stat-label">Sístole</span>
+              <span className="stat-value">{averages.sistole}</span>
+            </div>
+            <div className="kpi-stat">
+              <span className="stat-label">Diástole</span>
+              <span className="stat-value">{averages.diastole}</span>
+            </div>
+            <div className="kpi-stat">
+              <span className="stat-label">Ritmo</span>
+              <span className="stat-value">{averages.ritmoCardiaco}</span>
+            </div>
           </div>
         </Card>
         <Card
           title="Extremos de Sístole"
           className="kpi-card kpi-card-extremes"
         >
-          <div className="kpi-card-content">
+          <div className="kpi-card-header-container">
             <i className="pi pi-sort-alt kpi-icon" aria-hidden="true" />
           </div>
-          <div className="kpi-multiline">
-            <p>
-              Más alta: {sistoleExtremes.max} ({sistoleExtremes.maxValue})
-            </p>
-            <p>
-              Más baja: {sistoleExtremes.min} ({sistoleExtremes.minValue})
-            </p>
+          <div className="kpi-grid-values">
+            <div className="kpi-stat">
+              <span className="stat-label">Más Alta</span>
+              <span className="stat-value" style={{ color: "var(--red-600)" }}>
+                {sistoleExtremes.maxValue}
+              </span>
+              <small style={{ fontSize: "0.65rem" }}>
+                {sistoleExtremes.max}
+              </small>
+            </div>
+            <div className="kpi-stat">
+              <span className="stat-label">Más Baja</span>
+              <span className="stat-value" style={{ color: "var(--blue-600)" }}>
+                {sistoleExtremes.minValue}
+              </span>
+              <small style={{ fontSize: "0.65rem" }}>
+                {sistoleExtremes.min}
+              </small>
+            </div>
           </div>
         </Card>
       </div>
@@ -450,21 +471,44 @@ const TomaTensionDashboard = () => {
             field="sistole"
             header="Sístole"
             sortable
-            style={{ minWidth: "10rem" }}
-            body={(rowData) => formatValue(rowData.sistole)}
+            style={{ minWidth: "8rem", textAlign: "center" }} // Centrado
+            body={(rowData) => (
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color:
+                    rowData.sistole >= 140
+                      ? "var(--red-600)"
+                      : rowData.sistole < 120
+                        ? "var(--green-600)"
+                        : "inherit",
+                }}
+              >
+                {formatValue(rowData.sistole)}
+              </span>
+            )}
           />
           <Column
             field="diastole"
             header="Diástole"
             sortable
-            style={{ minWidth: "10rem" }}
-            body={(rowData) => formatValue(rowData.diastole)}
+            style={{ minWidth: "8rem", textAlign: "center" }} // Centrado
+            body={(rowData) => (
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color: rowData.diastole >= 90 ? "var(--red-600)" : "inherit",
+                }}
+              >
+                {formatValue(rowData.diastole)}
+              </span>
+            )}
           />
           <Column
             field="ritmoCardiaco"
             header="Ritmo Cardíaco"
             sortable
-            style={{ minWidth: "12rem" }}
+            style={{ minWidth: "10rem", textAlign: "center" }}
             body={(rowData) => formatValue(rowData.ritmoCardiaco)}
           />
           <Column
