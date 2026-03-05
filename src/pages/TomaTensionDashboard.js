@@ -415,30 +415,45 @@ const TomaTensionDashboard = () => {
       {/* --- SECCIÓN DE KPIs REESTRUCTURADA --- */}
       <div className={`toma-tension-kpis ${isMobile ? "mobile-kpis" : ""}`}>
         {/* 1. Total Registros */}
-        <Card
-          title="Total registros"
-          className="kpi-card kpi-card-total compact-kpi"
-        >
-          <div className="kpi-card-content compact-content">
-            <i className="pi pi-database kpi-icon-sm" aria-hidden="true" />
+        <Card title="Total registros" className="kpi-card-total compact-kpi">
+          <div className="compact-content">
+            <i
+              className="pi pi-database kpi-icon-sm"
+              style={{ color: "var(--accent-total)" }}
+            />
             <span className="kpi-value-lg">{totalRegistros}</span>
           </div>
         </Card>
 
         {/* 2. Promedios (Diseño Grid compacto) */}
-        <Card title="Promedios" className="kpi-card kpi-card-avg compact-kpi">
-          <div className="kpi-grid-values compact-grid">
+        <Card title="Promedios" className="kpi-card-avg compact-kpi">
+          <div className="compact-grid">
             <div className="kpi-stat">
-              <span className="stat-label-sm">SÍSTOLE</span>
-              <span className="stat-value-md">{averages.sistole}</span>
+              <span className="stat-label-sm">SIS</span>
+              <span
+                className="stat-value-md"
+                style={{ color: "var(--accent-avg)" }}
+              >
+                {averages.sistole}
+              </span>
             </div>
             <div className="kpi-stat">
-              <span className="stat-label-sm">DIÁSTOLE</span>
-              <span className="stat-value-md">{averages.diastole}</span>
+              <span className="stat-label-sm">DIA</span>
+              <span
+                className="stat-value-md"
+                style={{ color: "var(--accent-avg)" }}
+              >
+                {averages.diastole}
+              </span>
             </div>
             <div className="kpi-stat">
-              <span className="stat-label-sm">RITMO</span>
-              <span className="stat-value-md">{averages.ritmoCardiaco}</span>
+              <span className="stat-label-sm">PUL</span>
+              <span
+                className="stat-value-md"
+                style={{ color: "var(--accent-avg)" }}
+              >
+                {averages.ritmoCardiaco}
+              </span>
             </div>
           </div>
         </Card>
@@ -446,22 +461,26 @@ const TomaTensionDashboard = () => {
         {/* 3. Extremos Sístole (Diseño Grid compacto) */}
         <Card
           title="Extremos Sístole"
-          className="kpi-card kpi-card-extremes-sis compact-kpi"
+          className="kpi-card-extremes-sis compact-kpi"
         >
-          <div className="kpi-grid-values compact-grid">
-            <div className="kpi-stat extreme-stat">
+          <div className="compact-grid">
+            <div className="kpi-stat">
               <span className="stat-label-sm label-high">MÁX</span>
               <span className="stat-value-md val-high">
                 {Extremes.sistole.maxValue}
               </span>
-              <small className="stat-date">{Extremes.sistole.max}</small>
+              <small className="stat-date">
+                {Extremes.sistole.max.split(",")[0]}
+              </small>
             </div>
-            <div className="kpi-stat extreme-stat">
+            <div className="kpi-stat">
               <span className="stat-label-sm label-low">MÍN</span>
               <span className="stat-value-md val-low">
                 {Extremes.sistole.minValue}
               </span>
-              <small className="stat-date">{Extremes.sistole.min}</small>
+              <small className="stat-date">
+                {Extremes.sistole.min.split(",")[0]}
+              </small>
             </div>
           </div>
         </Card>
@@ -469,22 +488,26 @@ const TomaTensionDashboard = () => {
         {/* 4. Extremos Diástole (NUEVO compact-kpi) */}
         <Card
           title="Extremos Diástole"
-          className="kpi-card kpi-card-extremes-dia compact-kpi"
+          className="kpi-card-extremes-dia compact-kpi"
         >
-          <div className="kpi-grid-values compact-grid">
-            <div className="kpi-stat extreme-stat">
+          <div className="compact-grid">
+            <div className="kpi-stat">
               <span className="stat-label-sm label-high">MÁX</span>
               <span className="stat-value-md val-high">
                 {Extremes.diastole.maxValue}
               </span>
-              <small className="stat-date">{Extremes.diastole.max}</small>
+              <small className="stat-date">
+                {Extremes.diastole.max.split(",")[0]}
+              </small>
             </div>
-            <div className="kpi-stat extreme-stat">
+            <div className="kpi-stat">
               <span className="stat-label-sm label-low">MÍN</span>
               <span className="stat-value-md val-low">
                 {Extremes.diastole.minValue}
               </span>
-              <small className="stat-date">{Extremes.diastole.min}</small>
+              <small className="stat-date">
+                {Extremes.diastole.min.split(",")[0]}
+              </small>
             </div>
           </div>
         </Card>
