@@ -6,9 +6,12 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Calendar } from "primereact/calendar";
+// Importamos DataView para la vista móvil
+import { DataView } from "primereact/dataview";
 import Config from "../components/features/Config";
 import "../styles/TomaTensionDashboard.css";
 
+// --- Funciones Auxiliares (Sin cambios) ---
 const getNormalizedData = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -23,20 +26,24 @@ const toNumber = (value) => {
   return Number.isFinite(num) ? num : null;
 };
 
-const formatDate = (value) => {
+// Función formatDate actualizada para incluir segundos para mayor precisión en extremos
+const formatDate = (value, includeSeconds = false) => {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
 
-  // Cambiamos toLocaleDateString por toLocaleString
-  return date.toLocaleString("es-CO", {
+  const options = {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    hour: "2-digit", // Añadimos hora
-    minute: "2-digit", // Añadimos minutos
-    hour12: true, // Formato AM/PM
-  });
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  if (includeSeconds) options.second = "2-digit";
+
+  return date.toLocaleString("es-CO", options);
 };
 
 const toIsoDate = (dateValue) => {
@@ -67,19 +74,34 @@ const parseSyncStatus = (row) => {
 
 const formatValue = (value) => {
   if (value === null || value === undefined || value === "") return "-";
-
-  if (typeof value === "object") {
-    try {
-      return JSON.stringify(value);
-    } catch (error) {
-      return String(value);
-    }
-  }
-
   return String(value);
 };
 
+// --- Hook personalizado para detectar tamaño de pantalla ---
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+};
+
 const TomaTensionDashboard = () => {
+  const { width } = useWindowSize();
+  const isMobile = width < 768; // Definimos el punto de ruptura para móvil
+
   const defaultDateRange = useMemo(
     () => getRangeFromToday(DEFAULT_PRESET_DAYS),
     [],
@@ -148,28 +170,7 @@ const TomaTensionDashboard = () => {
 
   const totalRegistros = pagination.total;
 
-  const statusStats = useMemo(
-    () => ({
-      Sincronizado: totalRegistros,
-      Pendiente: 0,
-      Error: 0,
-      Desconocido: 0,
-    }),
-    [totalRegistros],
-  );
-
-  const statusBodyTemplate = (rowData) => {
-    const status = parseSyncStatus(rowData);
-    const severityMap = {
-      Sincronizado: "success",
-      Pendiente: "warning",
-      Error: "danger",
-      Desconocido: "info",
-    };
-
-    return <Tag value={status} severity={severityMap[status] || "info"} />;
-  };
-
+  // --- Memorización de Promedios ---
   const averages = useMemo(() => {
     const metrics = ["sistole", "diastole", "ritmoCardiaco"];
 
@@ -189,46 +190,138 @@ const TomaTensionDashboard = () => {
     }, {});
   }, [registros]);
 
-  const sistoleExtremes = useMemo(() => {
-    const rowsWithSistole = registros
+  // --- Memorización de Extremos (Sístole y Diástole) ---
+  const Extremes = useMemo(() => {
+    const rowsWithMetrics = registros
       .map((registro) => ({
         sistole: toNumber(registro?.sistole),
+        diastole: toNumber(registro?.diastole),
         fecha: registro?.fecha_registro || registro?.created_at || null,
       }))
-      .filter((row) => row.sistole !== null);
+      .filter((row) => row.sistole !== null && row.diastole !== null);
 
-    if (!rowsWithSistole.length) {
-      return { max: "-", min: "-", maxValue: "-", minValue: "-" };
+    if (!rowsWithMetrics.length) {
+      const empty = { max: "-", min: "-", maxValue: "-", minValue: "-" };
+      return { sistole: empty, diastole: empty };
     }
 
-    const maxRow = rowsWithSistole.reduce((max, row) =>
+    // Cálculos Sístole
+    const maxRowSis = rowsWithMetrics.reduce((max, row) =>
       row.sistole > max.sistole ? row : max,
     );
-    const minRow = rowsWithSistole.reduce((min, row) =>
+    const minRowSis = rowsWithMetrics.reduce((min, row) =>
       row.sistole < min.sistole ? row : min,
     );
 
+    // Cálculos Diástole
+    const maxRowDia = rowsWithMetrics.reduce((max, row) =>
+      row.diastole > max.diastole ? row : max,
+    );
+    const minRowDia = rowsWithMetrics.reduce((min, row) =>
+      row.diastole < min.diastole ? row : min,
+    );
+
     return {
-      max: formatDate(maxRow.fecha),
-      min: formatDate(minRow.fecha),
-      maxValue: maxRow.sistole,
-      minValue: minRow.sistole,
+      sistole: {
+        max: formatDate(maxRowSis.fecha),
+        min: formatDate(minRowSis.fecha),
+        maxValue: maxRowSis.sistole,
+        minValue: minRowSis.sistole,
+      },
+      diastole: {
+        max: formatDate(maxRowDia.fecha),
+        min: formatDate(minRowDia.fecha),
+        maxValue: maxRowDia.diastole,
+        minValue: minRowDia.diastole,
+      },
     };
   }, [registros]);
 
+  // --- Templates para la Tabla y Vista Móvil ---
+  const statusBodyTemplate = (rowData) => {
+    const status = parseSyncStatus(rowData);
+    const severityMap = {
+      Sincronizado: "success",
+      Desconocido: "info",
+    };
+    return (
+      <Tag
+        value={status}
+        severity={severityMap[status] || "info"}
+        style={{ fontSize: "0.75rem" }}
+      />
+    );
+  };
+
+  // Template para el valor de Sístole con color
+  const sistoleBodyTemplate = (rowData) => (
+    <span
+      style={{
+        fontWeight: "bold",
+        color: rowData.sistole >= 140 ? "var(--red-600)" : "inherit",
+      }}
+    >
+      {formatValue(rowData.sistole)}
+    </span>
+  );
+
+  // Template para el valor de Diástole con color
+  const diastoleBodyTemplate = (rowData) => (
+    <span
+      style={{
+        fontWeight: "bold",
+        color: rowData.diastole >= 90 ? "var(--red-600)" : "inherit",
+      }}
+    >
+      {formatValue(rowData.diastole)}
+    </span>
+  );
+
+  // --- Template para la vista de tarjetas en Móvil ---
+  const mobileRecordTemplate = (rowData) => {
+    return (
+      <div className="mobile-record-card">
+        <div className="mobile-record-header">
+          {statusBodyTemplate(rowData)}
+          <span className="mobile-record-date">
+            {formatDate(rowData.fecha_registro, true)}
+          </span>
+        </div>
+        <div className="mobile-record-body">
+          <div className="mobile-metric">
+            <span className="metric-label">SÍSTOLE</span>
+            {sistoleBodyTemplate(rowData)}
+          </div>
+          <div className="mobile-metric">
+            <span className="metric-label">DIÁSTOLE</span>
+            {diastoleBodyTemplate(rowData)}
+          </div>
+          <div className="mobile-metric">
+            <span className="metric-label">RITMO</span>
+            <span className="metric-value">
+              {formatValue(rowData.ritmoCardiaco)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // --- JSX Principal ---
   return (
     <div className="toma-tension-dashboard">
       <div className="toma-tension-header">
         <h2>Dashboard de Toma de Tensión</h2>
         <Button
           icon="pi pi-refresh"
-          label="Actualizar"
+          label={isMobile ? "" : "Actualizar"} // Solo icono en móvil
           onClick={fetchDashboardData}
           loading={loading}
+          className="p-button-sm"
         />
       </div>
 
-      <Card title="Filtros" className="toma-tension-filters-card">
+      <Card title="Filtros" className="toma-tension-filters-card compact-card">
         <div className="toma-tension-filters">
           <div className="filter-field">
             <label htmlFor="fecha_inicio">Fecha inicio</label>
@@ -239,35 +332,16 @@ const TomaTensionDashboard = () => {
               }
               onChange={(event) => {
                 setSelectedPreset(null);
-                setFilters((prev) => {
-                  const nextStartDate = toIsoDate(event.value);
-
-                  if (
-                    prev.fecha_fin &&
-                    nextStartDate &&
-                    nextStartDate > prev.fecha_fin
-                  ) {
-                    return {
-                      ...prev,
-                      fecha_inicio: nextStartDate,
-                      fecha_fin: nextStartDate,
-                      page: 1,
-                    };
-                  }
-
-                  return {
-                    ...prev,
-                    fecha_inicio: nextStartDate,
-                    page: 1,
-                  };
-                });
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_inicio: toIsoDate(event.value),
+                  page: 1,
+                }));
               }}
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
-              maxDate={
-                filters.fecha_fin ? new Date(filters.fecha_fin) : undefined
-              }
+              className="p-inputtext-sm"
             />
           </div>
 
@@ -278,43 +352,22 @@ const TomaTensionDashboard = () => {
               value={filters.fecha_fin ? new Date(filters.fecha_fin) : null}
               onChange={(event) => {
                 setSelectedPreset(null);
-                setFilters((prev) => {
-                  const nextEndDate = toIsoDate(event.value);
-
-                  if (
-                    prev.fecha_inicio &&
-                    nextEndDate &&
-                    nextEndDate < prev.fecha_inicio
-                  ) {
-                    return {
-                      ...prev,
-                      fecha_inicio: nextEndDate,
-                      fecha_fin: nextEndDate,
-                      page: 1,
-                    };
-                  }
-
-                  return {
-                    ...prev,
-                    fecha_fin: nextEndDate,
-                    page: 1,
-                  };
-                });
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_fin: toIsoDate(event.value),
+                  page: 1,
+                }));
               }}
               dateFormat="yy-mm-dd"
               showIcon
               placeholder="YYYY-MM-DD"
-              minDate={
-                filters.fecha_inicio
-                  ? new Date(filters.fecha_inicio)
-                  : undefined
-              }
+              className="p-inputtext-sm"
             />
           </div>
 
           <div className="filter-actions">
             <Button
-              label="Limpiar filtros"
+              label={isMobile ? "" : "Limpiar"}
               icon="pi pi-filter-slash"
               severity="secondary"
               outlined
@@ -326,6 +379,7 @@ const TomaTensionDashboard = () => {
                 }));
                 setSelectedPreset(DEFAULT_PRESET_DAYS);
               }}
+              className="p-button-sm"
             />
           </div>
 
@@ -336,7 +390,7 @@ const TomaTensionDashboard = () => {
                 <Button
                   key={days}
                   type="button"
-                  label={`Últimos ${days} días`}
+                  label={`${days} días`}
                   size="small"
                   outlined={selectedPreset !== days}
                   severity={selectedPreset === days ? "primary" : "secondary"}
@@ -348,6 +402,7 @@ const TomaTensionDashboard = () => {
                     }));
                     setSelectedPreset(days);
                   }}
+                  className="preset-btn p-button-xs"
                 />
               ))}
             </div>
@@ -355,177 +410,191 @@ const TomaTensionDashboard = () => {
         </div>
       </Card>
 
-      {error && <div className="toma-tension-error">{error}</div>}
+      {error && <div className="toma-tension-error compact-error">{error}</div>}
 
-      <div className="toma-tension-kpis">
-        <Card title="Total de registros" className="kpi-card kpi-card-total">
-          <div className="kpi-card-content">
-            <i className="pi pi-database kpi-icon" aria-hidden="true" />
-            <span>{totalRegistros}</span>
-          </div>
-        </Card>
-        <Card title="Errores" className="kpi-card kpi-card-error">
-          <div className="kpi-card-content">
-            <i
-              className="pi pi-exclamation-circle kpi-icon"
-              aria-hidden="true"
-            />
-            <span>{statusStats.Error}</span>
-          </div>
-        </Card>
-        <Card title="Promedios" className="kpi-card kpi-card-avg">
-          <div className="kpi-card-header-container">
-            <i className="pi pi-chart-line kpi-icon" />
-          </div>
-          <div className="kpi-grid-values">
-            <div className="kpi-stat">
-              <span className="stat-label">Sístole</span>
-              <span className="stat-value">{averages.sistole}</span>
-            </div>
-            <div className="kpi-stat">
-              <span className="stat-label">Diástole</span>
-              <span className="stat-value">{averages.diastole}</span>
-            </div>
-            <div className="kpi-stat">
-              <span className="stat-label">Ritmo</span>
-              <span className="stat-value">{averages.ritmoCardiaco}</span>
-            </div>
-          </div>
-        </Card>
+      {/* --- SECCIÓN DE KPIs REESTRUCTURADA --- */}
+      <div className={`toma-tension-kpis ${isMobile ? "mobile-kpis" : ""}`}>
+        {/* 1. Total Registros */}
         <Card
-          title="Extremos de Sístole"
-          className="kpi-card kpi-card-extremes"
+          title="Total registros"
+          className="kpi-card kpi-card-total compact-kpi"
         >
-          <div className="kpi-card-header-container">
-            <i className="pi pi-sort-alt kpi-icon" aria-hidden="true" />
+          <div className="kpi-card-content compact-content">
+            <i className="pi pi-database kpi-icon-sm" aria-hidden="true" />
+            <span className="kpi-value-lg">{totalRegistros}</span>
           </div>
-          <div className="kpi-grid-values">
+        </Card>
+
+        {/* 2. Promedios (Diseño Grid compacto) */}
+        <Card title="Promedios" className="kpi-card kpi-card-avg compact-kpi">
+          <div className="kpi-grid-values compact-grid">
             <div className="kpi-stat">
-              <span className="stat-label">Más Alta</span>
-              <span className="stat-value" style={{ color: "var(--red-600)" }}>
-                {sistoleExtremes.maxValue}
-              </span>
-              <small style={{ fontSize: "0.65rem" }}>
-                {sistoleExtremes.max}
-              </small>
+              <span className="stat-label-sm">SÍSTOLE</span>
+              <span className="stat-value-md">{averages.sistole}</span>
             </div>
             <div className="kpi-stat">
-              <span className="stat-label">Más Baja</span>
-              <span className="stat-value" style={{ color: "var(--blue-600)" }}>
-                {sistoleExtremes.minValue}
+              <span className="stat-label-sm">DIÁSTOLE</span>
+              <span className="stat-value-md">{averages.diastole}</span>
+            </div>
+            <div className="kpi-stat">
+              <span className="stat-label-sm">RITMO</span>
+              <span className="stat-value-md">{averages.ritmoCardiaco}</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* 3. Extremos Sístole (Diseño Grid compacto) */}
+        <Card
+          title="Extremos Sístole"
+          className="kpi-card kpi-card-extremes-sis compact-kpi"
+        >
+          <div className="kpi-grid-values compact-grid">
+            <div className="kpi-stat extreme-stat">
+              <span className="stat-label-sm label-high">MÁX</span>
+              <span className="stat-value-md val-high">
+                {Extremes.sistole.maxValue}
               </span>
-              <small style={{ fontSize: "0.65rem" }}>
-                {sistoleExtremes.min}
-              </small>
+              <small className="stat-date">{Extremes.sistole.max}</small>
+            </div>
+            <div className="kpi-stat extreme-stat">
+              <span className="stat-label-sm label-low">MÍN</span>
+              <span className="stat-value-md val-low">
+                {Extremes.sistole.minValue}
+              </span>
+              <small className="stat-date">{Extremes.sistole.min}</small>
+            </div>
+          </div>
+        </Card>
+
+        {/* 4. Extremos Diástole (NUEVO compact-kpi) */}
+        <Card
+          title="Extremos Diástole"
+          className="kpi-card kpi-card-extremes-dia compact-kpi"
+        >
+          <div className="kpi-grid-values compact-grid">
+            <div className="kpi-stat extreme-stat">
+              <span className="stat-label-sm label-high">MÁX</span>
+              <span className="stat-value-md val-high">
+                {Extremes.diastole.maxValue}
+              </span>
+              <small className="stat-date">{Extremes.diastole.max}</small>
+            </div>
+            <div className="kpi-stat extreme-stat">
+              <span className="stat-label-sm label-low">MÍN</span>
+              <span className="stat-value-md val-low">
+                {Extremes.diastole.minValue}
+              </span>
+              <small className="stat-date">{Extremes.diastole.min}</small>
             </div>
           </div>
         </Card>
       </div>
 
-      <Card title="Detalle de sincronización">
-        <DataTable
-          value={registros}
-          loading={loading}
-          paginator
-          lazy
-          first={(pagination.page - 1) * pagination.limit}
-          rows={pagination.limit}
-          totalRecords={pagination.total}
-          rowsPerPageOptions={[10, 20, 50, 100]}
-          paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
-          onPage={(event) => {
-            setFilters((prev) => ({
-              ...prev,
-              page: event.page + 1,
-              limit: event.rows,
-            }));
-          }}
-          emptyMessage="No hay registros disponibles"
-          responsiveLayout="scroll"
-          sortMode="multiple"
-        >
-          <Column
-            header="Estado"
-            body={statusBodyTemplate}
-            frozen
-            alignFrozen="left"
-            style={{ minWidth: "11rem" }}
+      {/* --- SECCIÓN DETALLE (Responsiva) --- */}
+      <Card
+        title="Detalle de sincronización"
+        className="compact-card Detail-card"
+      >
+        {isMobile ? (
+          // --- VISTA MÓVIL: DataView (Tarjetas) ---
+          <DataView
+            value={registros}
+            itemTemplate={mobileRecordTemplate}
+            paginator
+            lazy
+            first={(pagination.page - 1) * pagination.limit}
+            rows={pagination.limit}
+            totalRecords={pagination.total}
+            onPage={(event) => {
+              setFilters((prev) => ({
+                ...prev,
+                page: event.page + 1,
+                limit: event.rows,
+              }));
+            }}
+            emptyMessage="No hay registros disponibles"
+            className="mobile-dataview"
           />
-          <Column
-            field="id"
-            header="ID"
-            sortable
-            style={{ minWidth: "8rem" }}
-            body={(rowData) => formatValue(rowData.id)}
-            hidden={true}
-          />
-          <Column
-            field="paciente_id"
-            header="Paciente"
-            sortable
-            style={{ minWidth: "14rem" }}
-            body={(rowData) => formatValue(rowData.paciente_id)}
-          />
-          <Column
-            field="sistole"
-            header="Sístole"
-            sortable
-            style={{ minWidth: "8rem", textAlign: "center" }} // Centrado
-            body={(rowData) => (
-              <span
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    rowData.sistole >= 140
-                      ? "var(--red-600)"
-                      : rowData.sistole < 120
-                        ? "var(--green-600)"
-                        : "inherit",
-                }}
-              >
-                {formatValue(rowData.sistole)}
-              </span>
-            )}
-          />
-          <Column
-            field="diastole"
-            header="Diástole"
-            sortable
-            style={{ minWidth: "8rem", textAlign: "center" }} // Centrado
-            body={(rowData) => (
-              <span
-                style={{
-                  fontWeight: "bold",
-                  color: rowData.diastole >= 90 ? "var(--red-600)" : "inherit",
-                }}
-              >
-                {formatValue(rowData.diastole)}
-              </span>
-            )}
-          />
-          <Column
-            field="ritmoCardiaco"
-            header="Ritmo Cardíaco"
-            sortable
-            style={{ minWidth: "10rem", textAlign: "center" }}
-            body={(rowData) => formatValue(rowData.ritmoCardiaco)}
-          />
-          <Column
-            field="fecha_registro"
-            header="Fecha registro"
-            sortable
-            style={{ minWidth: "16rem" }}
-            body={(rowData) => formatDate(rowData.fecha_registro)}
-          />
-          <Column
-            field="created_at"
-            header="Actualizado"
-            sortable
-            style={{ minWidth: "12rem" }}
-            hidden={true}
-          />
-        </DataTable>
+        ) : (
+          // --- VISTA PC: DataTable (Tabla estándar corregida) ---
+          <DataTable
+            value={registros}
+            loading={loading}
+            paginator
+            lazy
+            first={(pagination.page - 1) * pagination.limit}
+            rows={pagination.limit}
+            totalRecords={pagination.total}
+            rowsPerPageOptions={[10, 20, 50, 100]}
+            paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+            currentPageReportTemplate="Muestra {first} a {last} de {totalRecords}"
+            onPage={(event) => {
+              setFilters((prev) => ({
+                ...prev,
+                page: event.page + 1,
+                limit: event.rows,
+              }));
+            }}
+            emptyMessage="No hay registros disponibles"
+            responsiveLayout="scroll"
+            sortMode="multiple"
+            className="p-datatable-sm corrected-datatable"
+          >
+            <Column
+              header="Estado"
+              body={statusBodyTemplate}
+              frozen
+              alignFrozen="left"
+              style={{ minWidth: "9rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+            />
+            <Column
+              field="paciente_id"
+              header="Paci."
+              sortable
+              style={{ minWidth: "5rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+            />
+            <Column
+              field="sistole"
+              header="Sístole"
+              sortable
+              style={{ minWidth: "7rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+              body={sistoleBodyTemplate}
+            />
+            <Column
+              field="diastole"
+              header="Diástole"
+              sortable
+              style={{ minWidth: "7rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+              body={diastoleBodyTemplate}
+            />
+            {/* Corrección Ritmo Cardiaco: Centrado de header y body */}
+            <Column
+              field="ritmoCardiaco"
+              header="Ritmo"
+              sortable
+              style={{ minWidth: "7rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+            />
+            <Column
+              field="fecha_registro"
+              header="Fecha registro"
+              sortable
+              style={{ minWidth: "14rem" }}
+              headerStyle={{ justifyContent: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+              body={(rowData) => formatDate(rowData.fecha_registro, true)}
+            />
+          </DataTable>
+        )}
       </Card>
     </div>
   );

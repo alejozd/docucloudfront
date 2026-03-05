@@ -1,221 +1,353 @@
+/* --- Variables de Color --- */
+:root {
+    --text-main: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --bg-main: #f8fafc;
+    --high-val: #dc2626; /* Rojo */
+    --low-val: #2563eb;  /* Azul */
+}
+
+/* --- Layout Principal --- */
 .toma-tension-dashboard {
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+    padding: 1rem; /* Reducido */
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* Reducido */
+    background-color: var(--bg-main);
+    font-family: var(--font-family);
 }
 
 .toma-tension-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
 }
 
 .toma-tension-header h2 {
-  margin: 0;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
-.toma-tension-error {
-  background-color: #ffe5e5;
-  color: #8a1f1f;
-  border: 1px solid #ffc7c7;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
+/* --- Clases de Utilidad Compactas --- */
+.compact-card .p-card-title {
+    font-size: 1rem !important; /* Título más chico */
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem !important;
 }
 
+.compact-card .p-card-content {
+    padding: 0 !important;
+}
+
+.p-button-xs {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* --- Sección Filtros --- */
 .toma-tension-filters-card .p-card-body {
-  padding-top: 0.6rem;
-  padding-bottom: 0.8rem;
+    padding: 0.75rem !important;
 }
 
 .toma-tension-filters {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  align-items: end;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    align-items: end;
 }
 
 .filter-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .filter-field label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #334155;
-}
-
-.filter-field .p-calendar,
-.filter-field .p-inputtext {
-  width: 100%;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .filter-actions {
-  display: flex;
-  justify-content: flex-start;
-  align-items: end;
+    display: flex;
+    justify-content: flex-start;
+    align-items: end;
 }
 
 .filter-presets {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
 }
 
 .preset-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
 }
 
+/* --- Sección KPIs (DISEÑO COMPACTO Y RESPONSIVO) --- */
 .toma-tension-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+    display: grid;
+    /* Por defecto: 4 columnas para PC */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 1rem;
+    margin-bottom: 0.5rem;
 }
 
-.kpi-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  position: relative;
+.compact-kpi {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: #ffffff;
+    transition: transform 0.2s;
 }
 
-.kpi-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  height: 4px;
+/* Reducir el espacio interno de la Card de PrimeReact */
+.compact-kpi .p-card-body {
+    padding: 0.6rem !important; 
 }
 
-.kpi-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14);
+.compact-kpi .p-card-title {
+    font-size: 0.85rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem !important;
+    text-align: center;
 }
 
-.kpi-card-total::before {
-  background: linear-gradient(90deg, #2563eb, #38bdf8);
+/* Valores principales */
+.kpi-value-lg {
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: block;
+    text-align: center;
 }
 
-.kpi-card-error::before {
-  background: linear-gradient(90deg, #dc2626, #fb7185);
+.stat-value-md {
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
-.kpi-card-avg::before {
-  background: linear-gradient(90deg, #7c3aed, #c084fc);
-}
-
-.kpi-card-extremes::before {
-  background: linear-gradient(90deg, #0891b2, #22d3ee);
-}
-
-.kpi-card .p-card-body {
-  text-align: center;
-  padding-top: 1rem;
-}
-
-.kpi-card-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.kpi-icon {
-  font-size: 1.35rem;
-  color: #334155;
-}
-
-.kpi-card span {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.kpi-multiline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #334155;
-  margin-top: 0.45rem;
-}
-
-.kpi-multiline p {
-  margin: 0;
-}
-
-.kpi-grid-values {
+/* Ajuste de los promedios y extremos para que no se desborden */
+.compact-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 1rem;
+    gap: 4px;
     text-align: center;
+}
+
+.kpi-card-extremes-sis .compact-grid,
+.kpi-card-extremes-dia .compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Estilos de valores dentro de KPI */
+.compact-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kpi-icon-sm {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.kpi-value-lg {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+/* Grid interno de Promedios y Extremos */
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 cols para promedios */
+    gap: 0.25rem;
+    text-align: center;
+}
+
+/* Ajuste para extremos (2 columnas) */
+.kpi-card-extremes-sis .compact-grid,
+.kpi-card-extremes-dia .compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
 }
 
 .kpi-stat {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.stat-label {
-    font-size: 0.8rem;
-    color: #666;
-    text-transform: uppercase;
+.extreme-stat {
+    border: 1px solid transparent; /* Reservado */
 }
 
-.stat-value {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Para resaltar la fila al pasar el mouse */
-.p-datatable-tbody > tr:hover {
-    background-color: #f8f9fa !important;
-}
-
-/* Centrar los títulos de las Cards de KPI */
-.kpi-card .p-card-title {
-    font-size: 1.1rem !important;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 0.5rem;
-}
-
-/* Ajuste para que los promedios resalten más */
-.kpi-stat .stat-label {
-    font-size: 0.75rem;
-    color: #94a3b8;
+.stat-label-sm {
+    font-size: 0.7rem;
+    color: var(--text-muted);
     font-weight: 700;
-    margin-bottom: 0.2rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.1rem;
 }
 
-.kpi-stat .stat-value {
-    font-size: 1.4rem; /* Un poco más grande */
-    color: #1e293b;
-}
-
-/* Evitar que los filtros se estiren infinito en PC */
-.toma-tension-filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 300px)); /* Máximo 300px por filtro */
-    gap: 1.5rem;
-}
-
-/* Mejorar la apariencia de la tabla */
-.p-datatable .p-column-header-content {
-    justify-content: center; /* Centrar encabezados también */
-}
-
-/* Estilo para los textos pequeños de fecha en los extremos */
-.kpi-stat small {
-    display: block;
+.stat-value-md {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-main);
     line-height: 1.1;
-    margin-top: 4px;
-    color: #64748b;
+}
+
+/* Colores específicos para valores altos/bajos */
+.label-high { color: #b91c1c; }
+.label-low { color: #1d4ed8; }
+.val-high { color: var(--high-val); }
+.val-low { color: var(--low-val); }
+
+.stat-date {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    line-height: 1.2;
+    margin-top: 0.15rem;
+    white-space: nowrap; /* Evita saltos de línea feos */
+}
+
+/* --- Sección Detalle --- */
+.Detail-card .p-card-body {
+    padding: 0.5rem !important;
+}
+
+/* Correcciones de alineación en DataTable (PC) */
+.corrected-datatable .p-datatable-thead > tr > th {
+    text-align: center !important;
+    justify-content: center !important;
+    font-size: 0.85rem;
+}
+
+.corrected-datatable .p-datatable-tbody > tr > td {
+    font-size: 0.85rem;
+}
+
+/* --- VISTA MÓVIL: DataView Records --- */
+.mobile-record-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.mobile-record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.6rem;
+}
+
+.mobile-record-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.mobile-record-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.mobile-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.metric-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.mobile-metric span:not(.metric-label) {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* --- MEDIA QUERIES PARA MÓVIL (Punto de ruptura 768px) --- */
+@media screen and (max-width: 767px) {
+    .toma-tension-dashboard {
+        padding: 0.75rem;
+    }
+
+    .toma-tension-header h2 {
+        font-size: 1.25rem;
+    }
+
+    /* KPIs en cuadrícula 2x2 en móvil */
+    .mobile-kpis {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+
+    .compact-kpi .p-card-title {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .kpi-value-lg {
+        font-size: 1.75rem;
+    }
+
+    .stat-value-md {
+        font-size: 1.1rem;
+    }
+
+    .stat-date {
+        font-size: 0.6rem;
+    }
+
+    /* Ocultar paginador estándar de PrimeReact en DataView móvil si es muy grande */
+    .mobile-dataview .p-paginator {
+        padding: 0.25rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Móviles (1 por fila si es muy pequeño o mantener 2 si están bien ajustados) */
+@media screen and (max-width: 600px) {
+    .toma-tension-kpis {
+        /* Si prefieres que se vea uno debajo de otro para que respiren: */
+        grid-template-columns: 1fr; 
+        gap: 0.75rem;
+    }
+
+    .toma-tension-header h2 {
+        font-size: 1.1rem;
+    }
+
+    /* Ajuste de filtros en móvil para que no se amontonen */
+    .toma-tension-filters {
+        grid-template-columns: 1fr;
+    }
+    
+    .kpi-value-lg {
+        font-size: 1.5rem;
+    }
 }
