@@ -148,3 +148,74 @@
 .kpi-multiline p {
   margin: 0;
 }
+
+.kpi-grid-values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.kpi-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Para resaltar la fila al pasar el mouse */
+.p-datatable-tbody > tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Centrar los títulos de las Cards de KPI */
+.kpi-card .p-card-title {
+    font-size: 1.1rem !important;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+/* Ajuste para que los promedios resalten más */
+.kpi-stat .stat-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.kpi-stat .stat-value {
+    font-size: 1.4rem; /* Un poco más grande */
+    color: #1e293b;
+}
+
+/* Evitar que los filtros se estiren infinito en PC */
+.toma-tension-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 300px)); /* Máximo 300px por filtro */
+    gap: 1.5rem;
+}
+
+/* Mejorar la apariencia de la tabla */
+.p-datatable .p-column-header-content {
+    justify-content: center; /* Centrar encabezados también */
+}
+
+/* Estilo para los textos pequeños de fecha en los extremos */
+.kpi-stat small {
+    display: block;
+    line-height: 1.1;
+    margin-top: 4px;
+    color: #64748b;
+}
