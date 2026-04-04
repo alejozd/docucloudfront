@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toast } from "primereact/toast";
 import Navbar from "././components/layout/Navbar";
 import Home from "././pages/Home";
 import Clientes from "./pages/Clientes";
@@ -27,6 +28,7 @@ import Ventas from "./pages/protected/Ventas";
 import Pagos from "./pages/protected/Pagos";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
+import PurchaseBridge from "./pages/protected/PurchaseBridge";
 import Usuarios from "./pages/microservices/Usuarios";
 import "././styles/App.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
@@ -45,6 +47,8 @@ const getTokenExpiration = (token) => {
 };
 
 function App() {
+  const toastRef = useRef(null);
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const storedToken = sessionStorage.getItem("jwtToken");
     return !!storedToken;
@@ -79,12 +83,18 @@ function App() {
     setIsAuthenticated(false);
     setJwtToken("");
     sessionStorage.removeItem("jwtToken");
-    alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+    toastRef.current?.show({
+      severity: "warn",
+      summary: "Sesión expirada",
+      detail: "Por favor, inicia sesión nuevamente.",
+      life: 3500,
+    });
   };
 
   return (
     <Router>
       <div className="App">
+        <Toast ref={toastRef} />
         <Navbar onLogout={handleLogout} />
         <div className="content">
           <Routes>
@@ -220,6 +230,17 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <Pagos />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchase-bridge"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
+                  <PurchaseBridge />
                 </ProtectedRoute>
               }
             />

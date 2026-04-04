@@ -30,6 +30,12 @@ const Navbar = () => {
               url: "/AutorizacionPage",
               id: "AutorizacionPage",
             },
+            {
+              label: "PurchaseBridge",
+              icon: "pi pi-briefcase",
+              url: "/purchase-bridge",
+              id: "purchase-bridge",
+            },
           ],
         },
         {
