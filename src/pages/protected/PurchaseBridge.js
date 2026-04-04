@@ -108,6 +108,8 @@ const normalizeLicencias = (payload) => {
 
 const PurchaseBridge = ({ jwtToken }) => {
   const [licencias, setLicencias] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedLicencia, setSelectedLicencia] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -146,6 +148,8 @@ const PurchaseBridge = ({ jwtToken }) => {
     try {
       const response = await axios.get(`${Config.apiUrl}${ENDPOINTS.listado}`, authHeaders);
       setLicencias(normalizeLicencias(response.data));
+      setSelectedRows([]);
+      setSelectedLicencia(null);
     } catch (requestError) {
       const detail = getMessage(requestError, "No se pudo cargar el listado de licencias");
       setError(detail);
@@ -384,35 +388,17 @@ const PurchaseBridge = ({ jwtToken }) => {
     setCodeDialog(true);
   };
 
-  const actionsTemplate = (row) => (
-    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-      <Button icon="pi pi-pencil" rounded text severity="info" tooltip="Editar" onClick={() => openEdit(row)} />
-      <Button
-        icon="pi pi-bolt"
-        rounded
-        text
-        severity="success"
-        tooltip="Activar"
-        onClick={() => openActivate(row)}
-      />
-      <Button
-        icon="pi pi-refresh"
-        rounded
-        text
-        severity="warning"
-        tooltip="Convertir"
-        onClick={() => openConvert(row)}
-      />
-      <Button
-        icon="pi pi-qrcode"
-        rounded
-        text
-        severity="secondary"
-        tooltip="Generar código"
-        onClick={() => openCode(row)}
-      />
-    </div>
-  );
+  const runSelectedAction = (actionName) => {
+    if (!selectedLicencia) {
+      notify("warn", "Selecciona una licencia para continuar");
+      return;
+    }
+
+    if (actionName === "editar") openEdit(selectedLicencia);
+    if (actionName === "activar") openActivate(selectedLicencia);
+    if (actionName === "convertir") openConvert(selectedLicencia);
+    if (actionName === "codigo") openCode(selectedLicencia);
+  };
 
   return (
     <div className="clientes-page">
@@ -435,9 +421,71 @@ const PurchaseBridge = ({ jwtToken }) => {
       {error ? <Message severity="error" text={error} /> : null}
 
       <Card className="clientes-table-card">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+            marginBottom: "0.8rem",
+          }}
+        >
+          <div>
+            <strong>Acciones del registro seleccionado</strong>
+            <p style={{ margin: "0.15rem 0 0", color: "#64748b" }}>
+              {selectedLicencia
+                ? `NIT seleccionado: ${selectedLicencia.nit || "N/A"}`
+                : "Selecciona una fila de la tabla para habilitar acciones."}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
+            <Button
+              label="Editar"
+              icon="pi pi-pencil"
+              severity="info"
+              onClick={() => runSelectedAction("editar")}
+              disabled={!selectedLicencia}
+            />
+            <Button
+              label="Activar"
+              icon="pi pi-bolt"
+              severity="success"
+              onClick={() => runSelectedAction("activar")}
+              disabled={!selectedLicencia}
+            />
+            <Button
+              label="Convertir"
+              icon="pi pi-refresh"
+              severity="warning"
+              onClick={() => runSelectedAction("convertir")}
+              disabled={!selectedLicencia}
+            />
+            <Button
+              label="Generar Código"
+              icon="pi pi-qrcode"
+              severity="secondary"
+              onClick={() => runSelectedAction("codigo")}
+              disabled={!selectedLicencia}
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="clientes-table-card">
         <DataTable
           value={licencias}
           dataKey="id"
+          selection={selectedRows}
+          onSelectionChange={(e) => {
+            const rows = e.value || [];
+            setSelectedRows(rows);
+            setSelectedLicencia(rows.length ? rows[rows.length - 1] : null);
+          }}
+          onRowClick={(e) => {
+            setSelectedLicencia(e.data);
+            setSelectedRows([e.data]);
+          }}
           loading={loading}
           paginator
           rows={10}
@@ -446,6 +494,7 @@ const PurchaseBridge = ({ jwtToken }) => {
           showGridlines
           stripedRows
         >
+          <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
           <Column field="nit" header="NIT" sortable />
           <Column field="estado" header="Estado" sortable />
           <Column field="tipo_licencia" header="Tipo Licencia" sortable />
@@ -453,7 +502,6 @@ const PurchaseBridge = ({ jwtToken }) => {
           <Column field="fecha_expiracion" header="Fecha Expiración" sortable />
           <Column field="dias_demo" header="Días Demo" sortable />
           <Column field="instalacion_hash" header="Instalación Hash" />
-          <Column header="Acciones" body={actionsTemplate} />
         </DataTable>
       </Card>
 
