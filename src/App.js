@@ -27,6 +27,7 @@ import Ventas from "./pages/protected/Ventas";
 import Pagos from "./pages/protected/Pagos";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
+import PurchaseBridge from "./pages/protected/PurchaseBridge";
 import Usuarios from "./pages/microservices/Usuarios";
 import "././styles/App.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
@@ -220,6 +221,17 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <Pagos />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchase-bridge"
+              element={
+                <ProtectedRoute
+                  isAuthenticated={isAuthenticated}
+                  jwtToken={jwtToken}
+                >
+                  <PurchaseBridge />
                 </ProtectedRoute>
               }
             />
