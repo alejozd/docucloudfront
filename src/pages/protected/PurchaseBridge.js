@@ -29,14 +29,15 @@ const TIPOS_LICENCIA = [
   { label: "Permanente", value: "permanente" },
 ];
 
+const LICENSE_APP = "PurchaseBridge";
+
 const APP_OPTIONS = [
-  { label: "PurchaseBridge", value: "purchasebridge" },
-  { label: "DocuCloud", value: "docucloud" },
+  { label: "PurchaseBridge", value: LICENSE_APP },
 ];
 
 const INITIAL_CREATE = {
   nit: "",
-  app: "purchasebridge",
+  app: LICENSE_APP,
   dias_demo: 15,
 };
 
@@ -49,11 +50,12 @@ const INITIAL_EDIT = {
   fecha_expiracion: "",
   dias_demo: 15,
   instalacion_hash: "",
+  app: LICENSE_APP,
 };
 
 const INITIAL_ACTIVATE = {
   nit: "",
-  app: "purchasebridge",
+  app: LICENSE_APP,
   instalacion_hash: "",
   tipo_licencia: "demo",
   dias_demo: 15,
@@ -63,6 +65,7 @@ const INITIAL_ACTIVATE = {
 
 const INITIAL_CONVERT = {
   nit: "",
+  app: LICENSE_APP,
   tipo_licencia: "anual",
   dias_licencia: 365,
   instalacion_hash: "",
@@ -70,7 +73,7 @@ const INITIAL_CONVERT = {
 
 const INITIAL_CODE = {
   nit: "",
-  app: "purchasebridge",
+  app: LICENSE_APP,
   instalacion_hash: "",
   dias: 30,
 };
@@ -102,7 +105,7 @@ const normalizeLicencias = (payload) => {
     fecha_expiracion: formatDate(item.fecha_expiracion),
     dias_demo: item.dias_demo ?? 0,
     instalacion_hash: item.instalacion_hash ?? "",
-    app: item.app ?? "purchasebridge",
+    app: item.app ?? LICENSE_APP,
   }));
 };
 
@@ -247,7 +250,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       fecha_expiracion: editForm.fecha_expiracion_raw || editForm.fecha_expiracion || null,
       dias_demo: Number(editForm.dias_demo || 0),
       instalacion_hash: editForm.instalacion_hash,
-      app: editForm.app || "purchasebridge",
+      app: LICENSE_APP,
     };
 
     await runAction(
@@ -271,7 +274,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     const payload = activateForm.online
       ? {
           nit: activateForm.nit,
-          app: activateForm.app,
+          app: LICENSE_APP,
           instalacion_hash: activateForm.instalacion_hash,
           tipo_licencia: activateForm.tipo_licencia,
           dias_demo: Number(activateForm.dias_demo || 15),
@@ -280,7 +283,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       : {
           nit: activateForm.nit,
           instalacion_hash: activateForm.instalacion_hash,
-          app: activateForm.app,
+          app: LICENSE_APP,
         };
 
     await runAction(
@@ -302,6 +305,7 @@ const PurchaseBridge = ({ jwtToken }) => {
 
     const payload = {
       nit: convertForm.nit,
+      app: LICENSE_APP,
       tipo_licencia: convertForm.tipo_licencia,
       dias_licencia: convertForm.tipo_licencia === "anual" ? Number(convertForm.dias_licencia) : undefined,
       instalacion_hash: convertForm.instalacion_hash || undefined,
@@ -330,7 +334,7 @@ const PurchaseBridge = ({ jwtToken }) => {
           `${Config.apiUrl}${ENDPOINTS.generarCodigo}`,
           {
             nit: codeForm.nit,
-            app: codeForm.app,
+            app: LICENSE_APP,
             instalacion_hash: codeForm.instalacion_hash,
             dias: Number(codeForm.dias),
           },
@@ -360,7 +364,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     setActivateForm({
       ...INITIAL_ACTIVATE,
       nit: row.nit || "",
-      app: row.app || "purchasebridge",
+      app: row.app || LICENSE_APP,
       instalacion_hash: row.instalacion_hash || "",
       tipo_licencia: row.tipo_licencia === "N/A" ? "demo" : row.tipo_licencia,
       dias_demo: row.dias_demo || 15,
@@ -372,6 +376,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     setConvertForm({
       ...INITIAL_CONVERT,
       nit: row.nit || "",
+      app: row.app || LICENSE_APP,
       tipo_licencia: row.tipo_licencia === "N/A" ? "anual" : row.tipo_licencia,
       instalacion_hash: row.instalacion_hash || "",
     });
@@ -382,7 +387,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     setCodeForm({
       ...INITIAL_CODE,
       nit: row.nit || "",
-      app: row.app || "purchasebridge",
+      app: row.app || LICENSE_APP,
       instalacion_hash: row.instalacion_hash || "",
     });
     setCodeDialog(true);
