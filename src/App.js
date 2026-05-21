@@ -30,6 +30,7 @@ import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
 import PurchaseBridge from "./pages/protected/PurchaseBridge";
 import Usuarios from "./pages/microservices/Usuarios";
+import ZamAirDashboard from "./components/ZamAirDashboard";
 import "././styles/App.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -245,6 +246,7 @@ function App() {
               }
             />
             <Route path="/AutorizacionPage" element={<AutorizacionPage />} />
+            <Route path="/zam-air" element={<ZamAirDashboard />} />
           </Routes>
         </div>
       </div>
