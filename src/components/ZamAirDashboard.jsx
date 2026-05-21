@@ -130,48 +130,57 @@ export default function ZamAirDashboard() {
 
       <div className="grid mb-4">
         <div className="col-12 md:col-3">
-          <Card title="⏱️ Horas Voladas" className="h-full">
-            <div className="flex align-items-center justify-content-center h-6rem">
-              <h3 className="text-2xl font-bold m-0">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
+          <Card className="h-full" style={{ minHeight: "150px" }}>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
+              <i className="pi pi-clock text-3xl text-primary mb-2"></i>
+              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
+              <small className="text-gray-500 mt-1">Horas Voladas</small>
             </div>
           </Card>
         </div>
-        <div className="col-12 md:col-3">
-          <Card title="💼 Personal" className="h-full">
-            <div className="flex align-items-center justify-content-center h-6rem">
-              <h3 className="text-2xl font-bold m-0 text-blue-600">
-                ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}
-              </h3>
-            </div>
-          </Card>
-        </div>
-        <div className="col-12 md:col-3">
-          <Card title="✈️ Vuelos" className="h-full">
-            <div className="flex align-items-center justify-content-center h-6rem">
-              <h3 className="text-2xl font-bold m-0">{Number(stats?.totalFlights || 0)}</h3>
-            </div>
-          </Card>
-        </div>
-        <div className="col-12 md:col-3">
-          <Card title="🗺️ Distancia" className="h-full">
-            <div className="flex align-items-center justify-content-center h-6rem">
-              <h3 className="text-2xl font-bold m-0">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
-            </div>
-          </Card>
-        </div>
-      </div>
 
-      <div className="grid mb-4">
         <div className="col-12 md:col-3">
-          <Card title="🏦 Banco" className="h-full">
-            <div className="flex align-items-center justify-content-center h-6rem">
-              <h3 className="text-2xl font-bold m-0 text-green-600">
-                ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}
-              </h3>
+          <Card className="h-full" style={{ minHeight: "150px" }}>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
+              <i className="pi pi-wallet text-3xl text-primary mb-2"></i>
+              <div className="w-full">
+                <div className="mb-2">
+                  <small className="text-gray-500 block text-center">Personal</small>
+                  <span className="text-xl font-bold text-blue-600 block text-center">
+                    ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div className="border-top border-gray-300 pt-2">
+                  <small className="text-gray-500 block text-center">Banco</small>
+                  <span className="text-xl font-bold text-green-600 block text-center">
+                    ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="col-12 md:col-3">
+          <Card className="h-full" style={{ minHeight: "150px" }}>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
+              <i className="pi pi-plane text-3xl text-primary mb-2"></i>
+              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalFlights || 0)}</h3>
+              <small className="text-gray-500 mt-1">Vuelos</small>
+            </div>
+          </Card>
+        </div>
+
+        <div className="col-12 md:col-3">
+          <Card className="h-full" style={{ minHeight: "150px" }}>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
+              <i className="pi pi-map text-3xl text-primary mb-2"></i>
+              <h3 className="text-2xl font-bold m-0 text-center">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+              <small className="text-gray-500 mt-1">Distancia</small>
             </div>
           </Card>
         </div>
