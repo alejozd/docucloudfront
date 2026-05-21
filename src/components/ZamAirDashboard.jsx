@@ -16,46 +16,74 @@ export default function ZamAirDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!API_KEY) {
+      // Fallback explícito para desarrollo local
+      const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3100";
+      const KEY = process.env.REACT_APP_ZAM_API_KEY;
+
+      if (!KEY) {
         setError(
-          "No se encontró la API Key de ZAM-AIR. Configura REACT_APP_ZAM_API_KEY para visualizar datos."
+          "No se encontró la API Key de ZAM-AIR. Configura REACT_APP_ZAM_API_KEY en tu .env.local para visualizar datos."
         );
         setLoading(false);
         return;
       }
 
       try {
-        const headers = { "x-api-key": API_KEY };
+        const headers = { "x-api-key": KEY, Accept: "application/json" };
+        const endpoints = ["fbos", "aircraft", "stats"];
+        const urls = endpoints.map((ep) => `${BASE_URL}/api/${ep}`);
 
-        const [fbosRes, aircraftRes, statsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/fbos`, { headers }),
-          fetch(`${API_BASE}/api/aircraft`, { headers }),
-          fetch(`${API_BASE}/api/stats`, { headers }),
-        ]);
+        console.log("🔍 [ZAM-AIR] Fetching from:", urls);
 
-        if (!fbosRes.ok || !aircraftRes.ok || !statsRes.ok) {
-          throw new Error("Error HTTP al consultar endpoints");
+        const responses = await Promise.all(urls.map((url) => fetch(url, { headers })));
+
+        // Validar que TODAS las respuestas sean HTTP 2xx
+        const failed = responses.find((res) => !res.ok);
+        if (failed) {
+          const preview = await failed.text();
+          console.error(
+            "❌ [ZAM-AIR] HTTP Error:",
+            failed.status,
+            failed.statusText,
+            "Preview:",
+            preview.substring(0, 200)
+          );
+          throw new Error(`Error HTTP ${failed.status} al consultar API`);
         }
 
-        const [fbosData, aircraftData, statsData] = await Promise.all([
-          fbosRes.json(),
-          aircraftRes.json(),
-          statsRes.json(),
-        ]);
+        // Validar content-type ANTES de llamar a .json()
+        const jsonPromises = responses.map(async (res) => {
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error(
+              "❌ [ZAM-AIR] Expected JSON, got:",
+              contentType,
+              "Body:",
+              text.substring(0, 150)
+            );
+            throw new Error(
+              "La API no devolvió JSON. Verifica que el backend esté corriendo en " + BASE_URL
+            );
+          }
+          return res.json();
+        });
+
+        const [fbosData, aircraftData, statsData] = await Promise.all(jsonPromises);
 
         if (fbosData?.ok) setFbos(fbosData.data || []);
         if (aircraftData?.ok) setAircraft(aircraftData.data || []);
         if (statsData?.ok) setStats(statsData.data || {});
       } catch (err) {
-        setError("Error cargando datos. Verifica conexión y API Key.");
-        console.error("Dashboard fetch error:", err);
+        setError(`Error cargando datos: ${err.message}. Revisa la consola (F12) para detalles.`);
+        console.error("🔍 [ZAM-AIR] Fetch failed:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [API_BASE, API_KEY]);
+  }, []); // Dependencias vacías: se ejecuta solo al montar el componente
 
   const suppliesBadge = (row) => {
     const days = Number(row?.daysOfSupplies || 0);
