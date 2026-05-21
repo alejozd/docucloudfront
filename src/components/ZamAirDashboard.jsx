@@ -130,36 +130,49 @@ export default function ZamAirDashboard() {
 
       <div className="grid mb-4">
         <div className="col-12 md:col-3">
-          <Card title="⏱️ Horas Voladas">
-            <h3 className="text-2xl font-bold">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
-          </Card>
-        </div>
-        <div className="col-12 md:col-3">
-          <Card title="💰 Balances ZAM-AIR" className="h-full">
-            <div className="flex flex-column gap-3">
-              <div>
-                <small className="text-gray-500 block mb-1">Personal</small>
-                <span className="text-xl font-bold text-blue-600">
-                  ${Number(stats?.personalBalance || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              <div className="border-top pt-2">
-                <small className="text-gray-500 block mb-1">Banco</small>
-                <span className="text-xl font-bold text-green-600">
-                  ${Number(stats?.bankBalance || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
+          <Card title="⏱️ Horas Voladas" className="h-full">
+            <div className="flex align-items-center justify-content-center h-6rem">
+              <h3 className="text-2xl font-bold m-0">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
             </div>
           </Card>
         </div>
         <div className="col-12 md:col-3">
-          <Card title="✈️ Vuelos">
-            <h3 className="text-2xl font-bold">{Number(stats?.totalFlights || 0)}</h3>
+          <Card title="💼 Personal" className="h-full">
+            <div className="flex align-items-center justify-content-center h-6rem">
+              <h3 className="text-2xl font-bold m-0 text-blue-600">
+                ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                })}
+              </h3>
+            </div>
           </Card>
         </div>
         <div className="col-12 md:col-3">
-          <Card title="🗺️ Distancia">
-            <h3 className="text-2xl font-bold">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+          <Card title="✈️ Vuelos" className="h-full">
+            <div className="flex align-items-center justify-content-center h-6rem">
+              <h3 className="text-2xl font-bold m-0">{Number(stats?.totalFlights || 0)}</h3>
+            </div>
+          </Card>
+        </div>
+        <div className="col-12 md:col-3">
+          <Card title="🗺️ Distancia" className="h-full">
+            <div className="flex align-items-center justify-content-center h-6rem">
+              <h3 className="text-2xl font-bold m-0">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="grid mb-4">
+        <div className="col-12 md:col-3">
+          <Card title="🏦 Banco" className="h-full">
+            <div className="flex align-items-center justify-content-center h-6rem">
+              <h3 className="text-2xl font-bold m-0 text-green-600">
+                ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                })}
+              </h3>
+            </div>
           </Card>
         </div>
       </div>
