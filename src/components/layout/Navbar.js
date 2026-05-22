@@ -165,6 +165,12 @@ const Navbar = () => {
           url: "/weather",
           id: "weather",
         },
+        {
+          label: "Aerolinea",
+          icon: "pi pi-plane",
+          url: "/zam-air",
+          id: "zam-air",
+        },
       ],
     },
     {
