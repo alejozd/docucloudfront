@@ -125,43 +125,40 @@ export default function ZamAirDashboard() {
   if (error) return <div className="p-4 text-red-500">❌ {error}</div>;
 
   return (
-    <div className="zam-air-dashboard p-4 surface-ground">
-      <div className="flex align-items-center justify-content-center mb-5">
-        <i className="pi pi-send text-4xl text-primary mr-3"></i>
-        <h2 className="text-4xl font-bold m-0 text-900">Dashboard ZAM-AIR</h2>
-      </div>
+    <div className="zam-air-dashboard p-4">
+      <h2 className="mb-4">🛫 Dashboard ZAM-AIR</h2>
 
       <div className="grid mb-5">
         <div className="col-12 md:col-6 lg:col-3">
           <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
-            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
-              <div className="w-4rem h-4rem bg-blue-50 border-circle flex align-items-center justify-content-center mb-3">
-                <i className="pi pi-clock text-3xl text-blue-600"></i>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-blue-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-clock text-2xl text-blue-600"></i>
               </div>
-              <h3 className="text-3xl font-bold m-0 text-900">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
-              <span className="text-600 font-medium mt-2">Horas Voladas</span>
+              <h3 className="text-2xl font-bold m-0 text-900">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
+              <span className="text-600 font-medium mt-1">Horas Voladas</span>
             </div>
           </Card>
         </div>
 
         <div className="col-12 md:col-6 lg:col-3">
           <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
-            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
-              <div className="w-4rem h-4rem bg-green-50 border-circle flex align-items-center justify-content-center mb-3">
-                <i className="pi pi-wallet text-3xl text-green-600"></i>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-green-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-wallet text-2xl text-green-600"></i>
               </div>
               <div className="w-full px-3">
-                <div className="flex justify-content-between align-items-center mb-2">
-                  <span className="text-600 font-medium">Personal</span>
-                  <span className="text-xl font-bold text-blue-600">
+                <div className="flex justify-content-between align-items-center mb-1">
+                  <span className="text-600 font-medium text-sm">Personal</span>
+                  <span className="text-lg font-bold text-blue-600">
                     ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
-                <div className="flex justify-content-between align-items-center border-top-1 surface-border pt-2">
-                  <span className="text-600 font-medium">Banco</span>
-                  <span className="text-xl font-bold text-green-600">
+                <div className="flex justify-content-between align-items-center border-top-1 surface-border pt-1">
+                  <span className="text-600 font-medium text-sm">Banco</span>
+                  <span className="text-lg font-bold text-green-600">
                     ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
@@ -174,32 +171,32 @@ export default function ZamAirDashboard() {
 
         <div className="col-12 md:col-6 lg:col-3">
           <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
-            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
-              <div className="w-4rem h-4rem bg-orange-50 border-circle flex align-items-center justify-content-center mb-3">
-                <i className="pi pi-send text-3xl text-orange-600"></i>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-orange-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-send text-2xl text-orange-600"></i>
               </div>
-              <h3 className="text-3xl font-bold m-0 text-900">{Number(stats?.totalFlights || 0)}</h3>
-              <span className="text-600 font-medium mt-2">Vuelos</span>
+              <h3 className="text-2xl font-bold m-0 text-900">{Number(stats?.totalFlights || 0)}</h3>
+              <span className="text-600 font-medium mt-1">Vuelos</span>
             </div>
           </Card>
         </div>
 
         <div className="col-12 md:col-6 lg:col-3">
           <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
-            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
-              <div className="w-4rem h-4rem bg-purple-50 border-circle flex align-items-center justify-content-center mb-3">
-                <i className="pi pi-map text-3xl text-purple-600"></i>
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-purple-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-map text-2xl text-purple-600"></i>
               </div>
-              <h3 className="text-3xl font-bold m-0 text-900">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
-              <span className="text-600 font-medium mt-2">Distancia</span>
+              <h3 className="text-2xl font-bold m-0 text-900">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+              <span className="text-600 font-medium mt-1">Distancia</span>
             </div>
           </Card>
         </div>
       </div>
 
-      <Card title="🏢 Mis FBOs" className="mb-5 shadow-2 border-round-xl">
+      <Card title="🏢 Mis FBOs" className="mb-4">
         <DataTable value={fbos} paginator rows={7} responsiveLayout="scroll" className="p-datatable-sm">
-          <Column field="icao" header="ICAO" sortable className="font-bold" />
+          <Column field="icao" header="ICAO" sortable />
           <Column field="name" header="Nombre" />
           <Column field="supplies" header="Supplies (kg)" sortable />
           <Column body={suppliesBadge} header="Autonomía" />
@@ -208,9 +205,9 @@ export default function ZamAirDashboard() {
         </DataTable>
       </Card>
 
-      <Card title="✈️ Mi Flota" className="mb-5 shadow-2 border-round-xl">
+      <Card title="✈️ Mi Flota" className="mb-4">
         <DataTable value={aircraft} paginator rows={5} responsiveLayout="scroll">
-          <Column field="registration" header="Registro" className="font-bold text-primary" />
+          <Column field="registration" header="Registro" />
           <Column field="makeModel" header="Modelo" />
           <Column field="location" header="Ubicación" />
           <Column field="fuelLevel" header="Combustible" body={(r) => `${Number(r.fuelLevel || 0)}%`} />
@@ -222,7 +219,7 @@ export default function ZamAirDashboard() {
         </DataTable>
       </Card>
 
-      <Card title="⛽ Combustible por FBO" className="mb-5 shadow-2 border-round-xl">
+      <Card title="⛽ Combustible por FBO" className="mb-4">
         <div style={{ height: "300px" }}>
           <Chart type="bar" data={fuelChartData} options={fuelChartOptions} />
         </div>
