@@ -125,36 +125,43 @@ export default function ZamAirDashboard() {
   if (error) return <div className="p-4 text-red-500">❌ {error}</div>;
 
   return (
-    <div className="zam-air-dashboard p-4">
-      <h2 className="mb-4">🛫 Dashboard ZAM-AIR</h2>
+    <div className="zam-air-dashboard p-4 surface-ground">
+      <div className="flex align-items-center justify-content-center mb-5">
+        <i className="pi pi-send text-4xl text-primary mr-3"></i>
+        <h2 className="text-4xl font-bold m-0 text-900">Dashboard ZAM-AIR</h2>
+      </div>
 
-      <div className="grid mb-4">
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-clock text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
-              <small className="text-gray-500 mt-1">Horas Voladas</small>
+      <div className="grid mb-5">
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
+              <div className="w-4rem h-4rem bg-blue-50 border-circle flex align-items-center justify-content-center mb-3">
+                <i className="pi pi-clock text-3xl text-blue-600"></i>
+              </div>
+              <h3 className="text-3xl font-bold m-0 text-900">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
+              <span className="text-600 font-medium mt-2">Horas Voladas</span>
             </div>
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-wallet text-3xl text-primary mb-2"></i>
-              <div className="w-full">
-                <div className="mb-2">
-                  <small className="text-gray-500 block text-center">Personal</small>
-                  <span className="text-xl font-bold text-blue-600 block text-center">
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
+              <div className="w-4rem h-4rem bg-green-50 border-circle flex align-items-center justify-content-center mb-3">
+                <i className="pi pi-wallet text-3xl text-green-600"></i>
+              </div>
+              <div className="w-full px-3">
+                <div className="flex justify-content-between align-items-center mb-2">
+                  <span className="text-600 font-medium">Personal</span>
+                  <span className="text-xl font-bold text-blue-600">
                     ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
-                <div className="border-top border-gray-300 pt-2">
-                  <small className="text-gray-500 block text-center">Banco</small>
-                  <span className="text-xl font-bold text-green-600 block text-center">
+                <div className="flex justify-content-between align-items-center border-top-1 surface-border pt-2">
+                  <span className="text-600 font-medium">Banco</span>
+                  <span className="text-xl font-bold text-green-600">
                     ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
@@ -165,30 +172,34 @@ export default function ZamAirDashboard() {
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-plane text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalFlights || 0)}</h3>
-              <small className="text-gray-500 mt-1">Vuelos</small>
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
+              <div className="w-4rem h-4rem bg-orange-50 border-circle flex align-items-center justify-content-center mb-3">
+                <i className="pi pi-send text-3xl text-orange-600"></i>
+              </div>
+              <h3 className="text-3xl font-bold m-0 text-900">{Number(stats?.totalFlights || 0)}</h3>
+              <span className="text-600 font-medium mt-2">Vuelos</span>
             </div>
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-map text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
-              <small className="text-gray-500 mt-1">Distancia</small>
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-4">
+              <div className="w-4rem h-4rem bg-purple-50 border-circle flex align-items-center justify-content-center mb-3">
+                <i className="pi pi-map text-3xl text-purple-600"></i>
+              </div>
+              <h3 className="text-3xl font-bold m-0 text-900">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+              <span className="text-600 font-medium mt-2">Distancia</span>
             </div>
           </Card>
         </div>
       </div>
 
-      <Card title="🏢 Mis FBOs" className="mb-4">
+      <Card title="🏢 Mis FBOs" className="mb-5 shadow-2 border-round-xl">
         <DataTable value={fbos} paginator rows={7} responsiveLayout="scroll" className="p-datatable-sm">
-          <Column field="icao" header="ICAO" sortable />
+          <Column field="icao" header="ICAO" sortable className="font-bold" />
           <Column field="name" header="Nombre" />
           <Column field="supplies" header="Supplies (kg)" sortable />
           <Column body={suppliesBadge} header="Autonomía" />
@@ -197,9 +208,9 @@ export default function ZamAirDashboard() {
         </DataTable>
       </Card>
 
-      <Card title="✈️ Mi Flota" className="mb-4">
+      <Card title="✈️ Mi Flota" className="mb-5 shadow-2 border-round-xl">
         <DataTable value={aircraft} paginator rows={5} responsiveLayout="scroll">
-          <Column field="registration" header="Registro" />
+          <Column field="registration" header="Registro" className="font-bold text-primary" />
           <Column field="makeModel" header="Modelo" />
           <Column field="location" header="Ubicación" />
           <Column field="fuelLevel" header="Combustible" body={(r) => `${Number(r.fuelLevel || 0)}%`} />
@@ -211,7 +222,7 @@ export default function ZamAirDashboard() {
         </DataTable>
       </Card>
 
-      <Card title="⛽ Combustible por FBO" className="mb-4">
+      <Card title="⛽ Combustible por FBO" className="mb-5 shadow-2 border-round-xl">
         <div style={{ height: "300px" }}>
           <Chart type="bar" data={fuelChartData} options={fuelChartOptions} />
         </div>

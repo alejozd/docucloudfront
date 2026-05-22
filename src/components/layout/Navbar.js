@@ -167,7 +167,7 @@ const Navbar = () => {
         },
         {
           label: "Aerolinea",
-          icon: "pi pi-plane",
+          icon: "pi pi-send",
           url: "/zam-air",
           id: "zam-air",
         },
