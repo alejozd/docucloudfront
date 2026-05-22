@@ -206,17 +206,103 @@ export default function ZamAirDashboard() {
       </Card>
 
       <Card title="✈️ Mi Flota" className="mb-4">
-        <DataTable value={aircraft} paginator rows={5} responsiveLayout="scroll">
-          <Column field="registration" header="Registro" />
-          <Column field="makeModel" header="Modelo" />
-          <Column field="location" header="Ubicación" />
-          <Column field="fuelLevel" header="Combustible" body={(r) => `${Number(r.fuelLevel || 0)}%`} />
-          <Column
-            field="hoursTo100Hr"
-            header="Mantenimiento"
-            body={(r) => (r.hoursTo100Hr ? `${r.hoursTo100Hr}h` : "N/A")}
-          />
-        </DataTable>
+        {/* Helpers para badges de combustible */}
+        {(() => {
+          const fuelBadge = (row) => {
+            const pct = Number(row?.fuelLevel || 0);
+            const colorClass = pct > 50 ? "success" : pct > 20 ? "warning" : "danger";
+            const label = pct > 0 ? `${pct}%` : "Vacío";
+            return <span className={`p-badge p-badge-${colorClass}`}>{label}</span>;
+          };
+
+          const maintenanceBadge = (row) => {
+            const hours = row?.hoursTo100Hr;
+            if (hours === null || hours === undefined || hours < 0)
+              return <span className="text-gray-500">N/A</span>;
+            const colorClass = hours < 10 ? "danger" : hours < 25 ? "warning" : "success";
+            return <span className={`p-badge p-badge-${colorClass}`}>{hours.toFixed(1)}h</span>;
+          };
+
+          const statusBadge = (row) => {
+            if (row?.rentedBy && row.rentedBy !== "Not rented." && row.rentedBy !== row.owner) {
+              return <span className="p-badge p-badge-info">Alquilado</span>;
+            }
+            if (row?.needsRepair) {
+              return <span className="p-badge p-badge-danger">Reparación</span>;
+            }
+            return <span className="p-badge p-badge-success">Disponible</span>;
+          };
+
+          return (
+            <DataTable
+              value={aircraft}
+              paginator
+              rows={5}
+              responsiveLayout="scroll"
+              className="p-datatable-sm"
+              rowHover
+            >
+              {/* Registro + Estado */}
+              <Column
+                field="registration"
+                header="Registro"
+                body={(row) => (
+                  <div className="flex align-items-center gap-2">
+                    <span className="font-semibold">{row.registration}</span>
+                    {statusBadge(row)}
+                  </div>
+                )}
+                sortable
+              />
+
+              {/* Modelo */}
+              <Column field="makeModel" header="Modelo" sortable />
+
+              {/* Ubicación actual */}
+              <Column
+                field="location"
+                header="Ubicación"
+                body={(row) => (
+                  <div>
+                    <div className="font-medium">{row.location}</div>
+                    {row.locationName && (
+                      <small className="text-gray-500 block text-xs mt-1">
+                        {row.locationName.split(",")[0]}
+                      </small>
+                    )}
+                  </div>
+                )}
+              />
+
+              {/* Base Home */}
+              <Column field="homeBase" header="Base Home" sortable />
+
+              {/* Combustible con badge de color */}
+              <Column header="Combustible" body={fuelBadge} sortable />
+
+              {/* Próximo mantenimiento 100h con badge de color */}
+              <Column header="Próx. 100h" body={maintenanceBadge} sortable />
+
+              {/* Horas de motor (opcional, útil) */}
+              <Column
+                field="engineHours"
+                header="Horas Motor"
+                body={(row) => (row.engineHours ? `${row.engineHours.toFixed(1)}h` : "N/A")}
+                sortable
+              />
+
+              {/* Fee mensual */}
+              <Column
+                field="monthlyFee"
+                header="Fee Mensual"
+                body={(row) =>
+                  row.monthlyFee ? `$${Number(row.monthlyFee).toLocaleString()}` : "-"
+                }
+                sortable
+              />
+            </DataTable>
+          );
+        })()}
       </Card>
 
       <Card title="⛽ Combustible por FBO" className="mb-4">
