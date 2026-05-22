@@ -128,33 +128,37 @@ export default function ZamAirDashboard() {
     <div className="zam-air-dashboard p-4">
       <h2 className="mb-4">🛫 Dashboard ZAM-AIR</h2>
 
-      <div className="grid mb-4">
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-clock text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
-              <small className="text-gray-500 mt-1">Horas Voladas</small>
+      <div className="grid mb-5">
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-blue-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-clock text-2xl text-blue-600"></i>
+              </div>
+              <h3 className="text-2xl font-bold m-0 text-900">{Number(stats?.totalHours || 0).toFixed(1)}h</h3>
+              <span className="text-600 font-medium mt-1">Horas Voladas</span>
             </div>
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-wallet text-3xl text-primary mb-2"></i>
-              <div className="w-full">
-                <div className="mb-2">
-                  <small className="text-gray-500 block text-center">Personal</small>
-                  <span className="text-xl font-bold text-blue-600 block text-center">
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-green-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-wallet text-2xl text-green-600"></i>
+              </div>
+              <div className="w-full px-3">
+                <div className="flex justify-content-between align-items-center mb-1">
+                  <span className="text-600 font-medium text-sm">Personal</span>
+                  <span className="text-lg font-bold text-blue-600">
                     ${Number(stats?.personalBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
-                <div className="border-top border-gray-300 pt-2">
-                  <small className="text-gray-500 block text-center">Banco</small>
-                  <span className="text-xl font-bold text-green-600 block text-center">
+                <div className="flex justify-content-between align-items-center border-top-1 surface-border pt-1">
+                  <span className="text-600 font-medium text-sm">Banco</span>
+                  <span className="text-lg font-bold text-green-600">
                     ${Number(stats?.bankBalance || 0).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
@@ -165,22 +169,26 @@ export default function ZamAirDashboard() {
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-plane text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{Number(stats?.totalFlights || 0)}</h3>
-              <small className="text-gray-500 mt-1">Vuelos</small>
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-orange-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-send text-2xl text-orange-600"></i>
+              </div>
+              <h3 className="text-2xl font-bold m-0 text-900">{Number(stats?.totalFlights || 0)}</h3>
+              <span className="text-600 font-medium mt-1">Vuelos</span>
             </div>
           </Card>
         </div>
 
-        <div className="col-12 md:col-3">
-          <Card className="h-full" style={{ minHeight: "150px" }}>
-            <div className="flex flex-column align-items-center justify-content-center h-full py-3">
-              <i className="pi pi-map text-3xl text-primary mb-2"></i>
-              <h3 className="text-2xl font-bold m-0 text-center">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
-              <small className="text-gray-500 mt-1">Distancia</small>
+        <div className="col-12 md:col-6 lg:col-3">
+          <Card className="h-full shadow-2 hover:shadow-6 transition-all transition-duration-300 cursor-pointer border-round-xl">
+            <div className="flex flex-column align-items-center justify-content-center h-full py-2">
+              <div className="w-3rem h-3rem bg-purple-50 border-circle flex align-items-center justify-content-center mb-2">
+                <i className="pi pi-map text-2xl text-purple-600"></i>
+              </div>
+              <h3 className="text-2xl font-bold m-0 text-900">{(Number(stats?.totalDistance || 0) / 1000).toFixed(1)}k nm</h3>
+              <span className="text-600 font-medium mt-1">Distancia</span>
             </div>
           </Card>
         </div>
