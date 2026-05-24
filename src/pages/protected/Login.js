@@ -100,7 +100,7 @@ const Login = ({ onLogin }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form flex flex-column gap-3">
+        <form onSubmit={handleSubmit} className="login-form p-fluid flex flex-column gap-3">
           <label htmlFor="password" className="login-field-width font-medium text-700 text-left">
             Contraseña
           </label>

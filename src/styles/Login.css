@@ -43,5 +43,5 @@
 
 .login-card-wide .login-field-width,
 .login-card-wide .login-password-wrapper {
-  max-width: 100%;
+  max-width: none;
 }
