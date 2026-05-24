@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import axios from "axios";
 import Config from "../../components/features/Config";
 import { Button } from "primereact/button";
@@ -31,9 +37,7 @@ const TIPOS_LICENCIA = [
 
 const LICENSE_APP = "PurchaseBridge";
 
-const APP_OPTIONS = [
-  { label: "PurchaseBridge", value: LICENSE_APP },
-];
+const APP_OPTIONS = [{ label: "PurchaseBridge", value: LICENSE_APP }];
 
 const INITIAL_CREATE = {
   nit: "",
@@ -133,13 +137,18 @@ const PurchaseBridge = ({ jwtToken }) => {
 
   const authHeaders = useMemo(
     () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
-    [jwtToken]
+    [jwtToken],
   );
 
   const notify = useCallback((severity, detail) => {
     toastRef.current?.show({
       severity,
-      summary: severity === "success" ? "Éxito" : severity === "warn" ? "Validación" : "Error",
+      summary:
+        severity === "success"
+          ? "Éxito"
+          : severity === "warn"
+            ? "Validación"
+            : "Error",
       detail,
       life: 3500,
     });
@@ -149,12 +158,18 @@ const PurchaseBridge = ({ jwtToken }) => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.get(`${Config.apiUrl}${ENDPOINTS.listado}`, authHeaders);
+      const response = await axios.get(
+        `${Config.apiUrl}${ENDPOINTS.listado}`,
+        authHeaders,
+      );
       setLicencias(normalizeLicencias(response.data));
       setSelectedRows([]);
       setSelectedLicencia(null);
     } catch (requestError) {
-      const detail = getMessage(requestError, "No se pudo cargar el listado de licencias");
+      const detail = getMessage(
+        requestError,
+        "No se pudo cargar el listado de licencias",
+      );
       setError(detail);
       notify("error", detail);
     } finally {
@@ -170,7 +185,8 @@ const PurchaseBridge = ({ jwtToken }) => {
   const validateCreate = () => {
     if (!createForm.nit.trim()) return "El NIT es obligatorio";
     if (!createForm.app) return "La aplicación es obligatoria";
-    if (!createForm.dias_demo || createForm.dias_demo <= 0) return "días demo debe ser mayor que 0";
+    if (!createForm.dias_demo || createForm.dias_demo <= 0)
+      return "días demo debe ser mayor que 0";
     return "";
   };
 
@@ -183,15 +199,20 @@ const PurchaseBridge = ({ jwtToken }) => {
 
   const validateActivate = () => {
     if (!activateForm.nit.trim()) return "El NIT es obligatorio";
-    if (!activateForm.instalacion_hash.trim()) return "El hash de instalación es obligatorio";
-    if (activateForm.online && !activateForm.tipo_licencia) return "El tipo de licencia es obligatorio";
+    if (!activateForm.instalacion_hash.trim())
+      return "El hash de instalación es obligatorio";
+    if (activateForm.online && !activateForm.tipo_licencia)
+      return "El tipo de licencia es obligatorio";
     return "";
   };
 
   const validateConvert = () => {
     if (!convertForm.nit.trim()) return "El NIT es obligatorio";
     if (!convertForm.tipo_licencia) return "Selecciona tipo de licencia";
-    if (convertForm.tipo_licencia === "anual" && (!convertForm.dias_licencia || convertForm.dias_licencia <= 0)) {
+    if (
+      convertForm.tipo_licencia === "anual" &&
+      (!convertForm.dias_licencia || convertForm.dias_licencia <= 0)
+    ) {
       return "Para anual, días licencia debe ser mayor que 0";
     }
     return "";
@@ -200,8 +221,10 @@ const PurchaseBridge = ({ jwtToken }) => {
   const validateCode = () => {
     if (!codeForm.nit.trim()) return "El NIT es obligatorio";
     if (!codeForm.app) return "La aplicación es obligatoria";
-    if (!codeForm.instalacion_hash.trim()) return "El hash de instalación es obligatorio";
-    if (!codeForm.dias || codeForm.dias <= 0) return "Días debe ser mayor que 0";
+    if (!codeForm.instalacion_hash.trim())
+      return "El hash de instalación es obligatorio";
+    if (!codeForm.dias || codeForm.dias <= 0)
+      return "Días debe ser mayor que 0";
     return "";
   };
 
@@ -225,14 +248,15 @@ const PurchaseBridge = ({ jwtToken }) => {
       return;
     }
 
-    await runAction(
-      async () => {
-        await axios.post(`${Config.apiUrl}${ENDPOINTS.crear}`, createForm, authHeaders);
-        setCreateDialog(false);
-        setCreateForm(INITIAL_CREATE);
-      },
-      "Licencia creada correctamente"
-    );
+    await runAction(async () => {
+      await axios.post(
+        `${Config.apiUrl}${ENDPOINTS.crear}`,
+        createForm,
+        authHeaders,
+      );
+      setCreateDialog(false);
+      setCreateForm(INITIAL_CREATE);
+    }, "Licencia creada correctamente");
   };
 
   const submitEdit = async () => {
@@ -246,21 +270,24 @@ const PurchaseBridge = ({ jwtToken }) => {
       nit: editForm.nit,
       estado: editForm.estado,
       tipo_licencia: editForm.tipo_licencia,
-      fecha_activacion: editForm.fecha_activacion_raw || editForm.fecha_activacion || null,
-      fecha_expiracion: editForm.fecha_expiracion_raw || editForm.fecha_expiracion || null,
+      fecha_activacion:
+        editForm.fecha_activacion_raw || editForm.fecha_activacion || null,
+      fecha_expiracion:
+        editForm.fecha_expiracion_raw || editForm.fecha_expiracion || null,
       dias_demo: Number(editForm.dias_demo || 0),
       instalacion_hash: editForm.instalacion_hash,
       app: LICENSE_APP,
     };
 
-    await runAction(
-      async () => {
-        await axios.put(`${Config.apiUrl}${ENDPOINTS.editar}/${editForm.id}`, payload, authHeaders);
-        setEditDialog(false);
-        setEditForm(INITIAL_EDIT);
-      },
-      "Licencia actualizada correctamente"
-    );
+    await runAction(async () => {
+      await axios.put(
+        `${Config.apiUrl}${ENDPOINTS.editar}/${editForm.id}`,
+        payload,
+        authHeaders,
+      );
+      setEditDialog(false);
+      setEditForm(INITIAL_EDIT);
+    }, "Licencia actualizada correctamente");
   };
 
   const submitActivate = async () => {
@@ -270,7 +297,9 @@ const PurchaseBridge = ({ jwtToken }) => {
       return;
     }
 
-    const endpoint = activateForm.online ? ENDPOINTS.activarOnline : ENDPOINTS.activar;
+    const endpoint = activateForm.online
+      ? ENDPOINTS.activarOnline
+      : ENDPOINTS.activar;
     const payload = activateForm.online
       ? {
           nit: activateForm.nit,
@@ -278,7 +307,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           instalacion_hash: activateForm.instalacion_hash,
           tipo_licencia: activateForm.tipo_licencia,
           dias_demo: Number(activateForm.dias_demo || 15),
-          dias_licencia: activateForm.dias_licencia ? Number(activateForm.dias_licencia) : undefined,
+          dias_licencia: activateForm.dias_licencia
+            ? Number(activateForm.dias_licencia)
+            : undefined,
         }
       : {
           nit: activateForm.nit,
@@ -292,7 +323,9 @@ const PurchaseBridge = ({ jwtToken }) => {
         setActivateDialog(false);
         setActivateForm(INITIAL_ACTIVATE);
       },
-      activateForm.online ? "Activación online ejecutada" : "Licencia activada correctamente"
+      activateForm.online
+        ? "Activación online ejecutada"
+        : "Licencia activada correctamente",
     );
   };
 
@@ -307,18 +340,22 @@ const PurchaseBridge = ({ jwtToken }) => {
       nit: convertForm.nit,
       app: LICENSE_APP,
       tipo_licencia: convertForm.tipo_licencia,
-      dias_licencia: convertForm.tipo_licencia === "anual" ? Number(convertForm.dias_licencia) : undefined,
+      dias_licencia:
+        convertForm.tipo_licencia === "anual"
+          ? Number(convertForm.dias_licencia)
+          : undefined,
       instalacion_hash: convertForm.instalacion_hash || undefined,
     };
 
-    await runAction(
-      async () => {
-        await axios.post(`${Config.apiUrl}${ENDPOINTS.convertir}`, payload, authHeaders);
-        setConvertDialog(false);
-        setConvertForm(INITIAL_CONVERT);
-      },
-      "Licencia convertida correctamente"
-    );
+    await runAction(async () => {
+      await axios.post(
+        `${Config.apiUrl}${ENDPOINTS.convertir}`,
+        payload,
+        authHeaders,
+      );
+      setConvertDialog(false);
+      setConvertForm(INITIAL_CONVERT);
+    }, "Licencia convertida correctamente");
   };
 
   const submitCode = async () => {
@@ -328,23 +365,20 @@ const PurchaseBridge = ({ jwtToken }) => {
       return;
     }
 
-    await runAction(
-      async () => {
-        await axios.post(
-          `${Config.apiUrl}${ENDPOINTS.generarCodigo}`,
-          {
-            nit: codeForm.nit,
-            app: LICENSE_APP,
-            instalacion_hash: codeForm.instalacion_hash,
-            dias: Number(codeForm.dias),
-          },
-          authHeaders
-        );
-        setCodeDialog(false);
-        setCodeForm(INITIAL_CODE);
-      },
-      "Código de licencia generado"
-    );
+    await runAction(async () => {
+      await axios.post(
+        `${Config.apiUrl}${ENDPOINTS.generarCodigo}`,
+        {
+          nit: codeForm.nit,
+          app: LICENSE_APP,
+          instalacion_hash: codeForm.instalacion_hash,
+          dias: Number(codeForm.dias),
+        },
+        authHeaders,
+      );
+      setCodeDialog(false);
+      setCodeForm(INITIAL_CODE);
+    }, "Código de licencia generado");
   };
 
   const openEdit = (row) => {
@@ -410,9 +444,13 @@ const PurchaseBridge = ({ jwtToken }) => {
       <Toast ref={toastRef} />
 
       <div className="clientes-header">
-        <h2>PurchaseBridge - Administración de Licencias</h2>
+        <h2>Administración de Licencias: PurchaseBridge - CustodiaStock</h2>
         <div className="clientes-actions">
-          <Button label="Crear licencia" icon="pi pi-plus" onClick={() => setCreateDialog(true)} />
+          <Button
+            label="Crear licencia"
+            icon="pi pi-plus"
+            onClick={() => setCreateDialog(true)}
+          />
           <Button
             label="Actualizar"
             icon="pi pi-refresh"
@@ -524,7 +562,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="create_nit"
             value={createForm.nit}
-            onChange={(e) => setCreateForm((prev) => ({ ...prev, nit: e.target.value }))}
+            onChange={(e) =>
+              setCreateForm((prev) => ({ ...prev, nit: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -533,7 +573,9 @@ const PurchaseBridge = ({ jwtToken }) => {
             id="create_app"
             value={createForm.app}
             options={APP_OPTIONS}
-            onChange={(e) => setCreateForm((prev) => ({ ...prev, app: e.value }))}
+            onChange={(e) =>
+              setCreateForm((prev) => ({ ...prev, app: e.value }))
+            }
           />
         </div>
         <div className="field">
@@ -541,13 +583,25 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputNumber
             id="create_dias_demo"
             value={createForm.dias_demo}
-            onValueChange={(e) => setCreateForm((prev) => ({ ...prev, dias_demo: e.value || 0 }))}
+            onValueChange={(e) =>
+              setCreateForm((prev) => ({ ...prev, dias_demo: e.value || 0 }))
+            }
             min={1}
           />
         </div>
         <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Cancelar" text severity="secondary" onClick={() => setCreateDialog(false)} />
-          <Button label="Crear" icon="pi pi-check" onClick={submitCreate} loading={submitting} />
+          <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            onClick={() => setCreateDialog(false)}
+          />
+          <Button
+            label="Crear"
+            icon="pi pi-check"
+            onClick={submitCreate}
+            loading={submitting}
+          />
         </div>
       </Dialog>
 
@@ -564,7 +618,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="edit_nit"
             value={editForm.nit}
-            onChange={(e) => setEditForm((prev) => ({ ...prev, nit: e.target.value }))}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, nit: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -572,7 +628,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="edit_estado"
             value={editForm.estado}
-            onChange={(e) => setEditForm((prev) => ({ ...prev, estado: e.target.value }))}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, estado: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -581,7 +639,9 @@ const PurchaseBridge = ({ jwtToken }) => {
             id="edit_tipo"
             value={editForm.tipo_licencia}
             options={TIPOS_LICENCIA}
-            onChange={(e) => setEditForm((prev) => ({ ...prev, tipo_licencia: e.value }))}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, tipo_licencia: e.value }))
+            }
           />
         </div>
         <div className="field">
@@ -589,7 +649,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputNumber
             id="edit_dias_demo"
             value={editForm.dias_demo}
-            onValueChange={(e) => setEditForm((prev) => ({ ...prev, dias_demo: e.value || 0 }))}
+            onValueChange={(e) =>
+              setEditForm((prev) => ({ ...prev, dias_demo: e.value || 0 }))
+            }
             min={0}
           />
         </div>
@@ -598,12 +660,27 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="edit_hash"
             value={editForm.instalacion_hash}
-            onChange={(e) => setEditForm((prev) => ({ ...prev, instalacion_hash: e.target.value }))}
+            onChange={(e) =>
+              setEditForm((prev) => ({
+                ...prev,
+                instalacion_hash: e.target.value,
+              }))
+            }
           />
         </div>
         <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Cancelar" text severity="secondary" onClick={() => setEditDialog(false)} />
-          <Button label="Guardar" icon="pi pi-save" onClick={submitEdit} loading={submitting} />
+          <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            onClick={() => setEditDialog(false)}
+          />
+          <Button
+            label="Guardar"
+            icon="pi pi-save"
+            onClick={submitEdit}
+            loading={submitting}
+          />
         </div>
       </Dialog>
 
@@ -620,7 +697,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="activate_nit"
             value={activateForm.nit}
-            onChange={(e) => setActivateForm((prev) => ({ ...prev, nit: e.target.value }))}
+            onChange={(e) =>
+              setActivateForm((prev) => ({ ...prev, nit: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -628,7 +707,12 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="activate_hash"
             value={activateForm.instalacion_hash}
-            onChange={(e) => setActivateForm((prev) => ({ ...prev, instalacion_hash: e.target.value }))}
+            onChange={(e) =>
+              setActivateForm((prev) => ({
+                ...prev,
+                instalacion_hash: e.target.value,
+              }))
+            }
           />
         </div>
         <div className="field-checkbox" style={{ marginTop: "0.6rem" }}>
@@ -636,7 +720,9 @@ const PurchaseBridge = ({ jwtToken }) => {
             id="activate_online"
             type="checkbox"
             checked={activateForm.online}
-            onChange={(e) => setActivateForm((prev) => ({ ...prev, online: e.target.checked }))}
+            onChange={(e) =>
+              setActivateForm((prev) => ({ ...prev, online: e.target.checked }))
+            }
           />
           <label htmlFor="activate_online" style={{ marginLeft: "0.5rem" }}>
             Usar activación online
@@ -650,7 +736,12 @@ const PurchaseBridge = ({ jwtToken }) => {
                 id="activate_tipo"
                 value={activateForm.tipo_licencia}
                 options={TIPOS_LICENCIA}
-                onChange={(e) => setActivateForm((prev) => ({ ...prev, tipo_licencia: e.value }))}
+                onChange={(e) =>
+                  setActivateForm((prev) => ({
+                    ...prev,
+                    tipo_licencia: e.value,
+                  }))
+                }
               />
             </div>
             <div className="field">
@@ -658,17 +749,27 @@ const PurchaseBridge = ({ jwtToken }) => {
               <InputNumber
                 id="activate_dias_demo"
                 value={activateForm.dias_demo}
-                onValueChange={(e) => setActivateForm((prev) => ({ ...prev, dias_demo: e.value || 0 }))}
+                onValueChange={(e) =>
+                  setActivateForm((prev) => ({
+                    ...prev,
+                    dias_demo: e.value || 0,
+                  }))
+                }
                 min={1}
               />
             </div>
             <div className="field">
-              <label htmlFor="activate_dias_licencia">Días Licencia (para anual)</label>
+              <label htmlFor="activate_dias_licencia">
+                Días Licencia (para anual)
+              </label>
               <InputNumber
                 id="activate_dias_licencia"
                 value={activateForm.dias_licencia}
                 onValueChange={(e) =>
-                  setActivateForm((prev) => ({ ...prev, dias_licencia: e.value || null }))
+                  setActivateForm((prev) => ({
+                    ...prev,
+                    dias_licencia: e.value || null,
+                  }))
                 }
                 min={1}
               />
@@ -676,8 +777,18 @@ const PurchaseBridge = ({ jwtToken }) => {
           </>
         ) : null}
         <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Cancelar" text severity="secondary" onClick={() => setActivateDialog(false)} />
-          <Button label="Activar" icon="pi pi-bolt" onClick={submitActivate} loading={submitting} />
+          <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            onClick={() => setActivateDialog(false)}
+          />
+          <Button
+            label="Activar"
+            icon="pi pi-bolt"
+            onClick={submitActivate}
+            loading={submitting}
+          />
         </div>
       </Dialog>
 
@@ -694,7 +805,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="convert_nit"
             value={convertForm.nit}
-            onChange={(e) => setConvertForm((prev) => ({ ...prev, nit: e.target.value }))}
+            onChange={(e) =>
+              setConvertForm((prev) => ({ ...prev, nit: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -703,7 +816,9 @@ const PurchaseBridge = ({ jwtToken }) => {
             id="convert_tipo"
             value={convertForm.tipo_licencia}
             options={TIPOS_LICENCIA}
-            onChange={(e) => setConvertForm((prev) => ({ ...prev, tipo_licencia: e.value }))}
+            onChange={(e) =>
+              setConvertForm((prev) => ({ ...prev, tipo_licencia: e.value }))
+            }
           />
         </div>
         {convertForm.tipo_licencia === "anual" ? (
@@ -712,7 +827,12 @@ const PurchaseBridge = ({ jwtToken }) => {
             <InputNumber
               id="convert_dias"
               value={convertForm.dias_licencia}
-              onValueChange={(e) => setConvertForm((prev) => ({ ...prev, dias_licencia: e.value || 0 }))}
+              onValueChange={(e) =>
+                setConvertForm((prev) => ({
+                  ...prev,
+                  dias_licencia: e.value || 0,
+                }))
+              }
               min={1}
             />
           </div>
@@ -722,11 +842,21 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="convert_hash"
             value={convertForm.instalacion_hash}
-            onChange={(e) => setConvertForm((prev) => ({ ...prev, instalacion_hash: e.target.value }))}
+            onChange={(e) =>
+              setConvertForm((prev) => ({
+                ...prev,
+                instalacion_hash: e.target.value,
+              }))
+            }
           />
         </div>
         <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Cancelar" text severity="secondary" onClick={() => setConvertDialog(false)} />
+          <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            onClick={() => setConvertDialog(false)}
+          />
           <Button
             label="Convertir"
             icon="pi pi-refresh"
@@ -750,7 +880,9 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="code_nit"
             value={codeForm.nit}
-            onChange={(e) => setCodeForm((prev) => ({ ...prev, nit: e.target.value }))}
+            onChange={(e) =>
+              setCodeForm((prev) => ({ ...prev, nit: e.target.value }))
+            }
           />
         </div>
         <div className="field">
@@ -767,7 +899,12 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputText
             id="code_hash"
             value={codeForm.instalacion_hash}
-            onChange={(e) => setCodeForm((prev) => ({ ...prev, instalacion_hash: e.target.value }))}
+            onChange={(e) =>
+              setCodeForm((prev) => ({
+                ...prev,
+                instalacion_hash: e.target.value,
+              }))
+            }
           />
         </div>
         <div className="field">
@@ -775,13 +912,25 @@ const PurchaseBridge = ({ jwtToken }) => {
           <InputNumber
             id="code_dias"
             value={codeForm.dias}
-            onValueChange={(e) => setCodeForm((prev) => ({ ...prev, dias: e.value || 0 }))}
+            onValueChange={(e) =>
+              setCodeForm((prev) => ({ ...prev, dias: e.value || 0 }))
+            }
             min={1}
           />
         </div>
         <div className="flex justify-content-end gap-2 mt-3">
-          <Button label="Cancelar" text severity="secondary" onClick={() => setCodeDialog(false)} />
-          <Button label="Generar" icon="pi pi-qrcode" onClick={submitCode} loading={submitting} />
+          <Button
+            label="Cancelar"
+            text
+            severity="secondary"
+            onClick={() => setCodeDialog(false)}
+          />
+          <Button
+            label="Generar"
+            icon="pi pi-qrcode"
+            onClick={submitCode}
+            loading={submitting}
+          />
         </div>
       </Dialog>
     </div>
