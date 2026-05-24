@@ -40,3 +40,8 @@
 .login-password input {
   box-sizing: border-box;
 }
+
+.login-card-wide .login-field-width,
+.login-card-wide .login-password-wrapper {
+  max-width: 100%;
+}

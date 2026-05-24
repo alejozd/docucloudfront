@@ -79,7 +79,7 @@ const Login = ({ onLogin }) => {
       <Toast ref={toastRef} />
 
       <Card
-        className="login-card w-full"
+        className="login-card login-card-wide w-full"
       >
         <div className="text-center mb-4">
           <div
