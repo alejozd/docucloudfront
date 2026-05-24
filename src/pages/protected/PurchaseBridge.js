@@ -501,6 +501,7 @@ const PurchaseBridge = ({ jwtToken }) => {
         >
           <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
           <Column field="nit" header="NIT" sortable />
+          <Column field="app" header="App" sortable />
           <Column field="estado" header="Estado" sortable />
           <Column field="tipo_licencia" header="Tipo Licencia" sortable />
           <Column field="fecha_activacion" header="Fecha Activación" sortable />
