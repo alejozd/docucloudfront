@@ -1,0 +1,166 @@
+/* ========================================
+   MODO OSCURO GLOBAL
+   ======================================== */
+
+/* Variables CSS para modo claro (default) */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Variables CSS para modo oscuro */
+body.dark-mode {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Aplicar variables globales */
+body.dark-mode {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .surface-card,
+body.dark-mode .card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .surface-section,
+body.dark-mode .surface-ground {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Navbar */
+body.dark-mode .navbar,
+body.dark-mode header {
+  background-color: var(--bg-card) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+/* Tablas (DataTable de PrimeReact) */
+body.dark-mode .p-datatable {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .p-datatable-header,
+body.dark-mode .p-datatable-thead > tr > th {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-datatable-tbody > tr {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .p-datatable-tbody > tr > td {
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-datatable-tbody > tr:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Formularios */
+body.dark-mode .p-inputtext,
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-inputtext:focus,
+body.dark-mode input:focus {
+  border-color: #00d4ff !important;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2) !important;
+}
+
+/* Botones */
+body.dark-mode .p-button-secondary,
+body.dark-mode .p-button-outlined {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-button-secondary:hover,
+body.dark-mode .p-button-outlined:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Dropdowns y Menús */
+body.dark-mode .p-dropdown-panel,
+body.dark-mode .p-menu,
+body.dark-mode .p-tieredmenu {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-dropdown-item,
+body.dark-mode .p-menuitem-link {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .p-dropdown-item:hover,
+body.dark-mode .p-menuitem-link:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Dialogs */
+body.dark-mode .p-dialog {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-dialog-header {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Toasts y Messages */
+body.dark-mode .p-toast-message {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Scrollbar personalizada para modo oscuro */
+body.dark-mode ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 5px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Transiciones suaves */
+body,
+.card,
+.p-component {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
