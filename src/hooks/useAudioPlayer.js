@@ -215,6 +215,7 @@ const useAudioPlayer = () => {
     duration,
     showResumeDialog,
     pendingAudio,
+    setDuration,
     formatTime,
     play,
     playFromPosition,

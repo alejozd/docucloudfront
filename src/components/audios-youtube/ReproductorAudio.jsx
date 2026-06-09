@@ -50,6 +50,7 @@ const ReproductorAudio = ({
   onStop,
   onSeek,
   onVolumeChange,
+  onDurationChange,
   showResumeDialog,
   pendingAudio,
   onResumeFromStart,
@@ -115,7 +116,14 @@ const ReproductorAudio = ({
       const dur = audioEl.duration;
       console.log('Duración calculada:', dur, 'tipo:', typeof dur);
       if (dur && !isNaN(dur) && isFinite(dur)) {
-        // La duración ya se maneja desde el hook useAudioPlayer
+        // Actualizar la duración local
+        setDuration(dur);
+        
+        // También actualizar la duración del padre si existe el callback
+        if (onDurationChange) {
+          onDurationChange(dur);
+        }
+        
         // Solo actualizamos la posición local
         setLocalPosition(toSafeNumber(audioEl.currentTime));
       } else {
