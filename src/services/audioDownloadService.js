@@ -84,15 +84,7 @@ const audioDownloadService = {
       },
     );
 
-    console.log("🔑 DEBUG API KEY:");
-    console.log("   Original:", API_KEY);
-    console.log("   Codificada:", encodedApiKey);
-    console.log("   Longitud original:", API_KEY.length);
-    console.log("   Longitud codificada:", encodedApiKey.length);
-
     const url = `${API_BASE_URL}/api/audio-download/download/${encodedFilename}?api_key=${encodedApiKey}`;
-    console.log("🔗 URL completa generada:", url);
-    console.log("🔗 URL (solo query params):", url.split("?")[1]);
     return url;
   },
 
@@ -109,7 +101,6 @@ const audioDownloadService = {
         { headers: { "x-api-key": API_KEY } }
       );
       
-      console.log('🎫 Token generado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error generando token:', error);

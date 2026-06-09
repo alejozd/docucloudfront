@@ -3,13 +3,14 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import audioDownloadService from '../../services/audioDownloadService';
 
 /**
  * Lista de archivos de audio descargados
  */
 const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
   const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
-
+  
   /**
    * Formatear tamaño de archivo
    */
@@ -42,22 +43,8 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
     }
   };
 
-  const handleDownload = (rowData) => {
-    const apiKey = process.env.REACT_APP_API_KEY;
-    const apiUrl = process.env.REACT_APP_API_URL;
+  const handleDownload = async (rowData) => {
     const audioName = getAudioName(rowData);
-
-    if (!apiKey) {
-      console.error('REACT_APP_API_KEY no está definida');
-      alert('Error: API Key no configurada');
-      return;
-    }
-
-    if (!apiUrl) {
-      console.error('REACT_APP_API_URL no está definida');
-      alert('Error: URL de API no configurada');
-      return;
-    }
 
     if (!audioName) {
       console.error('No se encontró el nombre del archivo para descargar', rowData);
@@ -65,16 +52,26 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
       return;
     }
 
-    // Codificar el nombre del archivo para URL
-    const encodedFilename = encodeURIComponent(audioName);
-
-    // Construir URL con API key como query parameter
-    const downloadUrl = `${apiUrl}/api/audio-download/download/${encodedFilename}?api_key=${apiKey}`;
-
-    console.log('Descargando desde:', downloadUrl);
-
-    // Abrir en nueva pestaña
-    window.open(downloadUrl, '_blank');
+    try {
+      // 1. Generar token temporal
+      const tokenData = await audioDownloadService.generateStreamToken(audioName);
+      
+      if (!tokenData || !tokenData.streamUrl) {
+        console.error('No se pudo generar el token de descarga');
+        alert('Error al generar enlace de descarga');
+        return;
+      }
+      
+      // 2. Agregar parámetro ?download=true a la URL
+      const downloadUrl = tokenData.streamUrl + '&download=true';
+      
+      // 3. Abrir en nueva pestaña (el navegador descargará el archivo)
+      window.open(downloadUrl, '_blank');
+      
+    } catch (error) {
+      console.error('Error al descargar:', error);
+      alert('Error al iniciar la descarga');
+    }
   };
 
   const confirmDelete = (rowData) => {
