@@ -112,12 +112,13 @@ const ReproductorAudio = ({
 
     const handleLoadedMetadata = () => {
       const dur = audioEl.duration;
-      console.log('Duración calculada:', dur);
+      console.log('Duración calculada:', dur, 'tipo:', typeof dur);
       if (dur && !isNaN(dur) && isFinite(dur)) {
         // La duración ya se maneja desde el hook useAudioPlayer
         // Solo actualizamos la posición local
         setLocalPosition(toSafeNumber(audioEl.currentTime));
       } else {
+        console.warn('Duración inválida, usando fallback');
         setLocalPosition(toSafeNumber(audioEl.currentTime));
       }
     };
@@ -126,18 +127,46 @@ const ReproductorAudio = ({
       if (onStop) onStop();
     };
 
+    const handleError = (e) => {
+      const error = audioEl.error;
+      if (error) {
+        console.error('=== ERROR DE AUDIO ===');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        
+        let mensaje = 'Error al reproducir el audio';
+        switch (error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            mensaje = 'Reproducción abortada';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            mensaje = 'Error de red al cargar el audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            mensaje = 'Error al decodificar el audio';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            mensaje = 'URL de audio no soportada o inválida';
+            break;
+        }
+        console.error(mensaje);
+      }
+    };
+
     audioEl.addEventListener('timeupdate', handleTimeUpdate);
     audioEl.addEventListener('loadedmetadata', handleLoadedMetadata);
     audioEl.addEventListener('ended', handleEnded);
+    audioEl.addEventListener('error', handleError);
 
     return () => {
       audioEl.removeEventListener('timeupdate', handleTimeUpdate);
       audioEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audioEl.removeEventListener('ended', handleEnded);
+      audioEl.removeEventListener('error', handleError);
     };
   }, [currentAudio, onStop]);
 
-  // Controlar reproducción cuando cambia isPlaying
+  // Controlar reproducción cuando cambia isPlaying y currentAudio
   useEffect(() => {
     const audioEl = audioElementRef.current;
     if (!audioEl || !currentAudio) return;
@@ -150,6 +179,22 @@ const ReproductorAudio = ({
       audioEl.pause();
     }
   }, [isPlaying, currentAudio]);
+
+  // Manejar carga del audio cuando cambia currentAudio
+  useEffect(() => {
+    if (currentAudio && currentAudio.streamUrl) {
+      console.log('=== DEBUG REPRODUCTOR ===');
+      console.log('currentAudio:', currentAudio);
+      console.log('streamUrl:', currentAudio.streamUrl);
+      console.log('=========================');
+      
+      const audioEl = audioElementRef.current;
+      if (audioEl) {
+        audioEl.src = currentAudio.streamUrl;
+        audioEl.load();
+      }
+    }
+  }, [currentAudio]);
 
   // Cambiar volumen y guardar en localStorage
   const handleVolumeChange = (newValue) => {
@@ -235,13 +280,14 @@ const ReproductorAudio = ({
 
   return (
     <>
-      {/* Elemento de audio oculto */}
+      {/* Elemento de audio oculto con manejador de errores */}
       {currentAudio && currentAudio.streamUrl && (
         <audio
           ref={audioElementRef}
           src={currentAudio.streamUrl}
           preload="metadata"
           style={{ display: 'none' }}
+          crossOrigin="anonymous"
         />
       )}
 

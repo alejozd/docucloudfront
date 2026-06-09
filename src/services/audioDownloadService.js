@@ -55,7 +55,20 @@ const audioDownloadService = {
    * @param {string} filename - Nombre del archivo
    */
   getStreamUrl: (filename) => {
-    return `${API_BASE_URL}/api/audio-download/stream/${encodeURIComponent(filename)}?api_key=${API_KEY}`;
+    if (!API_KEY) {
+      console.error('❌ REACT_APP_API_KEY NO ESTÁ DEFINIDA');
+      return null;
+    }
+    
+    if (!API_BASE_URL) {
+      console.error('❌ REACT_APP_API_URL NO ESTÁ DEFINIDA');
+      return null;
+    }
+    
+    const encodedFilename = encodeURIComponent(filename);
+    const url = `${API_BASE_URL}/api/audio-download/stream/${encodedFilename}?api_key=${API_KEY}`;
+    console.log('🔗 URL de streaming generada:', url);
+    return url;
   }
 };
 
