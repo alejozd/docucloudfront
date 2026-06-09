@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -8,18 +8,18 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
  * Lista de archivos de audio descargados
  */
 const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
-  const toastRef = useRef(null);
-  
+  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
+
   /**
    * Formatear tamaño de archivo
    */
   const formatSize = (bytes) => {
     if (bytes === 0 || bytes === undefined || bytes === null) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
@@ -42,6 +42,54 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
     }
   };
 
+  const handleDownload = (rowData) => {
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const audioName = getAudioName(rowData);
+
+    if (!apiKey) {
+      console.error('REACT_APP_API_KEY no está definida');
+      alert('Error: API Key no configurada');
+      return;
+    }
+
+    if (!apiUrl) {
+      console.error('REACT_APP_API_URL no está definida');
+      alert('Error: URL de API no configurada');
+      return;
+    }
+
+    if (!audioName) {
+      console.error('No se encontró el nombre del archivo para descargar', rowData);
+      alert('Error: nombre de archivo no disponible');
+      return;
+    }
+
+    // Codificar el nombre del archivo para URL
+    const encodedFilename = encodeURIComponent(audioName);
+
+    // Construir URL con API key como query parameter
+    const downloadUrl = `${apiUrl}/api/audio-download/download/${encodedFilename}?api_key=${apiKey}`;
+
+    console.log('Descargando desde:', downloadUrl);
+
+    // Abrir en nueva pestaña
+    window.open(downloadUrl, '_blank');
+  };
+
+  const confirmDelete = (rowData) => {
+    const audioName = getAudioName(rowData);
+
+    confirmDialog({
+      message: `¿Eliminar "${audioName}"?`,
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptClassName: 'p-button-danger',
+      accept: () => onDelete({ ...rowData, filename: audioName }),
+      reject: () => {}
+    });
+  };
+
   /**
    * Botón de reproducir
    */
@@ -49,9 +97,12 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
     return (
       <Button
         icon="pi pi-play"
-        className="p-button-rounded p-button-success p-button-sm"
+        className="p-button-sm"
+        severity="success"
+        rounded
         onClick={() => onPlay(rowData)}
         tooltip="Reproducir"
+        tooltipOptions={{ position: 'top' }}
       />
     );
   };
@@ -60,24 +111,14 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
    * Botón de descargar
    */
   const downloadActionTemplate = (rowData) => {
-    const handleDownload = () => {
-      // Obtener API Key desde variables de entorno
-      const apiKey = process.env.REACT_APP_API_KEY;
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3100';
-      
-      // Crear URL con API key como query parameter
-      const downloadUrl = `${apiUrl}/api/audio-download/download/${encodeURIComponent(rowData.filename)}?api_key=${apiKey}`;
-      
-      // Abrir en nueva pestaña para descargar
-      window.open(downloadUrl, '_blank');
-    };
-
     return (
       <Button
         icon="pi pi-download"
-        className="p-button-rounded p-button-info p-button-sm"
-        onClick={handleDownload}
-        tooltip="Descargar"
+        severity="success"
+        rounded
+        onClick={() => handleDownload(rowData)}
+        tooltip="Descargar MP3"
+        tooltipOptions={{ position: 'top' }}
       />
     );
   };
@@ -86,23 +127,15 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
    * Botón de eliminar con confirmación
    */
   const deleteActionTemplate = (rowData) => {
-    const confirmDelete = () => {
-      confirmDialog({
-        message: `¿Está seguro que desea eliminar el archivo "${rowData.filename}"?`,
-        header: 'Confirmar Eliminación',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClassName: 'p-button-danger',
-        accept: () => onDelete(rowData),
-        reject: () => {}
-      });
-    };
-
     return (
       <Button
         icon="pi pi-trash"
-        className="p-button-rounded p-button-danger p-button-sm"
-        onClick={confirmDelete}
+        className="p-button-sm"
+        severity="danger"
+        rounded
+        onClick={() => confirmDelete(rowData)}
         tooltip="Eliminar"
+        tooltipOptions={{ position: 'top' }}
       />
     );
   };
@@ -112,7 +145,7 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
    */
   const sortedFiles = React.useMemo(() => {
     if (!files || files.length === 0) return [];
-    
+
     return [...files].sort((a, b) => {
       const dateA = new Date(a.createdAt || a.fecha || 0);
       const dateB = new Date(b.createdAt || b.fecha || 0);
@@ -150,28 +183,28 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
         emptyMessage="No hay audios disponibles"
         responsiveLayout="scroll"
       >
-        <Column 
-          field="filename" 
-          header="Nombre del Archivo" 
+        <Column
+          field="filename"
+          header="Nombre del Archivo"
           sortable
           style={{ width: '40%' }}
         />
-        <Column 
-          field="size" 
-          header="Tamaño" 
+        <Column
+          field="size"
+          header="Tamaño"
           sortable
           body={(rowData) => formatSize(rowData.size)}
           style={{ width: '15%' }}
         />
-        <Column 
-          field="createdAt" 
-          header="Fecha de Creación" 
+        <Column
+          field="createdAt"
+          header="Fecha de Creación"
           sortable
           body={(rowData) => formatDate(rowData.createdAt)}
           style={{ width: '25%' }}
         />
-        <Column 
-          header="Acciones" 
+        <Column
+          header="Acciones"
           body={(rowData) => (
             <div className="flex gap-2">
               {playActionTemplate(rowData)}

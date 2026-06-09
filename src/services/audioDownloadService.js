@@ -26,7 +26,7 @@ const audioDownloadService = {
    * @param {string} filename - Nombre del archivo
    */
   getStatus: (filename) => {
-    return axios.get(`${API_BASE_URL}/api/audio-download/status/${filename}`, {
+    return axios.get(`${API_BASE_URL}/api/audio-download/status/${encodeURIComponent(filename)}`, {
       headers: { 'x-api-key': API_KEY }
     });
   },
@@ -45,7 +45,7 @@ const audioDownloadService = {
    * @param {string} filename - Nombre del archivo
    */
   deleteFile: (filename) => {
-    return axios.delete(`${API_BASE_URL}/api/audio-download/delete/${filename}`, {
+    return axios.delete(`${API_BASE_URL}/api/audio-download/delete/${encodeURIComponent(filename)}`, {
       headers: { 'x-api-key': API_KEY }
     });
   },
@@ -55,7 +55,7 @@ const audioDownloadService = {
    * @param {string} filename - Nombre del archivo
    */
   getStreamUrl: (filename) => {
-    return `${API_BASE_URL}/api/audio-download/stream/${filename}?api_key=${API_KEY}`;
+    return `${API_BASE_URL}/api/audio-download/stream/${encodeURIComponent(filename)}?api_key=${API_KEY}`;
   }
 };
 
