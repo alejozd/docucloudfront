@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from 'primereact/card';
 import { Toast } from 'primereact/toast';
-import { ConfirmDialog } from 'primereact/confirmdialog';
 import PasswordModal from '../../components/audios-youtube/PasswordModal';
 import DescargaForm from '../../components/audios-youtube/DescargaForm';
 import ListaAudios from '../../components/audios-youtube/ListaAudios';
@@ -249,8 +248,6 @@ const AudiosYouTubePage = () => {
   return (
     <div className="audios-youtube-page p-4 pb-8">
       <Toast ref={toastRef} />
-      <ConfirmDialog />
-      
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-900 mb-2">
