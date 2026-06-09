@@ -184,10 +184,17 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
         responsiveLayout="scroll"
       >
         <Column
-          field="filename"
-          header="Nombre del Archivo"
+          field="title"
+          header="Título"
           sortable
           style={{ width: '40%' }}
+          body={(rowData) => (
+            <div style={{ maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <strong>{rowData.title || rowData.name}</strong>
+              <br />
+              <small style={{ color: '#666' }}>{rowData.name}</small>
+            </div>
+          )}
         />
         <Column
           field="size"
