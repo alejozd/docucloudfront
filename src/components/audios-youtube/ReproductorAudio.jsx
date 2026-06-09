@@ -116,10 +116,7 @@ const ReproductorAudio = ({
       const dur = audioEl.duration;
       console.log('Duración calculada:', dur, 'tipo:', typeof dur);
       if (dur && !isNaN(dur) && isFinite(dur)) {
-        // Actualizar la duración local
-        setDuration(dur);
-        
-        // También actualizar la duración del padre si existe el callback
+        // Actualizar la duración del padre si existe el callback
         if (onDurationChange) {
           onDurationChange(dur);
         }
