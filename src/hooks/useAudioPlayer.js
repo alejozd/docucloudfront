@@ -34,13 +34,15 @@ const useAudioPlayer = () => {
    * @param {string} filename - Nombre del archivo de audio
    * @param {number} pos - Posición actual en segundos
    * @param {number} dur - Duración total en segundos
+   * @param {string} title - Título del audio (opcional)
    */
-  const savePosition = useCallback((filename, pos, dur) => {
+  const savePosition = useCallback((filename, pos, dur, title) => {
     try {
       if (filename && pos >= 0) {
         localStorage.setItem(`audio_${filename}`, JSON.stringify({
           position: pos,
           duration: dur,
+          title: title,
           lastPlayed: new Date().toISOString()
         }));
       }
@@ -115,7 +117,7 @@ const useAudioPlayer = () => {
     }
     // Guardar posición final al pausar
     if (currentAudio) {
-      savePosition(currentAudio.filename, position, duration);
+      savePosition(currentAudio.filename, position, duration, currentAudio.title);
     }
   }, [currentAudio, position, duration, savePosition]);
 
@@ -136,7 +138,7 @@ const useAudioPlayer = () => {
     }
     // Guardar posición final antes de cerrar
     if (currentAudio) {
-      savePosition(currentAudio.filename, position, duration);
+      savePosition(currentAudio.filename, position, duration, currentAudio.title);
     }
     setIsPlaying(false);
     setCurrentAudio(null);
@@ -175,7 +177,7 @@ const useAudioPlayer = () => {
     if (isPlaying && currentAudio) {
       // Guardar posición cada 5 segundos
       saveIntervalRef.current = setInterval(() => {
-        savePosition(currentAudio.filename, position, duration);
+        savePosition(currentAudio.filename, position, duration, currentAudio.title);
       }, 5000);
 
       return () => {
@@ -193,7 +195,7 @@ const useAudioPlayer = () => {
   useEffect(() => {
     return () => {
       if (currentAudio && position > 0) {
-        savePosition(currentAudio.filename, position, duration);
+        savePosition(currentAudio.filename, position, duration, currentAudio.title);
       }
     };
   }, [currentAudio, position, duration, savePosition]);
