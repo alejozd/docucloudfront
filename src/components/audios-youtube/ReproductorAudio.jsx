@@ -7,6 +7,8 @@ import audioDownloadService from '../../services/audioDownloadService';
 
 // Clave para guardar velocidad en localStorage
 const SPEED_STORAGE_KEY = 'audio_playback_speed';
+// Clave para guardar preferencia de tema
+const THEME_STORAGE_KEY = 'audio_player_theme';
 
 /**
  * Reproductor de audio fijo en la parte inferior usando react-h5-audio-player
@@ -24,8 +26,14 @@ const ReproductorAudio = ({
   const playerRef = useRef(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Estado para el token y URL del audio - SE GENERAN UNA SOLA VEZ
+  const [audioToken, setAudioToken] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [currentFilename, setCurrentFilename] = useState(null);
 
-  // Cargar velocidad guardada al montar
+  // Cargar velocidad guardada y tema al montar
   useEffect(() => {
     const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
     if (savedSpeed) {
@@ -33,6 +41,13 @@ const ReproductorAudio = ({
       if ([0.5, 0.75, 1, 1.25, 1.5, 2].includes(parsed)) {
         setPlaybackSpeed(parsed);
       }
+    }
+    
+    // Cargar preferencia de tema
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.body.classList.add('audio-player-dark');
     }
   }, []);
 
@@ -43,10 +58,15 @@ const ReproductorAudio = ({
     }
   }, [playbackSpeed]);
 
-  // Manejar carga del audio cuando cambia currentAudio
+  // Generar token SOLO cuando cambia el audio seleccionado (no en cada play/pause)
   useEffect(() => {
-    const loadAudio = async () => {
-      if (currentAudio && currentAudio.filename && playerRef.current) {
+    const loadAudioToken = async () => {
+      if (currentAudio && currentAudio.filename) {
+        // Solo generar nuevo token si el filename cambió
+        if (currentFilename === currentAudio.filename && audioUrl) {
+          return; // Ya tenemos un token válido para este audio
+        }
+        
         try {
           const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
           
@@ -55,25 +75,25 @@ const ReproductorAudio = ({
             return;
           }
           
-          if (playerRef.current.audio.current) {
-            playerRef.current.audio.current.src = tokenData.streamUrl;
-            
-            // Aplicar velocidad guardada
-            playerRef.current.audio.current.playbackRate = playbackSpeed;
-            
-            // Intentar reproducir automáticamente si estaba reproduciendo
-            if (isPlaying) {
-              await playerRef.current.audio.current.play();
-            }
-          }
+          setAudioToken(tokenData.token);
+          setAudioUrl(tokenData.streamUrl);
+          setCurrentFilename(currentAudio.filename);
+          
+          // Resetear estado de reproducción
+          setIsPlaying(false);
         } catch (error) {
-          console.error('❌ Error cargando audio:', error);
+          console.error('❌ Error generando token:', error);
         }
+      } else {
+        // Limpiar cuando no hay audio
+        setAudioUrl(null);
+        setAudioToken(null);
+        setCurrentFilename(null);
       }
     };
     
-    loadAudio();
-  }, [currentAudio, playbackSpeed, isPlaying]);
+    loadAudioToken();
+  }, [currentAudio?.filename]);
 
   // Manejar cambio de tiempo y guardar posición en localStorage
   const handleTimeUpdate = (e) => {
@@ -101,7 +121,7 @@ const ReproductorAudio = ({
     }
   };
 
-  // Manejar descarga
+  // Manejar descarga (genera nuevo token para descarga)
   const handleDownload = async () => {
     if (!currentAudio || !currentAudio.filename) return;
     
@@ -109,6 +129,19 @@ const ReproductorAudio = ({
       await audioDownloadService.downloadAudio(currentAudio.filename);
     } catch (error) {
       console.error('Error descargando audio:', error);
+    }
+  };
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem(THEME_STORAGE_KEY, newDarkMode ? 'dark' : 'light');
+    
+    if (newDarkMode) {
+      document.body.classList.add('audio-player-dark');
+    } else {
+      document.body.classList.remove('audio-player-dark');
     }
   };
 
@@ -131,10 +164,10 @@ const ReproductorAudio = ({
   return (
     <>
       {/* Reproductor fijo en la parte inferior */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 shadow-lg">
+      <div className={`fixed bottom-0 left-0 right-0 z-50 shadow-lg ${isDarkMode ? 'audio-player-dark' : ''}`}>
         <AudioPlayer
           ref={playerRef}
-          src=""
+          src={audioUrl || ''}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
@@ -153,7 +186,7 @@ const ReproductorAudio = ({
               key="speed-select"
               value={playbackSpeed}
               onChange={handleSpeedChange}
-              className="p-dropdown p-component"
+              className="p-dropdown p-component audio-speed-select"
               style={{ minWidth: '60px' }}
             >
               <option value="0.5">0.5x</option>
@@ -170,6 +203,14 @@ const ReproductorAudio = ({
               className="p-button-text p-button-rounded p-button-sm"
               onClick={handleDownload}
               tooltip="Descargar MP3"
+            />,
+            // Toggle Dark Mode
+            <Button
+              key="theme-toggle"
+              icon={isDarkMode ? "pi pi-sun" : "pi pi-moon"}
+              className="p-button-text p-button-rounded p-button-sm"
+              onClick={toggleDarkMode}
+              tooltip={isDarkMode ? "Modo Claro" : "Modo Oscuro"}
             />
           ]}
           header={
