@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import '../../styles/AudioPlayer.css';
 import { Button } from 'primereact/button';
 import audioDownloadService from '../../services/audioDownloadService';
 
@@ -138,10 +139,14 @@ const ReproductorAudio = ({
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
           onTimeUpdate={handleTimeUpdate}
-          showJumpControls={false}
+          showJumpControls={true}
+          showSkipControls={false}
+          progressJumpSteps={{ backward: 15000, forward: 15000 }}
+          progressUpdateInterval={100}
           layout="horizontal"
-          autoPlayAfterSrcChange={false}
+          autoPlayAfterSrcChange={true}
           preload="metadata"
+          timeFormat="auto"
           customAdditionalControls={[
             // Botón de velocidad
             <select 
