@@ -158,8 +158,8 @@ const AudiosYouTubePage = () => {
   const handlePlay = (audioData) => {
     player.play({
       filename: audioData.filename,
-      streamUrl: audioData.streamUrl,
-      duration: audioData.duration || 0
+      title: audioData.title || audioData.filename
+      // NO incluir streamUrl ni duration, se generarán dinámicamente
     });
   };
 
@@ -294,6 +294,7 @@ const AudiosYouTubePage = () => {
         onPlayPause={handlePlayPause}
         onStop={player.stop}
         onSeek={player.seek}
+        onDurationChange={player.setDuration}
         showResumeDialog={player.showResumeDialog}
         pendingAudio={player.pendingAudio}
         onResumeFromStart={handleResumeFromStart}
