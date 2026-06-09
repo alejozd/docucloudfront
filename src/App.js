@@ -15,6 +15,7 @@ import RegistroSolicitudesPage from "./pages/RegistroSolicitudesPage";
 import BatteryStatus from "./pages/tools/BatteryStatus";
 import GrabacionesPage from "./pages/grabaciones/GrabacionesPage";
 import VideosPage from "./pages/videos/VideosPage";
+import AudiosYouTubePage from "./pages/audios-youtube/AudiosYouTubePage";
 import SalesDashboard from "./pages/SalesDashboard";
 import TomaTensionDashboard from "./pages/TomaTensionDashboard";
 import ProtectedRoute from "././components/features/ProtectedRoute";
@@ -120,6 +121,7 @@ function App() {
             <Route path="/BatteryStatus" element={<BatteryStatus />} />
             <Route path="/GrabacionesPage" element={<GrabacionesPage />} />
             <Route path="/VideosPage" element={<VideosPage />} />
+            <Route path="/audios-youtube" element={<AudiosYouTubePage />} />
             <Route path="/SalesDashboard" element={<SalesDashboard />} />
             <Route
               path="/toma-tension-dashboard"

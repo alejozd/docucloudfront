@@ -123,6 +123,12 @@ const Navbar = () => {
           url: "/VideosPage",
           id: "VideosPage",
         },
+        {
+          label: "Audios YouTube",
+          icon: "pi pi-youtube",
+          url: "/audios-youtube",
+          id: "audios-youtube",
+        },
       ],
     },
     {
