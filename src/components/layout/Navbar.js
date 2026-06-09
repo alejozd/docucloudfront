@@ -1,8 +1,11 @@
 import React from "react";
 import { Menubar } from "primereact/menubar";
 import { Avatar } from "primereact/avatar";
+import { Button } from "primereact/button";
+import { useDarkMode } from "../../hooks/useDarkMode";
 
 const Navbar = () => {
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const items = [
     {
       label: "Inicio",
@@ -234,6 +237,14 @@ const Navbar = () => {
 
   const end = (
     <div className="flex align-items-center gap-2">
+      <Button
+        icon={isDarkMode ? "pi pi-sun" : "pi pi-moon"}
+        className="p-button-rounded p-button-text"
+        onClick={toggleDarkMode}
+        tooltip={isDarkMode ? "Modo Claro" : "Modo Oscuro"}
+        tooltipOptions={{ position: "bottom" }}
+        aria-label="Toggle Dark Mode"
+      />
       <Avatar
         // image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
         image="https://i.annihil.us/u/prod/marvel/i/mg/9/c0/527bb7b37ff55/landscape_medium.jpg"
