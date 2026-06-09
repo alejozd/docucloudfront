@@ -1,189 +1,408 @@
-/* src/styles/AudioPlayer.css */
+/* Reproductor de Audio - Estilos Personalizados para react-h5-audio-player */
 
-.custom-audio-player {
-  display: flex;
-  background-color: var(--surface-0); /* Fondo blanco puro para cada reproductor individual */
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-1); /* Sombra más ligera para los reproductores individuales */
-  padding: 0.8rem 1rem;
-  align-items: center;
-  gap: 1rem;
-  width: 100%; /* Ocupa el 100% del contenedor de la lista */
-  min-height: 70px; /* Altura mínima */
-  border: 1px solid var(--surface-border); /* Borde sutil para definirlo */
-  transition: box-shadow 0.2s, border-color 0.2s;
+/* Variables para colores RGB (necesarias para rgba) */
+:root {
+  --primary-color-rgb: 79, 70, 229; /* Default indigo-600 */
 }
 
-.custom-audio-player:hover {
-    box-shadow: var(--shadow-2); /* Sombra un poco más pronunciada al pasar el ratón */
-    border-color: var(--primary-color); /* Borde con color principal al pasar el ratón */
+/* Contenedor principal */
+.rhap_container {
+  background: linear-gradient(135deg, var(--surface-card) 0%, var(--surface-100) 100%) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+  border-top: 1px solid var(--surface-border) !important;
+  padding: 15px 30px !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease !important;
 }
 
-/* Estado activo */
-.custom-audio-player.is-active {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-3);
+/* Barra de progreso */
+.rhap_progress-filled {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color-light) 100%) !important;
+  box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.3) !important;
+  transition: width 0.1s linear !important;
 }
 
-
-/* Sección de Información del Audio (Título) */
-.player-info-controls {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  gap: 1rem;
+.rhap_progress-bar {
+  height: 6px !important;
+  border-radius: 3px !important;
+  background-color: var(--surface-300) !important;
+  cursor: pointer !important;
 }
 
-.player-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  flex-basis: 30%; /* Ocupa una porción fija en escritorio */
-  flex-shrink: 0; /* Evita que se encoja */
+/* Botón play/pause */
+.rhap_play-pause-button {
+  background: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-.song-details {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-  width: 100%; /* Ocupa el ancho disponible en su columna */
+.rhap_play-pause-button:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.5) !important;
+  background: var(--primary-color-dark) !important;
 }
 
-.song-title {
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: 0.95rem; /* Ligeramente más pequeño para la compacidad */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.rhap_play-pause-button:active {
+  transform: scale(0.95) !important;
 }
 
-/* Controles de Reproducción (Play/Pause/Stop) */
-.player-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  flex-shrink: 0;
-  flex-basis: 15%; /* Ocupa una porción fija en escritorio */
-  justify-content: flex-start; /* Alinea a la izquierda en su sección */
-}
-
-/* Estilo para los botones de PrimeReact en el reproductor */
-.player-controls .p-button-rounded.p-button-text.p-button-secondary {
-  background-color: transparent !important;
+/* Botones de control (rewind/forward) */
+.rhap_forward-button,
+.rhap_rewind-button {
   color: var(--text-color-secondary) !important;
-  border: none !important;
-  box-shadow: none !important;
-  transition: color 0.2s, background-color 0.2s;
+  transition: all 0.2s ease !important;
+  width: 36px !important;
+  height: 36px !important;
 }
 
-.player-controls .p-button-rounded.p-button-text.p-button-secondary:hover {
+.rhap_forward-button:hover,
+.rhap_rewind-button:hover {
   color: var(--primary-color) !important;
-  background-color: var(--surface-hover) !important;
+  transform: scale(1.1) !important;
+  background-color: var(--surface-200) !important;
+  border-radius: 50% !important;
 }
 
-.play-pause-btn {
-  width: 2.5rem; /* Tamaño de los botones */
-  height: 2.5rem;
-  font-size: 1.2rem !important;
-}
-
-.stop-btn {
-  width: 2rem;
-  height: 2rem;
+/* Tiempos */
+.rhap_time {
+  color: var(--text-color) !important;
+  font-weight: 600 !important;
   font-size: 0.9rem !important;
+  min-width: 45px !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
-/* Barra de Progreso */
-.player-progress {
-  display: flex;
-  align-items: center;
-  flex-grow: 1; /* Ocupa la mayor parte del espacio restante */
-  gap: 0.75rem;
-  min-width: 200px;
+/* Volumen */
+.rhap_volume-bar {
+  height: 5px !important;
+  border-radius: 3px !important;
+  background-color: var(--surface-300) !important;
 }
 
-.time-current,
-.time-duration {
-  font-family: monospace;
-  font-size: 1.2rem;
-  color: var(--text-color-secondary);
-  min-width: 40px;
-  text-align: center;
-  flex-shrink: 0;
+.rhap_volume-filled {
+  background: var(--primary-color) !important;
 }
 
-.audio-progress-slider {
-  flex-grow: 1;
+.rhap_volume-button {
+  color: var(--text-color-secondary) !important;
+  transition: all 0.2s ease !important;
 }
 
-/* ELIMINAMOS EL CONTROL DE VOLUMEN DE AQUÍ */
-/* .volume-control-container { ... } */
-
-
-/* --- Estilos PrimeReact para Sliders --- */
-.p-slider .p-slider-handle {
-  width: 0.9rem; /* Pulgar más pequeño para la compacidad */
-  height: 0.9rem;
-  margin-top: -0.45rem;
-  border: 2px solid var(--primary-color);
-  background: var(--surface-0);
-  box-shadow: var(--shadow-1);
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+.rhap_volume-button:hover {
+  color: var(--primary-color) !important;
 }
 
-.p-slider .p-slider-handle:hover {
-  background-color: var(--primary-hover-color);
-  border-color: var(--primary-hover-color);
+/* Header personalizado */
+.rhap_header {
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid var(--surface-border) !important;
+  margin-bottom: 10px !important;
 }
 
-.p-slider-horizontal .p-slider-range {
-  background: var(--primary-color);
+/* Controles adicionales */
+.rhap_additional-controls {
+  gap: 10px !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.p-slider-horizontal .p-slider-track {
-  background: var(--surface-d);
+/* Select de velocidad */
+.rhap_additional-controls .audio-speed-select,
+.rhap_additional-controls select {
+  background: var(--surface-200) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
 }
 
-/* --- Responsive Design (Ajustes para móviles) --- */
-@media (max-width: 767px) {
-  .custom-audio-player {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    gap: 0.8rem;
+.rhap_additional-controls .audio-speed-select:hover,
+.rhap_additional-controls select:hover {
+  background: var(--surface-300) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.rhap_additional-controls .audio-speed-select:focus,
+.rhap_additional-controls select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2) !important;
+}
+
+/* Botones en controles adicionales */
+.rhap_additional-controls button {
+  color: var(--text-color-secondary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.rhap_additional-controls button:hover {
+  color: var(--primary-color) !important;
+  transform: scale(1.1) !important;
+  background-color: var(--surface-200) !important;
+  border-radius: 50% !important;
+}
+
+/* Dark mode - Clase global con colores vibrantes modernos */
+body.audio-player-dark .rhap_container,
+body[class*="dark"] .rhap_container,
+.audio-player-dark .rhap_container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  border-top-color: #334155 !important;
+  box-shadow: 0 -4px 20px rgba(0, 212, 255, 0.15) !important;
+}
+
+body.audio-player-dark .rhap_header,
+body[class*="dark"] .rhap_header,
+.audio-player-dark .rhap_header {
+  border-bottom-color: #334155 !important;
+}
+
+/* Texto más vibrante en modo oscuro */
+body.audio-player-dark .rhap_time,
+body[class*="dark"] .rhap_time,
+.audio-player-dark .rhap_time {
+  color: #00d4ff !important; /* Cian brillante */
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3) !important;
+}
+
+body.audio-player-dark .rhap_current-time,
+body[class*="dark"] .rhap_current-time,
+.audio-player-dark .rhap_current-time {
+  color: #7dd3fc !important; /* Azul claro secundario */
+}
+
+body.audio-player-dark .rhap_total-time,
+body[class*="dark"] .rhap_total-time,
+.audio-player-dark .rhap_total-time {
+  color: #00d4ff !important;
+}
+
+/* Barra de progreso con gradiente cian-neón */
+body.audio-player-dark .rhap_progress-bar,
+body[class*="dark"] .rhap_progress-bar,
+.audio-player-dark .rhap_progress-bar {
+  background-color: #1e293b !important;
+}
+
+body.audio-player-dark .rhap_progress-filled,
+body[class*="dark"] .rhap_progress-filled,
+.audio-player-dark .rhap-progress-filled {
+  background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.6), 0 2px 8px rgba(0, 255, 136, 0.4) !important;
+}
+
+/* Botón play/pause con efecto neón */
+body.audio-player-dark .rhap_play-pause-button,
+body[class*="dark"] .rhap_play-pause-button,
+.audio-player-dark .rhap_play-pause-button {
+  background: linear-gradient(135deg, #00d4ff 0%, #0891b2 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3) !important;
+  color: #0f172a !important;
+}
+
+body.audio-player-dark .rhap_play-pause-button:hover,
+body[class*="dark"] .rhap_play-pause-button:hover,
+.audio-player-dark .rhap_play-pause-button:hover {
+  background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%) !important;
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.5) !important;
+  transform: scale(1.15) !important;
+}
+
+/* Botones de control (rewind/forward) */
+body.audio-player-dark .rhap_forward-button,
+body[class*="dark"] .rhap_forward-button,
+.audio-player-dark .rhap_forward-button,
+body.audio-player-dark .rhap_rewind-button,
+body[class*="dark"] .rhap_rewind-button,
+.audio-player-dark .rhap_rewind-button {
+  color: #7dd3fc !important;
+}
+
+body.audio-player-dark .rhap_forward-button:hover,
+body[class*="dark"] .rhap_forward-button:hover,
+.audio-player-dark .rhap_forward-button:hover,
+body.audio-player-dark .rhap_rewind-button:hover,
+body[class*="dark"] .rhap_rewind-button:hover,
+.audio-player-dark .rhap_rewind-button:hover {
+  color: #00ff88 !important;
+  background-color: rgba(0, 212, 255, 0.1) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3) !important;
+}
+
+/* Volumen */
+body.audio-player-dark .rhap_volume-bar,
+body[class*="dark"] .rhap_volume-bar,
+.audio-player-dark .rhap_volume-bar {
+  background-color: #1e293b !important;
+}
+
+body.audio-player-dark .rhap_volume-filled,
+body[class*="dark"] .rhap_volume-filled,
+.audio-player-dark .rhap_volume-filled {
+  background: linear-gradient(90deg, #00d4ff, #00ff88) !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5) !important;
+}
+
+body.audio-player-dark .rhap_volume-button,
+body[class*="dark"] .rhap_volume-button,
+.audio-player-dark .rhap_volume-button {
+  color: #7dd3fc !important;
+}
+
+body.audio-player-dark .rhap_volume-button:hover,
+body[class*="dark"] .rhap_volume-button:hover,
+.audio-player-dark .rhap_volume-button:hover {
+  color: #00ff88 !important;
+}
+
+/* Select de velocidad */
+body.audio-player-dark .rhap_additional-controls select,
+body.audio-player-dark .rhap_additional-controls .audio-speed-select {
+  background: #1e293b !important;
+  border-color: #0891b2 !important;
+  color: #00d4ff !important;
+  box-shadow: 0 0 5px rgba(0, 212, 255, 0.2) !important;
+}
+
+body.audio-player-dark .rhap_additional-controls select:hover,
+body.audio-player-dark .rhap_additional-controls .audio-speed-select:hover {
+  background: #334155 !important;
+  border-color: #00d4ff !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.4) !important;
+}
+
+body.audio-player-dark .rhap_additional-controls select:focus,
+body.audio-player-dark .rhap_additional-controls .audio-speed-select:focus {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5) !important;
+}
+
+/* Botones en controles adicionales */
+body.audio-player-dark .rhap_additional-controls button {
+  color: #7dd3fc !important;
+}
+
+body.audio-player-dark .rhap_additional-controls button:hover {
+  color: #00ff88 !important;
+  background-color: rgba(0, 212, 255, 0.1) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3) !important;
+}
+
+/* Header - Título del audio */
+body.audio-player-dark .rhap_header,
+body[class*="dark"] .rhap_header,
+.audio-player-dark .rhap_header {
+  border-bottom-color: #334155 !important;
+}
+
+body.audio-player-dark .rhap_header span,
+body[class*="dark"] .rhap_header span,
+.audio-player-dark .rhap_header span {
+  color: #e0f2fe !important;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.2) !important;
+}
+
+/* Icono de música en el header */
+body.audio-player-dark .rhap_header i,
+body[class*="dark"] .rhap_header i,
+.audio-player-dark .rhap_header i {
+  color: #00d4ff !important;
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.5) !important;
+}
+
+body.audio-player-dark .rhap_header .bg-primary,
+body[class*="dark"] .rhap_header .bg-primary,
+.audio-player-dark .rhap_header .bg-primary {
+  background: linear-gradient(135deg, #00d4ff, #0891b2) !important;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rhap_container {
+    padding: 10px 15px !important;
   }
-
-  .player-info-controls {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    gap: 0.8rem;
+  
+  .rhap_play-pause-button {
+    width: 40px !important;
+    height: 40px !important;
   }
-
-  .player-meta {
-    width: 100%;
-    justify-content: flex-start;
+  
+  .rhap_time {
+    font-size: 0.8rem !important;
+    min-width: 35px !important;
   }
-
-  .player-controls {
-    width: 100%;
-    justify-content: flex-start;
+  
+  .rhap_forward-button,
+  .rhap_rewind-button {
+    width: 32px !important;
+    height: 32px !important;
   }
-
-  .player-progress {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem;
+  
+  .rhap_header {
+    margin-bottom: 8px !important;
+    padding-bottom: 8px !important;
   }
+}
 
-  .audio-progress-slider {
-    flex-basis: 100%;
-    margin-top: 0.5rem;
-  }
+/* Animaciones */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
 
-  .time-current, .time-duration {
-    flex-shrink: 0;
-  }
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.rhap_play-status--playing .rhap_progress-filled {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Efecto de carga */
+.rhap_container[data-loading="true"] .rhap_progress-filled {
+  background: linear-gradient(
+    90deg,
+    var(--primary-color) 0%,
+    var(--primary-color-light) 50%,
+    var(--primary-color) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s infinite !important;
+}
+
+/* Iconos SVG */
+.rhap_play-pause-button svg,
+.rhap_forward-button svg,
+.rhap_rewind-button svg {
+  fill: currentColor !important;
+}
+
+/* Tooltip personalizado */
+.rhap_additional-controls button[title]:hover::after,
+.rhap_additional-controls button[data-tooltip]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-900);
+  color: var(--text-color-inverse);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 100;
 }
