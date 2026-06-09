@@ -3,6 +3,7 @@ import { Slider } from 'primereact/slider';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
+import audioDownloadService from '../../services/audioDownloadService';
 
 // Clave para guardar velocidad en localStorage
 const SPEED_STORAGE_KEY = 'audio_playback_speed';
@@ -49,6 +50,7 @@ const ReproductorAudio = ({
   onStop,
   onSeek,
   onVolumeChange,
+  onDurationChange,
   showResumeDialog,
   pendingAudio,
   onResumeFromStart,
@@ -114,7 +116,11 @@ const ReproductorAudio = ({
       const dur = audioEl.duration;
       console.log('Duración calculada:', dur, 'tipo:', typeof dur);
       if (dur && !isNaN(dur) && isFinite(dur)) {
-        // La duración ya se maneja desde el hook useAudioPlayer
+        // Actualizar la duración del padre si existe el callback
+        if (onDurationChange) {
+          onDurationChange(dur);
+        }
+        
         // Solo actualizamos la posición local
         setLocalPosition(toSafeNumber(audioEl.currentTime));
       } else {
@@ -174,10 +180,39 @@ const ReproductorAudio = ({
     const audioEl = audioElementRef.current;
     if (!audioEl || !currentAudio) return;
 
+    const attemptPlay = async () => {
+      try {
+        // Verificar si el audio ya está listo
+        if (audioEl.readyState >= 2) { // HAVE_CURRENT_DATA o superior
+          if (isPlaying) {
+            await audioEl.play();
+          }
+        } else {
+          // Esperar a que el audio esté listo
+          const canPlayHandler = async () => {
+            if (isPlaying) {
+              try {
+                await audioEl.play();
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  console.error('Error al reproducir:', error);
+                }
+              }
+            }
+            audioEl.removeEventListener('canplay', canPlayHandler);
+          };
+          
+          audioEl.addEventListener('canplay', canPlayHandler);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error al reproducir:', error);
+        }
+      }
+    };
+
     if (isPlaying) {
-      audioEl.play().catch(error => {
-        console.error('Error al reproducir:', error);
-      });
+      attemptPlay();
     } else {
       audioEl.pause();
     }
@@ -185,18 +220,60 @@ const ReproductorAudio = ({
 
   // Manejar carga del audio cuando cambia currentAudio
   useEffect(() => {
-    if (currentAudio && currentAudio.streamUrl) {
-      console.log('=== DEBUG REPRODUCTOR ===');
-      console.log('currentAudio:', currentAudio);
-      console.log('streamUrl:', currentAudio.streamUrl);
-      console.log('=========================');
-      
-      const audioEl = audioElementRef.current;
-      if (audioEl) {
-        audioEl.src = currentAudio.streamUrl;
-        audioEl.load();
+    const loadAudio = async () => {
+      if (currentAudio && currentAudio.filename) {
+        console.log('=== DEBUG REPRODUCTOR - INICIO ===');
+        console.log('currentAudio:', currentAudio);
+        
+        try {
+          console.log('📞 Llamando a generateStreamToken...');
+          const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
+          
+          console.log('🎫 Token data completo:', JSON.stringify(tokenData, null, 2));
+          console.log('🔗 Stream URL:', tokenData.streamUrl);
+          
+          // Verificar que la URL sea válida
+          if (!tokenData.streamUrl) {
+            console.error('❌ Stream URL es null o undefined');
+            return;
+          }
+          
+          const audioEl = audioElementRef.current;
+          if (audioEl) {
+            console.log('🎵 Estableciendo src del elemento audio');
+            console.log('🎵 URL completa:', tokenData.streamUrl);
+            
+            audioEl.src = tokenData.streamUrl;
+            
+            // Agregar evento de error más detallado
+            audioEl.onerror = (e) => {
+              console.error('❌ Error en elemento audio:', e);
+              console.error('❌ Error code:', audioEl.error?.code);
+              console.error('❌ Error message:', audioEl.error?.message);
+              console.error('❌ URL que falló:', audioEl.src);
+            };
+            
+            // Agregar evento de carga exitosa
+            audioEl.oncanplay = () => {
+              console.log('✅ Audio listo para reproducir');
+              console.log('✅ Duración:', audioEl.duration);
+            };
+            
+            audioEl.load();
+            console.log('🎵 load() llamado');
+          } else {
+            console.error('❌ audioElementRef.current es null');
+          }
+        } catch (error) {
+          console.error('❌ Error cargando audio:', error);
+          console.error('❌ Error stack:', error.stack);
+        }
+        
+        console.log('=== DEBUG REPRODUCTOR - FIN ===');
       }
-    }
+    };
+    
+    loadAudio();
   }, [currentAudio]);
 
   // Cambiar volumen y guardar en localStorage
@@ -284,10 +361,9 @@ const ReproductorAudio = ({
   return (
     <>
       {/* Elemento de audio oculto con manejador de errores */}
-      {currentAudio && currentAudio.streamUrl && (
+      {currentAudio && currentAudio.filename && (
         <audio
           ref={audioElementRef}
-          src={currentAudio.streamUrl}
           preload="metadata"
           style={{ display: 'none' }}
           crossOrigin="anonymous"

@@ -86,7 +86,11 @@ const useAudioPlayer = () => {
     }
 
     // Iniciar reproducción desde el inicio
-    setCurrentAudio(audio);
+    // NO incluir streamUrl, se generará dinámicamente
+    setCurrentAudio({
+      filename: audio.name || audio.filename,
+      title: audio.title
+    });
     setIsPlaying(true);
     setPosition(0);
     setDuration(audio.duration || 0);
@@ -98,7 +102,11 @@ const useAudioPlayer = () => {
    * @param {number} startPosition - Posición inicial en segundos
    */
   const playFromPosition = useCallback((audio, startPosition) => {
-    setCurrentAudio(audio);
+    // NO incluir streamUrl, se generará dinámicamente
+    setCurrentAudio({
+      filename: audio.name || audio.filename,
+      title: audio.title
+    });
     setIsPlaying(true);
     setPosition(startPosition);
     setDuration(audio.duration || 0);
@@ -207,6 +215,7 @@ const useAudioPlayer = () => {
     duration,
     showResumeDialog,
     pendingAudio,
+    setDuration,
     formatTime,
     play,
     playFromPosition,
