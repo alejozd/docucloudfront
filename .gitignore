@@ -1,11 +1,9 @@
-```gitignore
 # Dependencies
 node_modules/
 
-# Build artifacts
-dist/
-build/
-*.js.map
+# Logs and temp files
+*.log
+*.tmp
 
 # Environment
 .env
@@ -16,12 +14,7 @@ build/
 .vscode/
 .idea/
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Python (if applicable)
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -31,54 +24,127 @@ env/
 venv/
 .venv/
 pip-log.txt
-pip-delete-this-directory.txt
+pip-selfcheck.json
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.coverage.*
+.nox/
+.tox/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# IDE
+*.swp
+*.swo
+*~
+```
+
++++ .gitignore (修改后)
+```
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.js.map
+
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# Logs
+*.log
 
 # Coverage reports
 coverage/
 htmlcov/
+.coverage
 
-# Testing
-.nyc_output/
-coverage.lcov
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Temporary files
 *.tmp
 *.temp
-*.bak
-*.backup
-*.swp
-*.swo
 
-# Compiled files
-*.o
-*.obj
+# Distribution / packaging
+*.tar.gz
+*.whl
+*.egg-info/
+
+# Compiled Binary files
 *.exe
 *.dll
 *.so
 *.dylib
-*.class
-*.jar
-*.war
-*.ear
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# Compressed files
 *.zip
-*.tar.gz
-*.tgz
-*.tar.bz2
-*.rar
-*.7z
 *.gz
 *.tar
+*.tgz
 *.bz2
 *.xz
+*.7z
+*.rar
 *.zst
 *.lz4
 *.lzh
