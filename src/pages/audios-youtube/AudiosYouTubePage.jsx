@@ -288,13 +288,7 @@ const AudiosYouTubePage = () => {
       {/* Reproductor fijo en la parte inferior */}
       <ReproductorAudio
         currentAudio={player.currentAudio}
-        isPlaying={player.isPlaying}
-        position={player.position}
-        duration={player.duration}
-        onPlayPause={handlePlayPause}
         onStop={player.stop}
-        onSeek={player.seek}
-        onDurationChange={player.setDuration}
         showResumeDialog={player.showResumeDialog}
         pendingAudio={player.pendingAudio}
         onResumeFromStart={handleResumeFromStart}
