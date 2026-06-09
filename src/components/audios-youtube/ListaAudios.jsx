@@ -71,8 +71,6 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
     // Construir URL con API key como query parameter
     const downloadUrl = `${apiUrl}/api/audio-download/download/${encodedFilename}?api_key=${apiKey}`;
 
-    console.log('Descargando desde:', downloadUrl);
-
     // Abrir en nueva pestaña
     window.open(downloadUrl, '_blank');
   };
