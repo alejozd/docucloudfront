@@ -152,48 +152,180 @@
   border-radius: 50% !important;
 }
 
-/* Dark mode - Clase global */
+/* Dark mode - Clase global con colores vibrantes modernos */
 body.audio-player-dark .rhap_container,
 body[class*="dark"] .rhap_container,
 .audio-player-dark .rhap_container {
-  background: linear-gradient(135deg, var(--surface-900) 0%, var(--surface-800) 100%) !important;
-  border-top-color: var(--surface-700) !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  border-top-color: #334155 !important;
+  box-shadow: 0 -4px 20px rgba(0, 212, 255, 0.15) !important;
 }
 
 body.audio-player-dark .rhap_header,
 body[class*="dark"] .rhap_header,
 .audio-player-dark .rhap_header {
-  border-bottom-color: var(--surface-700) !important;
+  border-bottom-color: #334155 !important;
 }
 
+/* Texto más vibrante en modo oscuro */
+body.audio-player-dark .rhap_time,
+body[class*="dark"] .rhap_time,
+.audio-player-dark .rhap_time {
+  color: #00d4ff !important; /* Cian brillante */
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3) !important;
+}
+
+body.audio-player-dark .rhap_current-time,
+body[class*="dark"] .rhap_current-time,
+.audio-player-dark .rhap_current-time {
+  color: #7dd3fc !important; /* Azul claro secundario */
+}
+
+body.audio-player-dark .rhap_total-time,
+body[class*="dark"] .rhap_total-time,
+.audio-player-dark .rhap_total-time {
+  color: #00d4ff !important;
+}
+
+/* Barra de progreso con gradiente cian-neón */
 body.audio-player-dark .rhap_progress-bar,
 body[class*="dark"] .rhap_progress-bar,
 .audio-player-dark .rhap_progress-bar {
-  background-color: var(--surface-700) !important;
+  background-color: #1e293b !important;
 }
 
+body.audio-player-dark .rhap_progress-filled,
+body[class*="dark"] .rhap_progress-filled,
+.audio-player-dark .rhap-progress-filled {
+  background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.6), 0 2px 8px rgba(0, 255, 136, 0.4) !important;
+}
+
+/* Botón play/pause con efecto neón */
+body.audio-player-dark .rhap_play-pause-button,
+body[class*="dark"] .rhap_play-pause-button,
+.audio-player-dark .rhap_play-pause-button {
+  background: linear-gradient(135deg, #00d4ff 0%, #0891b2 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3) !important;
+  color: #0f172a !important;
+}
+
+body.audio-player-dark .rhap_play-pause-button:hover,
+body[class*="dark"] .rhap_play-pause-button:hover,
+.audio-player-dark .rhap_play-pause-button:hover {
+  background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%) !important;
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.5) !important;
+  transform: scale(1.15) !important;
+}
+
+/* Botones de control (rewind/forward) */
+body.audio-player-dark .rhap_forward-button,
+body[class*="dark"] .rhap_forward-button,
+.audio-player-dark .rhap_forward-button,
+body.audio-player-dark .rhap_rewind-button,
+body[class*="dark"] .rhap_rewind-button,
+.audio-player-dark .rhap_rewind-button {
+  color: #7dd3fc !important;
+}
+
+body.audio-player-dark .rhap_forward-button:hover,
+body[class*="dark"] .rhap_forward-button:hover,
+.audio-player-dark .rhap_forward-button:hover,
+body.audio-player-dark .rhap_rewind-button:hover,
+body[class*="dark"] .rhap_rewind-button:hover,
+.audio-player-dark .rhap_rewind-button:hover {
+  color: #00ff88 !important;
+  background-color: rgba(0, 212, 255, 0.1) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3) !important;
+}
+
+/* Volumen */
 body.audio-player-dark .rhap_volume-bar,
 body[class*="dark"] .rhap_volume-bar,
 .audio-player-dark .rhap_volume-bar {
-  background-color: var(--surface-700) !important;
+  background-color: #1e293b !important;
 }
 
+body.audio-player-dark .rhap_volume-filled,
+body[class*="dark"] .rhap_volume-filled,
+.audio-player-dark .rhap_volume-filled {
+  background: linear-gradient(90deg, #00d4ff, #00ff88) !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5) !important;
+}
+
+body.audio-player-dark .rhap_volume-button,
+body[class*="dark"] .rhap_volume-button,
+.audio-player-dark .rhap_volume-button {
+  color: #7dd3fc !important;
+}
+
+body.audio-player-dark .rhap_volume-button:hover,
+body[class*="dark"] .rhap_volume-button:hover,
+.audio-player-dark .rhap_volume-button:hover {
+  color: #00ff88 !important;
+}
+
+/* Select de velocidad */
 body.audio-player-dark .rhap_additional-controls select,
 body.audio-player-dark .rhap_additional-controls .audio-speed-select {
-  background: var(--surface-700) !important;
-  border-color: var(--surface-600) !important;
-  color: var(--text-color) !important;
+  background: #1e293b !important;
+  border-color: #0891b2 !important;
+  color: #00d4ff !important;
+  box-shadow: 0 0 5px rgba(0, 212, 255, 0.2) !important;
 }
 
 body.audio-player-dark .rhap_additional-controls select:hover,
 body.audio-player-dark .rhap_additional-controls .audio-speed-select:hover {
-  background: var(--surface-600) !important;
+  background: #334155 !important;
+  border-color: #00d4ff !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.4) !important;
 }
 
-body.audio-player-dark .rhap_forward-button:hover,
-body.audio-player-dark .rhap_rewind-button:hover,
+body.audio-player-dark .rhap_additional-controls select:focus,
+body.audio-player-dark .rhap_additional-controls .audio-speed-select:focus {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5) !important;
+}
+
+/* Botones en controles adicionales */
+body.audio-player-dark .rhap_additional-controls button {
+  color: #7dd3fc !important;
+}
+
 body.audio-player-dark .rhap_additional-controls button:hover {
-  background-color: var(--surface-700) !important;
+  color: #00ff88 !important;
+  background-color: rgba(0, 212, 255, 0.1) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3) !important;
+}
+
+/* Header - Título del audio */
+body.audio-player-dark .rhap_header,
+body[class*="dark"] .rhap_header,
+.audio-player-dark .rhap_header {
+  border-bottom-color: #334155 !important;
+}
+
+body.audio-player-dark .rhap_header span,
+body[class*="dark"] .rhap_header span,
+.audio-player-dark .rhap_header span {
+  color: #e0f2fe !important;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.2) !important;
+}
+
+/* Icono de música en el header */
+body.audio-player-dark .rhap_header i,
+body[class*="dark"] .rhap_header i,
+.audio-player-dark .rhap_header i {
+  color: #00d4ff !important;
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.5) !important;
+}
+
+body.audio-player-dark .rhap_header .bg-primary,
+body[class*="dark"] .rhap_header .bg-primary,
+.audio-player-dark .rhap_header .bg-primary {
+  background: linear-gradient(135deg, #00d4ff, #0891b2) !important;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4) !important;
 }
 
 /* Responsive */
