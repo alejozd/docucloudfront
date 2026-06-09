@@ -61,13 +61,15 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
    */
   const downloadActionTemplate = (rowData) => {
     const handleDownload = () => {
-      // Crear enlace temporal para descargar
-      const link = document.createElement('a');
-      link.href = rowData.downloadUrl;
-      link.download = rowData.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Obtener API Key desde variables de entorno
+      const apiKey = process.env.REACT_APP_API_KEY;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3100';
+      
+      // Crear URL con API key como query parameter
+      const downloadUrl = `${apiUrl}/api/audio-download/download/${encodeURIComponent(rowData.filename)}?api_key=${apiKey}`;
+      
+      // Abrir en nueva pestaña para descargar
+      window.open(downloadUrl, '_blank');
     };
 
     return (
