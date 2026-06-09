@@ -1,0 +1,89 @@
+/* Estilos personalizados para react-h5-audio-player */
+
+.rhap_container {
+  background-color: var(--surface-card) !important;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+  padding: 10px 20px !important;
+  border-top: 1px solid var(--surface-border);
+}
+
+.rhap_progress-filled {
+  background-color: var(--primary-color) !important;
+}
+
+.rhap_play-pause-button {
+  background-color: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+}
+
+.rhap_play-pause-button:hover {
+  background-color: var(--primary-600) !important;
+}
+
+.rhap_time {
+  color: var(--text-color) !important;
+}
+
+.rhap_header {
+  padding-bottom: 8px !important;
+}
+
+/* Controles adicionales */
+.rhap_additional-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Dropdown de velocidad */
+.rhap_additional-controls .p-dropdown {
+  min-width: 60px !important;
+  font-size: 0.875rem !important;
+}
+
+/* Botón de descarga */
+.rhap_additional-controls .p-button.p-button-text {
+  color: var(--text-color) !important;
+}
+
+.rhap_additional-controls .p-button.p-button-text:hover {
+  background-color: var(--surface-hover) !important;
+}
+
+/* Dark mode support */
+body[class*="dark"] .rhap_container,
+body.dark-mode .rhap_container {
+  background-color: var(--surface-800) !important;
+  border-top-color: var(--surface-700) !important;
+}
+
+body[class*="dark"] .rhap_time,
+body.dark-mode .rhap_time {
+  color: var(--surface-200) !important;
+}
+
+body[class*="dark"] .rhap_additional-controls .p-button.p-button-text,
+body.dark-mode .rhap_additional-controls .p-button.p-button-text {
+  color: var(--surface-200) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rhap_container {
+    padding: 8px 12px !important;
+  }
+  
+  .rhap_header {
+    padding-bottom: 4px !important;
+  }
+  
+  .rhap_header .w-3rem {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+}
+
+/* Ajustes para que el header no se superponga */
+.rhap_stacked .rhap_header {
+  margin-bottom: 0.5rem !important;
+}
