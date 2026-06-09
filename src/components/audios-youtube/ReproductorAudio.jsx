@@ -4,11 +4,10 @@ import 'react-h5-audio-player/lib/styles.css';
 import '../../styles/AudioPlayer.css';
 import { Button } from 'primereact/button';
 import audioDownloadService from '../../services/audioDownloadService';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 // Clave para guardar velocidad en localStorage
 const SPEED_STORAGE_KEY = 'audio_playback_speed';
-// Clave para guardar preferencia de tema
-const THEME_STORAGE_KEY = 'audio_player_theme';
 
 /**
  * Reproductor de audio fijo en la parte inferior usando react-h5-audio-player
@@ -26,14 +25,14 @@ const ReproductorAudio = ({
   const playerRef = useRef(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   
   // Estado para el token y URL del audio - SE GENERAN UNA SOLA VEZ
   const [audioToken, setAudioToken] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [currentFilename, setCurrentFilename] = useState(null);
 
-  // Cargar velocidad guardada y tema al montar
+  // Cargar velocidad guardada al montar
   useEffect(() => {
     const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
     if (savedSpeed) {
@@ -41,13 +40,6 @@ const ReproductorAudio = ({
       if ([0.5, 0.75, 1, 1.25, 1.5, 2].includes(parsed)) {
         setPlaybackSpeed(parsed);
       }
-    }
-    
-    // Cargar preferencia de tema
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.body.classList.add('audio-player-dark');
     }
   }, []);
 
@@ -132,19 +124,6 @@ const ReproductorAudio = ({
     }
   };
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem(THEME_STORAGE_KEY, newDarkMode ? 'dark' : 'light');
-    
-    if (newDarkMode) {
-      document.body.classList.add('audio-player-dark');
-    } else {
-      document.body.classList.remove('audio-player-dark');
-    }
-  };
-
   // Si no hay audio seleccionado, no mostrar el reproductor
   if (!currentAudio) {
     return null;
@@ -164,7 +143,7 @@ const ReproductorAudio = ({
   return (
     <>
       {/* Reproductor fijo en la parte inferior */}
-      <div className={`fixed bottom-0 left-0 right-0 z-50 shadow-lg ${isDarkMode ? 'audio-player-dark' : ''}`}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 shadow-lg">
         <AudioPlayer
           ref={playerRef}
           src={audioUrl || ''}

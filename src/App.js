@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toast } from "primereact/toast";
+import { DarkModeProvider } from "./hooks/useDarkMode";
 import Navbar from "././components/layout/Navbar";
 import Home from "././pages/Home";
 import Clientes from "./pages/Clientes";
@@ -33,6 +34,7 @@ import PurchaseBridge from "./pages/protected/PurchaseBridge";
 import Usuarios from "./pages/microservices/Usuarios";
 import ZamAirDashboard from "./components/ZamAirDashboard";
 import "././styles/App.css";
+import "./styles/darkMode.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -94,6 +96,7 @@ function App() {
   };
 
   return (
+    <DarkModeProvider>
     <Router>
       <div className="App">
         <Toast ref={toastRef} />
@@ -253,6 +256,7 @@ function App() {
         </div>
       </div>
     </Router>
+    </DarkModeProvider>
   );
 }
 
