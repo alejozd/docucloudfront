@@ -148,6 +148,9 @@ const ReproductorAudio = ({
           case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
             mensaje = 'URL de audio no soportada o inválida';
             break;
+          default:
+            mensaje = 'Error desconocido al reproducir';
+            break;
         }
         console.error(mensaje);
       }
