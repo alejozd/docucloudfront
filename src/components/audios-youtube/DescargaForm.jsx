@@ -182,9 +182,9 @@ const DescargaForm = ({ onDownloadComplete }) => {
             <div className="flex flex-column gap-2">
               <div className="flex justify-content-between align-items-center">
                 <span className="font-medium text-sm">{statusMessage}</span>
-                <span className="text-sm text-color-secondary">{progress}%</span>
+                <span className="text-sm text-color-secondary">{parseInt(progress) || 0}%</span>
               </div>
-              <ProgressBar value={progress} showValue={false} />
+              <ProgressBar value={parseInt(progress) || 0} showValue={false} />
             </div>
           )}
 
