@@ -3,6 +3,7 @@ import { Slider } from 'primereact/slider';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
+import audioDownloadService from '../../services/audioDownloadService';
 
 // Clave para guardar velocidad en localStorage
 const SPEED_STORAGE_KEY = 'audio_playback_speed';
@@ -185,18 +186,32 @@ const ReproductorAudio = ({
 
   // Manejar carga del audio cuando cambia currentAudio
   useEffect(() => {
-    if (currentAudio && currentAudio.streamUrl) {
-      console.log('=== DEBUG REPRODUCTOR ===');
-      console.log('currentAudio:', currentAudio);
-      console.log('streamUrl:', currentAudio.streamUrl);
-      console.log('=========================');
-      
-      const audioEl = audioElementRef.current;
-      if (audioEl) {
-        audioEl.src = currentAudio.streamUrl;
-        audioEl.load();
+    const loadAudio = async () => {
+      if (currentAudio && currentAudio.filename) {
+        console.log('=== DEBUG REPRODUCTOR ===');
+        console.log('currentAudio:', currentAudio);
+        
+        try {
+          // Generar token temporal
+          const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
+          
+          console.log('🎫 Token data:', tokenData);
+          console.log('🔗 Stream URL:', tokenData.streamUrl);
+          
+          const audioEl = audioElementRef.current;
+          if (audioEl) {
+            audioEl.src = tokenData.streamUrl;
+            audioEl.load();
+          }
+        } catch (error) {
+          console.error('❌ Error cargando audio:', error);
+        }
+        
+        console.log('=========================');
       }
-    }
+    };
+    
+    loadAudio();
   }, [currentAudio]);
 
   // Cambiar volumen y guardar en localStorage
@@ -284,10 +299,9 @@ const ReproductorAudio = ({
   return (
     <>
       {/* Elemento de audio oculto con manejador de errores */}
-      {currentAudio && currentAudio.streamUrl && (
+      {currentAudio && currentAudio.filename && (
         <audio
           ref={audioElementRef}
-          src={currentAudio.streamUrl}
           preload="metadata"
           style={{ display: 'none' }}
           crossOrigin="anonymous"

@@ -95,6 +95,27 @@ const audioDownloadService = {
     console.log("🔗 URL (solo query params):", url.split("?")[1]);
     return url;
   },
+
+  /**
+   * Genera un token temporal para streaming de audio
+   * @param {string} filename - Nombre del archivo
+   * @returns {Promise} Promesa con el token y URL de streaming
+   */
+  generateStreamToken: async (filename) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/audio-download/generate-token`,
+        { filename },
+        { headers: { "x-api-key": API_KEY } }
+      );
+      
+      console.log('🎫 Token generado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error generando token:', error);
+      throw error;
+    }
+  },
 };
 
 export default audioDownloadService;
