@@ -8,16 +8,29 @@ import { Dropdown } from 'primereact/dropdown';
 // Clave para guardar velocidad en localStorage
 const SPEED_STORAGE_KEY = 'audio_playback_speed';
 
+const toSafeNumber = (value, fallback = 0) => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : fallback;
+};
+
+const getSliderEventValue = (eventOrValue) => {
+  if (eventOrValue && typeof eventOrValue === 'object' && 'value' in eventOrValue) {
+    return eventOrValue.value;
+  }
+  return eventOrValue;
+};
+
 /**
  * Formatea el tiempo en HH:MM:SS o MM:SS según corresponda
  */
 const formatTimeExtended = (seconds) => {
-  if (!seconds || isNaN(seconds)) return '00:00';
-  
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
-  
+  const safeSeconds = toSafeNumber(seconds);
+  if (safeSeconds <= 0) return '00:00';
+
+  const hrs = Math.floor(safeSeconds / 3600);
+  const mins = Math.floor((safeSeconds % 3600) / 60);
+  const secs = Math.floor(safeSeconds % 60);
+
   if (hrs > 0) {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
@@ -28,14 +41,14 @@ const formatTimeExtended = (seconds) => {
  * Reproductor de audio fijo en la parte inferior
  * Con persistencia de posición, controles modernos y velocidad de reproducción
  */
-const ReproductorAudio = ({ 
-  currentAudio, 
-  isPlaying, 
-  position, 
-  duration, 
-  onPlayPause, 
-  onStop, 
-  onSeek, 
+const ReproductorAudio = ({
+  currentAudio,
+  isPlaying,
+  position,
+  duration,
+  onPlayPause,
+  onStop,
+  onSeek,
   onVolumeChange,
   showResumeDialog,
   pendingAudio,
@@ -47,7 +60,7 @@ const ReproductorAudio = ({
   const [volume, setVolume] = useState(80);
   const [localPosition, setLocalPosition] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  
+
   // Opciones de velocidad
   const speedOptions = [
     { label: '1x', value: 1 },
@@ -77,7 +90,7 @@ const ReproductorAudio = ({
   // Sincronizar posición local con la del hook
   useEffect(() => {
     if (currentAudio) {
-      setLocalPosition(position);
+      setLocalPosition(toSafeNumber(position));
     }
   }, [position, currentAudio]);
 
@@ -87,11 +100,11 @@ const ReproductorAudio = ({
     if (!audioEl || !currentAudio) return;
 
     const handleTimeUpdate = () => {
-      setLocalPosition(audioEl.currentTime);
+      setLocalPosition(toSafeNumber(audioEl.currentTime));
     };
 
     const handleLoadedMetadata = () => {
-      setLocalPosition(audioEl.currentTime);
+      setLocalPosition(toSafeNumber(audioEl.currentTime));
     };
 
     const handleEnded = () => {
@@ -135,23 +148,26 @@ const ReproductorAudio = ({
   };
 
   // Buscar posición
-  const handleSeekChange = (value) => {
-    setLocalPosition(value);
+  const handleSeekChange = (event) => {
+    const newPosition = toSafeNumber(getSliderEventValue(event));
+    setLocalPosition(newPosition);
   };
 
-  const handleSeekEnd = (value) => {
+  const handleSeekEnd = (event) => {
+    const newPosition = toSafeNumber(getSliderEventValue(event));
     if (onSeek) {
-      onSeek(value);
+      onSeek(newPosition);
     }
     if (audioElementRef.current) {
-      audioElementRef.currentTime = value;
+      audioElementRef.current.currentTime = newPosition;
     }
   };
 
   // Saltar adelante/atras 15 segundos
   const skipForward = () => {
     if (audioElementRef.current) {
-      const newPos = Math.min(audioElementRef.current.currentTime + 15, duration);
+      const safeDuration = toSafeNumber(duration, 100);
+      const newPos = Math.min(toSafeNumber(audioElementRef.current.currentTime) + 15, safeDuration);
       audioElementRef.current.currentTime = newPos;
       setLocalPosition(newPos);
       if (onSeek) onSeek(newPos);
@@ -160,7 +176,7 @@ const ReproductorAudio = ({
 
   const skipBackward = () => {
     if (audioElementRef.current) {
-      const newPos = Math.max(audioElementRef.current.currentTime - 15, 0);
+      const newPos = Math.max(toSafeNumber(audioElementRef.current.currentTime) - 15, 0);
       audioElementRef.current.currentTime = newPos;
       setLocalPosition(newPos);
       if (onSeek) onSeek(newPos);
@@ -182,13 +198,19 @@ const ReproductorAudio = ({
     return null;
   }
 
+  const sliderValue = toSafeNumber(localPosition);
+  const sliderMax = Math.max(toSafeNumber(duration, 100), 1);
+
+  console.log('Slider value:', sliderValue, typeof sliderValue);
+  console.log('Slider max:', sliderMax, typeof sliderMax);
+
   const footerContent = (
     <div className="flex justify-content-end gap-2">
-      <Button 
-        label="Cerrar" 
-        icon="pi pi-times" 
-        className="p-button-text p-button-sm" 
-        onClick={onStop} 
+      <Button
+        label="Cerrar"
+        icon="pi pi-times"
+        className="p-button-text p-button-sm"
+        onClick={onStop}
       />
     </div>
   );
@@ -218,7 +240,7 @@ const ReproductorAudio = ({
                 {currentAudio.filename || 'Audio desconocido'}
               </span>
               <span className="text-xs text-color-secondary">
-                {formatTimeExtended(duration)}
+                {formatTimeExtended(sliderMax)}
               </span>
             </div>
           </div>
@@ -257,19 +279,19 @@ const ReproductorAudio = ({
           {/* Barra de progreso */}
           <div className="flex align-items-center gap-2 flex-1 w-full lg:w-auto">
             <span className="text-xs text-color-secondary min-w-4rem text-right font-mono">
-              {formatTimeExtended(localPosition)}
+              {formatTimeExtended(sliderValue)}
             </span>
             <Slider
-              value={localPosition}
+              value={sliderValue}
               onChange={handleSeekChange}
               onChangeEnd={handleSeekEnd}
               min={0}
-              max={duration || 100}
+              max={sliderMax}
               step={1}
               className="flex-1 w-full"
             />
             <span className="text-xs text-color-secondary min-w-4rem font-mono">
-              {formatTimeExtended(duration)}
+              {formatTimeExtended(sliderMax)}
             </span>
           </div>
 
@@ -287,7 +309,7 @@ const ReproductorAudio = ({
                 panelClassName="text-xs"
               />
             </div>
-            
+
             {/* Control de volumen */}
             <div className="flex align-items-center gap-2">
               <i className="pi pi-volume-down text-color-secondary"></i>
@@ -320,7 +342,7 @@ const ReproductorAudio = ({
             Ya has escuchado este audio anteriormente.
           </p>
           <p className="m-0 font-medium">
-            ¿Deseas continuar desde {formatTimeExtended(position)} o empezar desde el inicio?
+            ¿Deseas continuar desde {formatTimeExtended(toSafeNumber(position))} o empezar desde el inicio?
           </p>
           <div className="flex justify-content-end gap-2 mt-3">
             <Button
@@ -332,7 +354,7 @@ const ReproductorAudio = ({
               }}
             />
             <Button
-              label={`Continuar desde ${formatTimeExtended(position)}`}
+              label={`Continuar desde ${formatTimeExtended(toSafeNumber(position))}`}
               icon="pi pi-forward"
               onClick={() => {
                 if (onResumeFromPosition) onResumeFromPosition();
@@ -353,7 +375,7 @@ const ReproductorAudio = ({
           z-index: 1000;
           animation: slideUp 0.3s ease-out;
         }
-        
+
         @keyframes slideUp {
           from {
             transform: translateY(100%);
@@ -364,17 +386,17 @@ const ReproductorAudio = ({
             opacity: 1;
           }
         }
-        
+
         .truncate {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        
+
         .min-w-4rem {
           min-width: 4rem;
         }
-        
+
         .font-mono {
           font-family: 'Courier New', Courier, monospace;
         }

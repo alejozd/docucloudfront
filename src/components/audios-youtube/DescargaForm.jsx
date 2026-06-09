@@ -6,6 +6,12 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import audioDownloadService from '../../services/audioDownloadService';
 
+const getSafeProgress = (value) => {
+  const parsedProgress = parseInt(value, 10);
+  if (!Number.isFinite(parsedProgress)) return 0;
+  return Math.max(0, Math.min(parsedProgress, 100));
+};
+
 /**
  * Formulario para descargar audio desde YouTube
  */
@@ -137,6 +143,8 @@ const DescargaForm = ({ onDownloadComplete }) => {
     setIsLoading(false);
   };
 
+  const safeProgress = getSafeProgress(progress);
+
   return (
     <div className="flex flex-column gap-4">
       <div className="flex flex-column md:flex-row gap-3 align-items-end">
@@ -158,7 +166,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
             </small>
           )}
         </div>
-        
+
         <Button
           label="Iniciar Descarga"
           icon="pi pi-download"
@@ -182,25 +190,25 @@ const DescargaForm = ({ onDownloadComplete }) => {
             <div className="flex flex-column gap-2">
               <div className="flex justify-content-between align-items-center">
                 <span className="font-medium text-sm">{statusMessage}</span>
-                <span className="text-sm text-color-secondary">{parseInt(progress) || 0}%</span>
+                <span className="text-sm text-color-secondary">{safeProgress}%</span>
               </div>
-              <ProgressBar value={parseInt(progress) || 0} showValue={false} />
+              <ProgressBar value={safeProgress} showValue={false} />
             </div>
           )}
 
           {downloadStatus === 'completed' && (
-            <Message 
-              severity="success" 
-              text={statusMessage} 
+            <Message
+              severity="success"
+              text={statusMessage}
               icon="pi pi-check-circle"
               className="w-full"
             />
           )}
 
           {downloadStatus === 'failed' && (
-            <Message 
-              severity="error" 
-              text={statusMessage} 
+            <Message
+              severity="error"
+              text={statusMessage}
               icon="pi pi-times-circle"
               className="w-full"
             />
