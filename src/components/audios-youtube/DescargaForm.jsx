@@ -175,6 +175,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
       const response = await audioDownloadService.startDownload(url.trim());
       const data = response.data;
       const filename = data.filename || data.fileName || data.name || data.titulo || data.title;
+      const title = data.title || data.titulo || filename;
 
       if (filename) {
         if (data.status === 'completed' || data.completed === true || data.exists === true) {
@@ -183,7 +184,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
         }
 
         setDownloadStatus('downloading');
-        setStatusMessage(data.message || 'Descargando audio...');
+        setStatusMessage(`Descargando: ${title}`);
         if (data.progress !== undefined) {
           setProgress(data.progress);
         }
