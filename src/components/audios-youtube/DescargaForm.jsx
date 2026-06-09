@@ -1,10 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import audioDownloadService from '../../services/audioDownloadService';
+
+const getSafeProgress = (value) => {
+  const parsedProgress = parseInt(value, 10);
+  if (!Number.isFinite(parsedProgress)) return 0;
+  return Math.max(0, Math.min(parsedProgress, 100));
+};
+
+const getAudioName = (file) => file?.filename || file?.fileName || file?.name || file?.titulo || file?.title || '';
+
+const normalizeFilename = (filename) => {
+  try {
+    return decodeURIComponent(filename || '').trim().toLowerCase();
+  } catch (error) {
+    return (filename || '').trim().toLowerCase();
+  }
+};
+
+const matchesAudioFilename = (fileName, targetName) => {
+  const normalizedFile = normalizeFilename(fileName);
+  const normalizedTarget = normalizeFilename(targetName);
+
+  return normalizedFile === normalizedTarget ||
+    normalizedFile.startsWith(`${normalizedTarget}.`) ||
+    normalizedTarget.startsWith(`${normalizedFile}.`);
+};
 
 /**
  * Formulario para descargar audio desde YouTube
@@ -15,9 +40,48 @@ const DescargaForm = ({ onDownloadComplete }) => {
   const [downloadStatus, setDownloadStatus] = useState(null); // null, 'pending', 'downloading', 'completed', 'failed'
   const [statusMessage, setStatusMessage] = useState('');
   const [progress, setProgress] = useState(0);
-  const [currentFilename, setCurrentFilename] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const pollingIntervalRef = React.useRef(null);
+  const pollingIntervalRef = useRef(null);
+  const pollingTimeoutRef = useRef(null);
+  const completionNotifiedRef = useRef(false);
+
+  const clearPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
+  }, []);
+
+  const findDownloadedFile = useCallback(async (filename) => {
+    if (!filename) return null;
+
+    const response = await audioDownloadService.listFiles();
+    const data = response.data;
+    const files = Array.isArray(data) ? data : (data.files || []);
+
+    return files.find((file) => matchesAudioFilename(getAudioName(file), filename)) || null;
+  }, []);
+
+  const completeDownload = useCallback((data, fallbackFilename) => {
+    if (completionNotifiedRef.current) return;
+
+    const completedFilename = data?.filename || getAudioName(data) || fallbackFilename;
+    completionNotifiedRef.current = true;
+    setDownloadStatus('completed');
+    setStatusMessage(`Audio completado: ${completedFilename}`);
+    setProgress(100);
+    clearPolling();
+    setIsLoading(false);
+
+    if (onDownloadComplete) {
+      onDownloadComplete({ ...data, filename: completedFilename });
+    }
+  }, [clearPolling, onDownloadComplete]);
 
   // Validar URL de YouTube en tiempo real
   useEffect(() => {
@@ -28,59 +92,71 @@ const DescargaForm = ({ onDownloadComplete }) => {
   // Limpiar intervalo al desmontar
   useEffect(() => {
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
+      clearPolling();
     };
-  }, []);
+  }, [clearPolling]);
 
   /**
    * Verificar estado de la descarga mediante polling
    */
-  const checkStatus = async (filename) => {
+  const checkStatus = useCallback(async (filename) => {
     try {
       const response = await audioDownloadService.getStatus(filename);
       const data = response.data;
 
-      if (data.status === 'completed') {
-        setDownloadStatus('completed');
-        setStatusMessage(`Audio completado: ${data.filename || filename}`);
-        setProgress(100);
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
+      if (data.status === 'completed' || data.completed === true || data.exists === true) {
+        completeDownload(data, filename);
+        return;
+      }
+
+      if (data.status === 'failed' || data.status === 'error') {
+        const downloadedFile = await findDownloadedFile(filename);
+        if (downloadedFile) {
+          completeDownload(downloadedFile, filename);
+          return;
         }
-        setIsLoading(false);
-        // Notificar que la descarga completó
-        if (onDownloadComplete) {
-          onDownloadComplete(data);
-        }
-      } else if (data.status === 'failed' || data.status === 'error') {
+
         setDownloadStatus('failed');
         setStatusMessage(data.error || 'Error al descargar el audio');
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-        }
+        clearPolling();
         setIsLoading(false);
-      } else if (data.status === 'downloading' || data.status === 'processing') {
+        return;
+      }
+
+      if (data.status === 'downloading' || data.status === 'processing' || data.status === 'pending') {
         setDownloadStatus('downloading');
         setStatusMessage(data.message || 'Descargando audio...');
         if (data.progress !== undefined) {
           setProgress(data.progress);
         }
       }
+
+      try {
+        const downloadedFile = await findDownloadedFile(filename);
+        if (downloadedFile) {
+          completeDownload(downloadedFile, filename);
+        }
+      } catch (listError) {
+        console.error('Error al verificar archivos descargados:', listError);
+      }
     } catch (error) {
+      try {
+        const downloadedFile = await findDownloadedFile(filename);
+        if (downloadedFile) {
+          completeDownload(downloadedFile, filename);
+          return;
+        }
+      } catch (listError) {
+        console.error('Error al verificar archivos descargados:', listError);
+      }
+
       console.error('Error al verificar estado:', error);
       setDownloadStatus('failed');
       setStatusMessage('Error al verificar el estado de la descarga');
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+      clearPolling();
       setIsLoading(false);
     }
-  };
+  }, [clearPolling, completeDownload, findDownloadedFile]);
 
   /**
    * Iniciar descarga del audio
@@ -88,6 +164,8 @@ const DescargaForm = ({ onDownloadComplete }) => {
   const handleStartDownload = async () => {
     if (!isValidUrl) return;
 
+    clearPolling();
+    completionNotifiedRef.current = false;
     setIsLoading(true);
     setDownloadStatus('pending');
     setStatusMessage('Iniciando descarga...');
@@ -96,19 +174,27 @@ const DescargaForm = ({ onDownloadComplete }) => {
     try {
       const response = await audioDownloadService.startDownload(url.trim());
       const data = response.data;
+      const filename = data.filename || data.fileName || data.name || data.titulo || data.title;
 
-      if (data.filename) {
-        setCurrentFilename(data.filename);
+      if (filename) {
+        if (data.status === 'completed' || data.completed === true || data.exists === true) {
+          completeDownload(data, filename);
+          return;
+        }
+
         setDownloadStatus('downloading');
         setStatusMessage(data.message || 'Descargando audio...');
+        if (data.progress !== undefined) {
+          setProgress(data.progress);
+        }
 
-        // Iniciar polling cada 5 segundos
+        // Iniciar polling cada 3 segundos para no depender de F5 cuando el archivo ya existe.
         pollingIntervalRef.current = setInterval(() => {
-          checkStatus(data.filename);
-        }, 5000);
+          checkStatus(filename);
+        }, 3000);
 
         // Primera verificación inmediata
-        setTimeout(() => checkStatus(data.filename), 2000);
+        pollingTimeoutRef.current = setTimeout(() => checkStatus(filename), 1000);
       } else {
         setDownloadStatus('failed');
         setStatusMessage('No se recibió el nombre del archivo');
@@ -126,16 +212,15 @@ const DescargaForm = ({ onDownloadComplete }) => {
    * Cancelar descarga actual
    */
   const handleCancel = () => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
+    clearPolling();
+    completionNotifiedRef.current = false;
     setDownloadStatus(null);
     setStatusMessage('');
     setProgress(0);
-    setCurrentFilename('');
     setIsLoading(false);
   };
+
+  const safeProgress = getSafeProgress(progress);
 
   return (
     <div className="flex flex-column gap-4">
@@ -158,7 +243,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
             </small>
           )}
         </div>
-        
+
         <Button
           label="Iniciar Descarga"
           icon="pi pi-download"
@@ -182,25 +267,31 @@ const DescargaForm = ({ onDownloadComplete }) => {
             <div className="flex flex-column gap-2">
               <div className="flex justify-content-between align-items-center">
                 <span className="font-medium text-sm">{statusMessage}</span>
-                <span className="text-sm text-color-secondary">{parseInt(progress) || 0}%</span>
+                <span className="text-sm text-color-secondary">
+                  {safeProgress > 0 ? `${safeProgress}%` : 'Procesando...'}
+                </span>
               </div>
-              <ProgressBar value={parseInt(progress) || 0} showValue={false} />
+              {safeProgress > 0 ? (
+                <ProgressBar value={safeProgress} showValue={false} />
+              ) : (
+                <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
+              )}
             </div>
           )}
 
           {downloadStatus === 'completed' && (
-            <Message 
-              severity="success" 
-              text={statusMessage} 
+            <Message
+              severity="success"
+              text={statusMessage}
               icon="pi pi-check-circle"
               className="w-full"
             />
           )}
 
           {downloadStatus === 'failed' && (
-            <Message 
-              severity="error" 
-              text={statusMessage} 
+            <Message
+              severity="error"
+              text={statusMessage}
               icon="pi pi-times-circle"
               className="w-full"
             />
