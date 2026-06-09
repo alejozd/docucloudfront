@@ -1,22 +1,40 @@
 import React from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-import { Password } from 'primereact/password';
 import { InputText } from 'primereact/inputtext';
+
+// Obtener API Key desde variables de entorno
+const VITE_API_KEY = import.meta.env.VITE_API_KEY;
 
 /**
  * Modal para pedir password de autenticación
  * Similar al módulo "Aerolínea" (ZamAir)
+ * Usa la ZAM_API_KEY del backend para validación
  */
 const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
   const [password, setPassword] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
+  
+  // Verificar si VITE_API_KEY está definida
+  React.useEffect(() => {
+    if (!VITE_API_KEY) {
+      console.warn('⚠️ ADVERTENCIA: VITE_API_KEY no está definida en el archivo .env');
+      console.warn('Por favor, configura VITE_API_KEY en tu archivo .env con la misma clave que el backend (ZAM_API_KEY)');
+    }
+  }, []);
 
   const handleAuthenticate = () => {
     if (!password.trim()) {
       setErrorMsg('Por favor ingrese el password');
       return;
     }
+    
+    // Validar que el password coincida con VITE_API_KEY
+    if (VITE_API_KEY && password !== VITE_API_KEY) {
+      setErrorMsg('Password incorrecto. Verifique la clave.');
+      return;
+    }
+    
     onAuthenticate(password);
   };
 
@@ -57,11 +75,20 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
     >
       <div className="flex flex-column gap-3 p-3">
         <p className="m-0 text-color-secondary">
-          Por favor ingrese el password para acceder al módulo de descarga de audios desde YouTube.
+          Por favor ingrese la <strong>ZAM_API_KEY</strong> para acceder al módulo de descarga de audios desde YouTube.
         </p>
         
+        {!VITE_API_KEY && (
+          <div className="p-3 bg-orange-100 border-round border-1 border-orange-300">
+            <i className="pi pi-exclamation-triangle text-orange-600 mr-2"></i>
+            <span className="text-orange-700 text-sm">
+              Advertencia: VITE_API_KEY no está configurada en el archivo .env
+            </span>
+          </div>
+        )}
+        
         <div className="flex flex-column gap-2">
-          <label htmlFor="password" className="font-medium">Password</label>
+          <label htmlFor="password" className="font-medium">ZAM API Key</label>
           <InputText
             id="password"
             type="password"
@@ -71,7 +98,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
               setErrorMsg('');
             }}
             onKeyPress={handleKeyPress}
-            placeholder="Ingrese el password"
+            placeholder="Ingrese su ZAM_API_KEY"
             className="w-full"
             autoFocus
           />
