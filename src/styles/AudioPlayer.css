@@ -1,189 +1,141 @@
-/* src/styles/AudioPlayer.css */
+/* Reproductor de Audio - Estilos Personalizados para react-h5-audio-player */
 
-.custom-audio-player {
-  display: flex;
-  background-color: var(--surface-0); /* Fondo blanco puro para cada reproductor individual */
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-1); /* Sombra más ligera para los reproductores individuales */
-  padding: 0.8rem 1rem;
-  align-items: center;
-  gap: 1rem;
-  width: 100%; /* Ocupa el 100% del contenedor de la lista */
-  min-height: 70px; /* Altura mínima */
-  border: 1px solid var(--surface-border); /* Borde sutil para definirlo */
-  transition: box-shadow 0.2s, border-color 0.2s;
+/* Contenedor principal */
+.rhap_container {
+  background: linear-gradient(135deg, var(--surface-card) 0%, var(--surface-100) 100%) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+  border-top: 1px solid var(--surface-border) !important;
+  padding: 15px 30px !important;
+  backdrop-filter: blur(10px);
 }
 
-.custom-audio-player:hover {
-    box-shadow: var(--shadow-2); /* Sombra un poco más pronunciada al pasar el ratón */
-    border-color: var(--primary-color); /* Borde con color principal al pasar el ratón */
+/* Barra de progreso */
+.rhap_progress-filled {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color-light) 100%) !important;
+  box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.3) !important;
 }
 
-/* Estado activo */
-.custom-audio-player.is-active {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-3);
+.rhap_progress-bar {
+  height: 6px !important;
+  border-radius: 3px !important;
 }
 
-
-/* Sección de Información del Audio (Título) */
-.player-info-controls {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  gap: 1rem;
+/* Botón play/pause */
+.rhap_play-pause-button {
+  background: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.4) !important;
+  transition: all 0.3s ease !important;
 }
 
-.player-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  flex-basis: 30%; /* Ocupa una porción fija en escritorio */
-  flex-shrink: 0; /* Evita que se encoja */
+.rhap_play-pause-button:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.5) !important;
 }
 
-.song-details {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-  width: 100%; /* Ocupa el ancho disponible en su columna */
-}
-
-.song-title {
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: 0.95rem; /* Ligeramente más pequeño para la compacidad */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Controles de Reproducción (Play/Pause/Stop) */
-.player-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  flex-shrink: 0;
-  flex-basis: 15%; /* Ocupa una porción fija en escritorio */
-  justify-content: flex-start; /* Alinea a la izquierda en su sección */
-}
-
-/* Estilo para los botones de PrimeReact en el reproductor */
-.player-controls .p-button-rounded.p-button-text.p-button-secondary {
-  background-color: transparent !important;
+/* Botones de control */
+.rhap_forward-button,
+.rhap_rewind-button {
   color: var(--text-color-secondary) !important;
-  border: none !important;
-  box-shadow: none !important;
-  transition: color 0.2s, background-color 0.2s;
+  transition: all 0.2s ease !important;
 }
 
-.player-controls .p-button-rounded.p-button-text.p-button-secondary:hover {
+.rhap_forward-button:hover,
+.rhap_rewind-button:hover {
   color: var(--primary-color) !important;
-  background-color: var(--surface-hover) !important;
+  transform: scale(1.1) !important;
 }
 
-.play-pause-btn {
-  width: 2.5rem; /* Tamaño de los botones */
-  height: 2.5rem;
-  font-size: 1.2rem !important;
-}
-
-.stop-btn {
-  width: 2rem;
-  height: 2rem;
+/* Tiempos */
+.rhap_time {
+  color: var(--text-color) !important;
+  font-weight: 600 !important;
   font-size: 0.9rem !important;
+  min-width: 45px !important;
 }
 
-/* Barra de Progreso */
-.player-progress {
-  display: flex;
-  align-items: center;
-  flex-grow: 1; /* Ocupa la mayor parte del espacio restante */
-  gap: 0.75rem;
-  min-width: 200px;
+/* Volumen */
+.rhap_volume-bar {
+  height: 5px !important;
+  border-radius: 3px !important;
 }
 
-.time-current,
-.time-duration {
-  font-family: monospace;
-  font-size: 1.2rem;
-  color: var(--text-color-secondary);
-  min-width: 40px;
-  text-align: center;
-  flex-shrink: 0;
+.rhap_volume-filled {
+  background: var(--primary-color) !important;
 }
 
-.audio-progress-slider {
-  flex-grow: 1;
+/* Header personalizado */
+.rhap_header {
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid var(--surface-border) !important;
+  margin-bottom: 10px !important;
 }
 
-/* ELIMINAMOS EL CONTROL DE VOLUMEN DE AQUÍ */
-/* .volume-control-container { ... } */
-
-
-/* --- Estilos PrimeReact para Sliders --- */
-.p-slider .p-slider-handle {
-  width: 0.9rem; /* Pulgar más pequeño para la compacidad */
-  height: 0.9rem;
-  margin-top: -0.45rem;
-  border: 2px solid var(--primary-color);
-  background: var(--surface-0);
-  box-shadow: var(--shadow-1);
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+/* Controles adicionales */
+.rhap_additional-controls {
+  gap: 10px !important;
 }
 
-.p-slider .p-slider-handle:hover {
-  background-color: var(--primary-hover-color);
-  border-color: var(--primary-hover-color);
+/* Select de velocidad */
+.rhap_additional-controls select {
+  background: var(--surface-200) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
 }
 
-.p-slider-horizontal .p-slider-range {
-  background: var(--primary-color);
+.rhap_additional-controls select:hover {
+  background: var(--surface-300) !important;
+  border-color: var(--primary-color) !important;
 }
 
-.p-slider-horizontal .p-slider-track {
-  background: var(--surface-d);
+/* Botón de descarga */
+.rhap_additional-controls button {
+  color: var(--text-color-secondary) !important;
+  transition: all 0.2s ease !important;
 }
 
-/* --- Responsive Design (Ajustes para móviles) --- */
-@media (max-width: 767px) {
-  .custom-audio-player {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    gap: 0.8rem;
+.rhap_additional-controls button:hover {
+  color: var(--primary-color) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Dark mode */
+body[class*="dark"] .rhap_container {
+  background: linear-gradient(135deg, var(--surface-900) 0%, var(--surface-800) 100%) !important;
+  border-top-color: var(--surface-700) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rhap_container {
+    padding: 10px 15px !important;
   }
-
-  .player-info-controls {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    gap: 0.8rem;
+  
+  .rhap_play-pause-button {
+    width: 40px !important;
+    height: 40px !important;
   }
-
-  .player-meta {
-    width: 100%;
-    justify-content: flex-start;
+  
+  .rhap_time {
+    font-size: 0.8rem !important;
+    min-width: 35px !important;
   }
+}
 
-  .player-controls {
-    width: 100%;
-    justify-content: flex-start;
-  }
+/* Animaciones */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
 
-  .player-progress {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-
-  .audio-progress-slider {
-    flex-basis: 100%;
-    margin-top: 0.5rem;
-  }
-
-  .time-current, .time-duration {
-    flex-shrink: 0;
-  }
+.rhap_play-status--playing .rhap_progress-filled {
+  animation: pulse 2s ease-in-out infinite;
 }
