@@ -114,7 +114,6 @@ const ReproductorAudio = ({
 
     const handleLoadedMetadata = () => {
       const dur = audioEl.duration;
-      console.log('Duración calculada:', dur, 'tipo:', typeof dur);
       if (dur && !isNaN(dur) && isFinite(dur)) {
         // Actualizar la duración del padre si existe el callback
         if (onDurationChange) {
@@ -136,9 +135,7 @@ const ReproductorAudio = ({
     const handleError = (e) => {
       const error = audioEl.error;
       if (error) {
-        console.error('=== ERROR DE AUDIO ===');
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
+        console.error('Error de audio:', error.code, error.message);
         
         let mensaje = 'Error al reproducir el audio';
         switch (error.code) {
@@ -222,15 +219,8 @@ const ReproductorAudio = ({
   useEffect(() => {
     const loadAudio = async () => {
       if (currentAudio && currentAudio.filename) {
-        console.log('=== DEBUG REPRODUCTOR - INICIO ===');
-        console.log('currentAudio:', currentAudio);
-        
         try {
-          console.log('📞 Llamando a generateStreamToken...');
           const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
-          
-          console.log('🎫 Token data completo:', JSON.stringify(tokenData, null, 2));
-          console.log('🔗 Stream URL:', tokenData.streamUrl);
           
           // Verificar que la URL sea válida
           if (!tokenData.streamUrl) {
@@ -240,27 +230,22 @@ const ReproductorAudio = ({
           
           const audioEl = audioElementRef.current;
           if (audioEl) {
-            console.log('🎵 Estableciendo src del elemento audio');
-            console.log('🎵 URL completa:', tokenData.streamUrl);
-            
             audioEl.src = tokenData.streamUrl;
             
             // Agregar evento de error más detallado
             audioEl.onerror = (e) => {
-              console.error('❌ Error en elemento audio:', e);
-              console.error('❌ Error code:', audioEl.error?.code);
-              console.error('❌ Error message:', audioEl.error?.message);
-              console.error('❌ URL que falló:', audioEl.src);
+              console.error('Error en elemento audio:', e);
+              console.error('Error code:', audioEl.error?.code);
+              console.error('Error message:', audioEl.error?.message);
+              console.error('URL que falló:', audioEl.src);
             };
             
             // Agregar evento de carga exitosa
             audioEl.oncanplay = () => {
-              console.log('✅ Audio listo para reproducir');
-              console.log('✅ Duración:', audioEl.duration);
+              // Audio listo para reproducir
             };
             
             audioEl.load();
-            console.log('🎵 load() llamado');
           } else {
             console.error('❌ audioElementRef.current es null');
           }
@@ -268,8 +253,6 @@ const ReproductorAudio = ({
           console.error('❌ Error cargando audio:', error);
           console.error('❌ Error stack:', error.stack);
         }
-        
-        console.log('=== DEBUG REPRODUCTOR - FIN ===');
       }
     };
     
@@ -343,9 +326,6 @@ const ReproductorAudio = ({
 
   const sliderValue = toSafeNumber(localPosition);
   const sliderMax = Math.max(toSafeNumber(duration, 100), 1);
-
-  console.log('Slider value:', sliderValue, typeof sliderValue);
-  console.log('Slider max:', sliderMax, typeof sliderMax);
 
   const footerContent = (
     <div className="flex justify-content-end gap-2">
@@ -427,7 +407,6 @@ const ReproductorAudio = ({
             <Slider
               value={sliderValue}
               onChange={handleSeekChange}
-              onChangeEnd={handleSeekEnd}
               min={0}
               max={sliderMax}
               step={1}
