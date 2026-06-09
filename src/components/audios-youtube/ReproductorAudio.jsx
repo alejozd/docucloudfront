@@ -237,7 +237,7 @@ const ReproductorAudio = ({
             </div>
             <div className="flex flex-column overflow-hidden">
               <span className="font-medium text-sm truncate">
-                {currentAudio.filename || 'Audio desconocido'}
+                {currentAudio.title || currentAudio.filename || 'Audio desconocido'}
               </span>
               <span className="text-xs text-color-secondary">
                 {formatTimeExtended(sliderMax)}
