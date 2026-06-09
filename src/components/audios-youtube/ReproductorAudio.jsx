@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Slider } from 'primereact/slider';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Knob } from 'primereact/knob';
 import { Dropdown } from 'primereact/dropdown';
 
 // Clave para guardar velocidad en localStorage
@@ -69,13 +68,21 @@ const ReproductorAudio = ({
     { label: '2x', value: 2 }
   ];
 
-  // Cargar velocidad guardada al montar
+  // Cargar velocidad y volumen guardados al montar
   useEffect(() => {
     const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
     if (savedSpeed) {
       const parsed = parseFloat(savedSpeed);
       if ([1, 1.25, 1.5, 2].includes(parsed)) {
         setPlaybackSpeed(parsed);
+      }
+    }
+    // Cargar volumen guardado
+    const savedVolume = localStorage.getItem('audio_volume');
+    if (savedVolume) {
+      const parsedVolume = parseInt(savedVolume, 10);
+      if (!isNaN(parsedVolume) && parsedVolume >= 0 && parsedVolume <= 100) {
+        setVolume(parsedVolume);
       }
     }
   }, []);
@@ -104,25 +111,65 @@ const ReproductorAudio = ({
     };
 
     const handleLoadedMetadata = () => {
-      setLocalPosition(toSafeNumber(audioEl.currentTime));
+      const dur = audioEl.duration;
+      console.log('Duración calculada:', dur, 'tipo:', typeof dur);
+      if (dur && !isNaN(dur) && isFinite(dur)) {
+        // La duración ya se maneja desde el hook useAudioPlayer
+        // Solo actualizamos la posición local
+        setLocalPosition(toSafeNumber(audioEl.currentTime));
+      } else {
+        console.warn('Duración inválida, usando fallback');
+        setLocalPosition(toSafeNumber(audioEl.currentTime));
+      }
     };
 
     const handleEnded = () => {
       if (onStop) onStop();
     };
 
+    const handleError = (e) => {
+      const error = audioEl.error;
+      if (error) {
+        console.error('=== ERROR DE AUDIO ===');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        
+        let mensaje = 'Error al reproducir el audio';
+        switch (error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            mensaje = 'Reproducción abortada';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            mensaje = 'Error de red al cargar el audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            mensaje = 'Error al decodificar el audio';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            mensaje = 'URL de audio no soportada o inválida';
+            break;
+          default:
+            mensaje = 'Error desconocido al reproducir';
+            break;
+        }
+        console.error(mensaje);
+      }
+    };
+
     audioEl.addEventListener('timeupdate', handleTimeUpdate);
     audioEl.addEventListener('loadedmetadata', handleLoadedMetadata);
     audioEl.addEventListener('ended', handleEnded);
+    audioEl.addEventListener('error', handleError);
 
     return () => {
       audioEl.removeEventListener('timeupdate', handleTimeUpdate);
       audioEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audioEl.removeEventListener('ended', handleEnded);
+      audioEl.removeEventListener('error', handleError);
     };
   }, [currentAudio, onStop]);
 
-  // Controlar reproducción cuando cambia isPlaying
+  // Controlar reproducción cuando cambia isPlaying y currentAudio
   useEffect(() => {
     const audioEl = audioElementRef.current;
     if (!audioEl || !currentAudio) return;
@@ -136,15 +183,34 @@ const ReproductorAudio = ({
     }
   }, [isPlaying, currentAudio]);
 
-  // Cambiar volumen
-  const handleVolumeChange = (value) => {
-    setVolume(value);
+  // Manejar carga del audio cuando cambia currentAudio
+  useEffect(() => {
+    if (currentAudio && currentAudio.streamUrl) {
+      console.log('=== DEBUG REPRODUCTOR ===');
+      console.log('currentAudio:', currentAudio);
+      console.log('streamUrl:', currentAudio.streamUrl);
+      console.log('=========================');
+      
+      const audioEl = audioElementRef.current;
+      if (audioEl) {
+        audioEl.src = currentAudio.streamUrl;
+        audioEl.load();
+      }
+    }
+  }, [currentAudio]);
+
+  // Cambiar volumen y guardar en localStorage
+  const handleVolumeChange = (newValue) => {
+    const numValue = typeof newValue === 'number' ? newValue : 0;
+    setVolume(numValue);
     if (audioElementRef.current) {
-      audioElementRef.current.volume = value / 100;
+      audioElementRef.current.volume = numValue / 100;
     }
     if (onVolumeChange) {
-      onVolumeChange(value);
+      onVolumeChange(numValue);
     }
+    // Guardar en localStorage
+    localStorage.setItem('audio_volume', numValue.toString());
   };
 
   // Buscar posición
@@ -217,13 +283,14 @@ const ReproductorAudio = ({
 
   return (
     <>
-      {/* Elemento de audio oculto */}
+      {/* Elemento de audio oculto con manejador de errores */}
       {currentAudio && currentAudio.streamUrl && (
         <audio
           ref={audioElementRef}
           src={currentAudio.streamUrl}
           preload="metadata"
           style={{ display: 'none' }}
+          crossOrigin="anonymous"
         />
       )}
 
@@ -305,24 +372,21 @@ const ReproductorAudio = ({
                 options={speedOptions}
                 onChange={handleSpeedChange}
                 className="w-5rem"
-                inputClassName="text-xs"
                 panelClassName="text-xs"
               />
             </div>
 
             {/* Control de volumen */}
-            <div className="flex align-items-center gap-2">
-              <i className="pi pi-volume-down text-color-secondary"></i>
-              <Knob
-                value={volume}
-                onChange={handleVolumeChange}
-                size="36"
+            <div className="flex align-items-center gap-2" style={{ minWidth: '120px' }}>
+              <i className="pi pi-volume-down text-color-secondary" style={{ fontSize: '0.9rem' }}></i>
+              <Slider 
+                value={volume} 
+                onChange={(e) => handleVolumeChange(e.value)}
+                className="w-8rem"
                 min={0}
                 max={100}
-                step={5}
-                valueTemplate={(val) => `${val}%`}
-                strokeWidth={8}
               />
+              <span style={{ fontSize: '0.8rem', minWidth: '35px' }}>{volume}%</span>
             </div>
           </div>
         </div>

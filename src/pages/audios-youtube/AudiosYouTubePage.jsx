@@ -263,7 +263,6 @@ const AudiosYouTubePage = () => {
       <Card 
         title="Nueva Descarga" 
         className="mb-4 shadow-2"
-        headerClassName="bg-primary-alpha-10"
       >
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
@@ -274,7 +273,6 @@ const AudiosYouTubePage = () => {
       <Card 
         title="Audios Descargados" 
         className="shadow-2"
-        headerClassName="bg-primary-alpha-10"
       >
         <ListaAudios
           files={files}
