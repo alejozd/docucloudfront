@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
-import { Spinner } from 'primereact/spinner';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import audioDownloadService from '../../services/audioDownloadService';
@@ -10,7 +9,7 @@ import audioDownloadService from '../../services/audioDownloadService';
 /**
  * Formulario para descargar audio desde YouTube
  */
-const DescargaForm = ({ apiKey, onDownloadComplete }) => {
+const DescargaForm = ({ onDownloadComplete }) => {
   const [url, setUrl] = useState('');
   const [isValidUrl, setIsValidUrl] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState(null); // null, 'pending', 'downloading', 'completed', 'failed'
@@ -40,7 +39,7 @@ const DescargaForm = ({ apiKey, onDownloadComplete }) => {
    */
   const checkStatus = async (filename) => {
     try {
-      const response = await audioDownloadService.getStatus(filename, apiKey);
+      const response = await audioDownloadService.getStatus(filename);
       const data = response.data;
 
       if (data.status === 'completed') {
@@ -95,7 +94,7 @@ const DescargaForm = ({ apiKey, onDownloadComplete }) => {
     setProgress(0);
 
     try {
-      const response = await audioDownloadService.startDownload(url.trim(), apiKey);
+      const response = await audioDownloadService.startDownload(url.trim());
       const data = response.data;
 
       if (data.filename) {

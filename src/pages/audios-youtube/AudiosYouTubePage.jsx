@@ -9,6 +9,9 @@ import ReproductorAudio from '../../components/audios-youtube/ReproductorAudio';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import audioDownloadService from '../../services/audioDownloadService';
 
+// Obtener API Key desde variables de entorno
+const VITE_API_KEY = import.meta.env.VITE_API_KEY;
+
 /**
  * Página principal para descarga de audios desde YouTube
  * Integrada bajo "Utilidades" → "Audios YouTube"
@@ -20,9 +23,6 @@ const AudiosYouTubePage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
-  
-  // API Key (en producción debería venir de variables de entorno o backend)
-  const API_KEY = process.env.REACT_APP_AUDIO_API_KEY || 'zam-api-key-demo';
   
   // Estado de archivos
   const [files, setFiles] = useState([]);
@@ -50,7 +50,7 @@ const AudiosYouTubePage = () => {
     
     setFilesLoading(true);
     try {
-      const response = await audioDownloadService.listFiles(API_KEY);
+      const response = await audioDownloadService.listFiles();
       const data = response.data;
       
       // Procesar archivos y agregar URLs de streaming y descarga
@@ -59,8 +59,8 @@ const AudiosYouTubePage = () => {
         filename: file.filename || file.name || file.titulo,
         size: file.size || file.tamano,
         createdAt: file.createdAt || file.fecha || file.created_at,
-        streamUrl: audioDownloadService.getStreamUrl(file.filename || file.name, API_KEY),
-        downloadUrl: audioDownloadService.getStreamUrl(file.filename || file.name, API_KEY)
+        streamUrl: audioDownloadService.getStreamUrl(file.filename || file.name),
+        downloadUrl: audioDownloadService.getStreamUrl(file.filename || file.name)
       }));
       
       setFiles(processedFiles);
@@ -75,7 +75,7 @@ const AudiosYouTubePage = () => {
     } finally {
       setFilesLoading(false);
     }
-  }, [isAuthenticated, API_KEY]);
+  }, [isAuthenticated]);
 
   /**
    * Cargar archivos al autenticarse
@@ -92,12 +92,9 @@ const AudiosYouTubePage = () => {
   const handleAuthenticate = (password) => {
     setAuthLoading(true);
     
-    // Validación simple (en producción validar contra backend)
-    // El password puede estar hardcodeado o en variable de entorno
-    const validPassword = process.env.REACT_APP_AUDIO_PASSWORD || 'admin123';
-    
+    // Validar que el password coincida con VITE_API_KEY
     setTimeout(() => {
-      if (password === validPassword) {
+      if (VITE_API_KEY && password === VITE_API_KEY) {
         setIsAuthenticated(true);
         setShowPasswordModal(false);
         sessionStorage.setItem('audioDownloadAuth', 'true');
@@ -107,11 +104,23 @@ const AudiosYouTubePage = () => {
           detail: 'Bienvenido al módulo de descarga de audios',
           life: 3000
         });
+      } else if (!VITE_API_KEY) {
+        // Si no hay VITE_API_KEY definida, permitir acceso pero mostrar advertencia
+        console.warn('⚠️ VITE_API_KEY no está definida. Permitiendo acceso sin validación.');
+        setIsAuthenticated(true);
+        setShowPasswordModal(false);
+        sessionStorage.setItem('audioDownloadAuth', 'true');
+        toastRef.current?.show({
+          severity: 'warn',
+          summary: 'Advertencia',
+          detail: 'VITE_API_KEY no configurada. Las llamadas a la API podrían fallar.',
+          life: 5000
+        });
       } else {
         toastRef.current?.show({
           severity: 'error',
           summary: 'Autenticación Fallida',
-          detail: 'Password incorrecto',
+          detail: 'API Key incorrecta',
           life: 3000
         });
       }
@@ -160,7 +169,7 @@ const AudiosYouTubePage = () => {
    */
   const handleDelete = async (audioData) => {
     try {
-      await audioDownloadService.deleteFile(audioData.filename, API_KEY);
+      await audioDownloadService.deleteFile(audioData.filename);
       toastRef.current?.show({
         severity: 'success',
         summary: 'Archivo Eliminado',
@@ -260,7 +269,6 @@ const AudiosYouTubePage = () => {
         headerClassName="bg-primary-alpha-10"
       >
         <DescargaForm 
-          apiKey={API_KEY}
           onDownloadComplete={handleDownloadComplete}
         />
       </Card>
@@ -288,7 +296,6 @@ const AudiosYouTubePage = () => {
         isPlaying={player.isPlaying}
         position={player.position}
         duration={player.duration}
-        formatTime={player.formatTime}
         onPlayPause={handlePlayPause}
         onStop={player.stop}
         onSeek={player.seek}

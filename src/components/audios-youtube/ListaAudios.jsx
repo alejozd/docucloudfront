@@ -9,7 +9,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
  */
 const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
   const toastRef = useRef(null);
-
+  
   /**
    * Formatear tamaño de archivo
    */
