@@ -188,26 +188,54 @@ const ReproductorAudio = ({
   useEffect(() => {
     const loadAudio = async () => {
       if (currentAudio && currentAudio.filename) {
-        console.log('=== DEBUG REPRODUCTOR ===');
+        console.log('=== DEBUG REPRODUCTOR - INICIO ===');
         console.log('currentAudio:', currentAudio);
         
         try {
-          // Generar token temporal
+          console.log('📞 Llamando a generateStreamToken...');
           const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
           
-          console.log('🎫 Token data:', tokenData);
+          console.log('🎫 Token data completo:', JSON.stringify(tokenData, null, 2));
           console.log('🔗 Stream URL:', tokenData.streamUrl);
+          
+          // Verificar que la URL sea válida
+          if (!tokenData.streamUrl) {
+            console.error('❌ Stream URL es null o undefined');
+            return;
+          }
           
           const audioEl = audioElementRef.current;
           if (audioEl) {
+            console.log('🎵 Estableciendo src del elemento audio');
+            console.log('🎵 URL completa:', tokenData.streamUrl);
+            
             audioEl.src = tokenData.streamUrl;
+            
+            // Agregar evento de error más detallado
+            audioEl.onerror = (e) => {
+              console.error('❌ Error en elemento audio:', e);
+              console.error('❌ Error code:', audioEl.error?.code);
+              console.error('❌ Error message:', audioEl.error?.message);
+              console.error('❌ URL que falló:', audioEl.src);
+            };
+            
+            // Agregar evento de carga exitosa
+            audioEl.oncanplay = () => {
+              console.log('✅ Audio listo para reproducir');
+              console.log('✅ Duración:', audioEl.duration);
+            };
+            
             audioEl.load();
+            console.log('🎵 load() llamado');
+          } else {
+            console.error('❌ audioElementRef.current es null');
           }
         } catch (error) {
           console.error('❌ Error cargando audio:', error);
+          console.error('❌ Error stack:', error.stack);
         }
         
-        console.log('=========================');
+        console.log('=== DEBUG REPRODUCTOR - FIN ===');
       }
     };
     
