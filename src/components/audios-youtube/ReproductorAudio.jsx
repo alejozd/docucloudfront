@@ -175,10 +175,39 @@ const ReproductorAudio = ({
     const audioEl = audioElementRef.current;
     if (!audioEl || !currentAudio) return;
 
+    const attemptPlay = async () => {
+      try {
+        // Verificar si el audio ya está listo
+        if (audioEl.readyState >= 2) { // HAVE_CURRENT_DATA o superior
+          if (isPlaying) {
+            await audioEl.play();
+          }
+        } else {
+          // Esperar a que el audio esté listo
+          const canPlayHandler = async () => {
+            if (isPlaying) {
+              try {
+                await audioEl.play();
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  console.error('Error al reproducir:', error);
+                }
+              }
+            }
+            audioEl.removeEventListener('canplay', canPlayHandler);
+          };
+          
+          audioEl.addEventListener('canplay', canPlayHandler);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error al reproducir:', error);
+        }
+      }
+    };
+
     if (isPlaying) {
-      audioEl.play().catch(error => {
-        console.error('Error al reproducir:', error);
-      });
+      attemptPlay();
     } else {
       audioEl.pause();
     }
