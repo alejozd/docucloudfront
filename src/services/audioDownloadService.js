@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3100';
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3100';
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 // Verificar si API_KEY está definida
 if (!API_KEY) {
-  console.warn('⚠️ ADVERTENCIA: VITE_API_KEY no está definida en el archivo .env');
+  console.warn('⚠️ ADVERTENCIA: REACT_APP_API_KEY no está definida en el archivo .env');
   console.warn('Las llamadas a la API podrían fallar sin una clave válida.');
 }
 

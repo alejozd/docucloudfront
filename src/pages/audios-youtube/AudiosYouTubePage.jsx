@@ -10,7 +10,7 @@ import useAudioPlayer from '../../hooks/useAudioPlayer';
 import audioDownloadService from '../../services/audioDownloadService';
 
 // Obtener API Key desde variables de entorno
-const VITE_API_KEY = import.meta.env.VITE_API_KEY;
+const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
 
 /**
  * Página principal para descarga de audios desde YouTube
@@ -92,9 +92,9 @@ const AudiosYouTubePage = () => {
   const handleAuthenticate = (password) => {
     setAuthLoading(true);
     
-    // Validar que el password coincida con VITE_API_KEY
+    // Validar que el password coincida con REACT_APP_API_KEY
     setTimeout(() => {
-      if (VITE_API_KEY && password === VITE_API_KEY) {
+      if (REACT_APP_API_KEY && password === REACT_APP_API_KEY) {
         setIsAuthenticated(true);
         setShowPasswordModal(false);
         sessionStorage.setItem('audioDownloadAuth', 'true');
@@ -104,16 +104,16 @@ const AudiosYouTubePage = () => {
           detail: 'Bienvenido al módulo de descarga de audios',
           life: 3000
         });
-      } else if (!VITE_API_KEY) {
-        // Si no hay VITE_API_KEY definida, permitir acceso pero mostrar advertencia
-        console.warn('⚠️ VITE_API_KEY no está definida. Permitiendo acceso sin validación.');
+      } else if (!REACT_APP_API_KEY) {
+        // Si no hay REACT_APP_API_KEY definida, permitir acceso pero mostrar advertencia
+        console.warn('⚠️ REACT_APP_API_KEY no está definida. Permitiendo acceso sin validación.');
         setIsAuthenticated(true);
         setShowPasswordModal(false);
         sessionStorage.setItem('audioDownloadAuth', 'true');
         toastRef.current?.show({
           severity: 'warn',
           summary: 'Advertencia',
-          detail: 'VITE_API_KEY no configurada. Las llamadas a la API podrían fallar.',
+          detail: 'REACT_APP_API_KEY no configurada. Las llamadas a la API podrían fallar.',
           life: 5000
         });
       } else {

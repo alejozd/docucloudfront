@@ -4,7 +4,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 
 // Obtener API Key desde variables de entorno
-const VITE_API_KEY = import.meta.env.VITE_API_KEY;
+const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
 
 /**
  * Modal para pedir password de autenticación
@@ -15,11 +15,11 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
   const [password, setPassword] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
   
-  // Verificar si VITE_API_KEY está definida
+  // Verificar si REACT_APP_API_KEY está definida
   React.useEffect(() => {
-    if (!VITE_API_KEY) {
-      console.warn('⚠️ ADVERTENCIA: VITE_API_KEY no está definida en el archivo .env');
-      console.warn('Por favor, configura VITE_API_KEY en tu archivo .env con la misma clave que el backend (ZAM_API_KEY)');
+    if (!REACT_APP_API_KEY) {
+      console.warn('⚠️ ADVERTENCIA: REACT_APP_API_KEY no está definida en el archivo .env');
+      console.warn('Por favor, configura REACT_APP_API_KEY en tu archivo .env con la misma clave que el backend (ZAM_API_KEY)');
     }
   }, []);
 
@@ -29,8 +29,8 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
       return;
     }
     
-    // Validar que el password coincida con VITE_API_KEY
-    if (VITE_API_KEY && password !== VITE_API_KEY) {
+    // Validar que el password coincida con REACT_APP_API_KEY
+    if (REACT_APP_API_KEY && password !== REACT_APP_API_KEY) {
       setErrorMsg('Password incorrecto. Verifique la clave.');
       return;
     }
@@ -78,11 +78,11 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
           Por favor ingrese la <strong>ZAM_API_KEY</strong> para acceder al módulo de descarga de audios desde YouTube.
         </p>
         
-        {!VITE_API_KEY && (
+        {!REACT_APP_API_KEY && (
           <div className="p-3 bg-orange-100 border-round border-1 border-orange-300">
             <i className="pi pi-exclamation-triangle text-orange-600 mr-2"></i>
             <span className="text-orange-700 text-sm">
-              Advertencia: VITE_API_KEY no está configurada en el archivo .env
+              Advertencia: REACT_APP_API_KEY no está configurada en el archivo .env
             </span>
           </div>
         )}
