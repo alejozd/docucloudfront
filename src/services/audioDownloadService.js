@@ -66,7 +66,10 @@ const audioDownloadService = {
     }
     
     const encodedFilename = encodeURIComponent(filename);
-    const url = `${API_BASE_URL}/api/audio-download/stream/${encodedFilename}?api_key=${API_KEY}`;
+    // IMPORTANTE: También codificar la API key porque tiene caracteres especiales
+    const encodedApiKey = encodeURIComponent(API_KEY);
+    
+    const url = `${API_BASE_URL}/api/audio-download/download/${encodedFilename}?api_key=${encodedApiKey}`;
     console.log('🔗 URL de streaming generada:', url);
     return url;
   }
