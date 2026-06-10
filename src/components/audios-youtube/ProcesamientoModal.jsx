@@ -47,21 +47,27 @@ const ProcesamientoModal = ({
   const [customSplit, setCustomSplit] = useState(30);
 
   const handleProcess = () => {
-    const options = {};
+    const operations = [];
 
     if (applyVolume) {
-      options.volumeIncrease = volumeLevel === 'custom' ? customVolume : volumeLevel;
+      operations.push({
+        type: 'volume',
+        level: parseInt(volumeLevel === 'custom' ? customVolume : volumeLevel, 10)
+      });
     }
 
     if (applySplit) {
-      options.splitInterval = splitInterval === 'custom' ? customSplit : splitInterval;
+      operations.push({
+        type: 'split',
+        interval: parseInt(splitInterval === 'custom' ? customSplit : splitInterval, 10)
+      });
     }
 
-    if (Object.keys(options).length === 0) {
+    if (operations.length === 0) {
       return; // Nada que procesar
     }
 
-    onProcess(audio.filename, options);
+    onProcess(audio.filename, operations);
   };
 
   const footer = (
