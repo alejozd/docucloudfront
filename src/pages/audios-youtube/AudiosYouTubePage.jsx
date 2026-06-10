@@ -186,12 +186,12 @@ const AudiosYouTubePage = () => {
   /**
    * Iniciar polling de estado de procesamiento
    */
-  const startProcessStatusPolling = useCallback((processId) => {
+  const startProcessStatusPolling = useCallback((taskId) => {
     clearProcessPolling();
 
     processPollingRef.current = setInterval(async () => {
       try {
-        const response = await audioDownloadService.getProcessStatus(processId);
+        const response = await audioDownloadService.getProcessStatus(taskId);
         const { status, progress, message, error } = response.data;
 
         if (status === 'completed') {
@@ -233,18 +233,18 @@ const AudiosYouTubePage = () => {
   /**
    * Manejar inicio de procesamiento
    */
-  const handleProcessAudio = async (filename, options) => {
+  const handleProcessAudio = async (filename, operations) => {
     setIsProcessing(true);
     setProcessProgress(0);
     setProcessStatusMessage('Iniciando procesamiento...');
     setProcessError(null);
 
     try {
-      const response = await audioDownloadService.processAudio(filename, options);
-      const { processId } = response.data;
+      const response = await audioDownloadService.processAudio(filename, operations);
+      const { taskId } = response.data;
 
-      if (processId) {
-        startProcessStatusPolling(processId);
+      if (taskId) {
+        startProcessStatusPolling(taskId);
       } else {
         throw new Error('No se recibió ID de proceso');
       }
