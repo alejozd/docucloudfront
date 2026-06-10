@@ -104,7 +104,7 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
    * Verificar estado de la descarga mediante polling
    */
   const checkStatus = useCallback(async (filename, attempts = 0) => {
-    const maxAttempts = 100; // 100 intentos = ~5 minutos con polling cada 3s
+    const maxAttempts = 150; // 150 intentos = ~7.5 minutos con polling cada 3s
 
     try {
       const response = await audioDownloadService.getStatus(filename);
@@ -114,18 +114,16 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
       if (status === 'completed' || data.completed === true || data.exists === true) {
         setEstimatedSize(sizeFormatted);
 
-        // Recargar lista si la prop está disponible
         if (loadFiles) await loadFiles();
-
         completeDownload(data, filename);
-        return;
+        return false; // Stop polling
       }
 
       if (status === 'failed' || status === 'error') {
         const downloadedFile = await findDownloadedFile(filename);
         if (downloadedFile) {
           completeDownload(downloadedFile, filename);
-          return;
+          return false;
         }
 
         setDownloadError(error || 'Error en la descarga');
@@ -133,7 +131,7 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
         setStatusMessage(error || 'Error al descargar el audio');
         clearPolling();
         setIsLoading(false);
-        return;
+        return false;
       }
 
       if (status === 'downloading' || status === 'processing' || status === 'pending') {
@@ -148,40 +146,42 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
       }
 
       if (attempts >= maxAttempts) {
-        setDownloadError('Tiempo de espera agotado. La descarga puede estar en progreso.');
+        setDownloadError('Tiempo de espera agotado. Verifique en la lista de audios.');
         setDownloadStatus('failed');
-        setStatusMessage('La descarga está tomando más tiempo de lo esperado.');
+        setStatusMessage('La descarga está tomando demasiado tiempo.');
         clearPolling();
         setIsLoading(false);
-        return;
+        return false;
       }
 
-      try {
-        const downloadedFile = await findDownloadedFile(filename);
-        if (downloadedFile) {
-          completeDownload(downloadedFile, filename);
+      // Verificar si el archivo ya aparece en la lista como respaldo cada 5 intentos
+      if (attempts > 0 && attempts % 5 === 0) {
+        try {
+          const downloadedFile = await findDownloadedFile(filename);
+          if (downloadedFile) {
+            completeDownload(downloadedFile, filename);
+            return false;
+          }
+        } catch (listError) {
+          console.error('Error al verificar archivos descargados:', listError);
         }
-      } catch (listError) {
-        console.error('Error al verificar archivos descargados:', listError);
       }
+
+      return true; // Continue polling
     } catch (error) {
+      console.error('Error al verificar estado:', error);
       try {
         const downloadedFile = await findDownloadedFile(filename);
         if (downloadedFile) {
           completeDownload(downloadedFile, filename);
-          return;
+          return false;
         }
       } catch (listError) {
         console.error('Error al verificar archivos descargados:', listError);
       }
-
-      console.error('Error al verificar estado:', error);
-      setDownloadStatus('failed');
-      setStatusMessage('Error al verificar el estado de la descarga');
-      clearPolling();
-      setIsLoading(false);
+      return true;
     }
-  }, [clearPolling, completeDownload, findDownloadedFile]);
+  }, [clearPolling, completeDownload, findDownloadedFile, loadFiles]);
 
   /**
    * Iniciar descarga del audio
@@ -218,15 +218,25 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
           setProgress(data.progress);
         }
 
-        // Iniciar polling con contador de intentos
+        // Iniciar polling recursivo con contador de intentos
         let attempts = 0;
-        pollingIntervalRef.current = setInterval(() => {
-          attempts++;
-          checkStatus(filename, attempts);
-        }, 3000);
+        const poll = () => {
+          pollingTimeoutRef.current = setTimeout(async () => {
+            attempts++;
+            const shouldContinue = await checkStatus(filename, attempts);
+            if (shouldContinue !== false) {
+              poll();
+            }
+          }, 3000);
+        };
 
         // Primera verificación inmediata
-        pollingTimeoutRef.current = setTimeout(() => checkStatus(filename, 0), 1000);
+        pollingTimeoutRef.current = setTimeout(async () => {
+          const shouldContinue = await checkStatus(filename, 0);
+          if (shouldContinue !== false) {
+            poll();
+          }
+        }, 1000);
       } else {
         setDownloadStatus('failed');
         setStatusMessage('No se recibió el nombre del archivo');
