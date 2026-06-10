@@ -34,13 +34,17 @@ const matchesAudioFilename = (fileName, targetName) => {
 /**
  * Formulario para descargar audio desde YouTube
  */
-const DescargaForm = ({ onDownloadComplete }) => {
+const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
   const [url, setUrl] = useState('');
   const [isValidUrl, setIsValidUrl] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState(null); // null, 'pending', 'downloading', 'completed', 'failed'
   const [statusMessage, setStatusMessage] = useState('');
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [estimatedSize, setEstimatedSize] = useState(null);
+
   const pollingIntervalRef = useRef(null);
   const pollingTimeoutRef = useRef(null);
   const completionNotifiedRef = useRef(false);
@@ -99,36 +103,57 @@ const DescargaForm = ({ onDownloadComplete }) => {
   /**
    * Verificar estado de la descarga mediante polling
    */
-  const checkStatus = useCallback(async (filename) => {
+  const checkStatus = useCallback(async (filename, attempts = 0) => {
+    const maxAttempts = 100; // 100 intentos = ~5 minutos con polling cada 3s
+
     try {
       const response = await audioDownloadService.getStatus(filename);
       const data = response.data;
+      const { status, size, sizeFormatted, error, progress: prog } = data;
 
-      if (data.status === 'completed' || data.completed === true || data.exists === true) {
+      if (status === 'completed' || data.completed === true || data.exists === true) {
+        setEstimatedSize(sizeFormatted);
+
+        // Recargar lista si la prop está disponible
+        if (loadFiles) await loadFiles();
+
         completeDownload(data, filename);
         return;
       }
 
-      if (data.status === 'failed' || data.status === 'error') {
+      if (status === 'failed' || status === 'error') {
         const downloadedFile = await findDownloadedFile(filename);
         if (downloadedFile) {
           completeDownload(downloadedFile, filename);
           return;
         }
 
+        setDownloadError(error || 'Error en la descarga');
         setDownloadStatus('failed');
-        setStatusMessage(data.error || 'Error al descargar el audio');
+        setStatusMessage(error || 'Error al descargar el audio');
         clearPolling();
         setIsLoading(false);
         return;
       }
 
-      if (data.status === 'downloading' || data.status === 'processing' || data.status === 'pending') {
+      if (status === 'downloading' || status === 'processing' || status === 'pending') {
         setDownloadStatus('downloading');
         setStatusMessage(data.message || 'Descargando audio...');
-        if (data.progress !== undefined) {
-          setProgress(data.progress);
+        if (prog !== undefined) {
+          setProgress(prog);
         }
+        if (sizeFormatted) {
+          setEstimatedSize(sizeFormatted);
+        }
+      }
+
+      if (attempts >= maxAttempts) {
+        setDownloadError('Tiempo de espera agotado. La descarga puede estar en progreso.');
+        setDownloadStatus('failed');
+        setStatusMessage('La descarga está tomando más tiempo de lo esperado.');
+        clearPolling();
+        setIsLoading(false);
+        return;
       }
 
       try {
@@ -161,18 +186,20 @@ const DescargaForm = ({ onDownloadComplete }) => {
   /**
    * Iniciar descarga del audio
    */
-  const handleStartDownload = async () => {
-    if (!isValidUrl) return;
+  const handleStartDownload = async (targetUrl = url) => {
+    if (!isValidUrl && !targetUrl) return;
 
     clearPolling();
     completionNotifiedRef.current = false;
     setIsLoading(true);
     setDownloadStatus('pending');
+    setDownloadError(null);
+    setRetryCount(0);
     setStatusMessage('Iniciando descarga...');
     setProgress(0);
 
     try {
-      const response = await audioDownloadService.startDownload(url.trim());
+      const response = await audioDownloadService.startDownload(targetUrl.trim());
       const data = response.data;
       const filename = data.filename || data.fileName || data.name || data.titulo || data.title;
       const title = data.title || data.titulo || filename;
@@ -189,13 +216,15 @@ const DescargaForm = ({ onDownloadComplete }) => {
           setProgress(data.progress);
         }
 
-        // Iniciar polling cada 3 segundos para no depender de F5 cuando el archivo ya existe.
+        // Iniciar polling con contador de intentos
+        let attempts = 0;
         pollingIntervalRef.current = setInterval(() => {
-          checkStatus(filename);
+          attempts++;
+          checkStatus(filename, attempts);
         }, 3000);
 
         // Primera verificación inmediata
-        pollingTimeoutRef.current = setTimeout(() => checkStatus(filename), 1000);
+        pollingTimeoutRef.current = setTimeout(() => checkStatus(filename, 0), 1000);
       } else {
         setDownloadStatus('failed');
         setStatusMessage('No se recibió el nombre del archivo');
@@ -203,9 +232,19 @@ const DescargaForm = ({ onDownloadComplete }) => {
       }
     } catch (error) {
       console.error('Error al iniciar descarga:', error);
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Error al iniciar la descarga';
+      setDownloadError(errorMsg);
       setDownloadStatus('failed');
-      setStatusMessage(error.response?.data?.message || 'Error al iniciar la descarga');
+      setStatusMessage(errorMsg);
       setIsLoading(false);
+
+      // Reintento automático (máximo 2)
+      if (retryCount < 2) {
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          handleStartDownload(targetUrl);
+        }, 3000);
+      }
     }
   };
 
@@ -256,7 +295,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
 
       {/* Estado de la descarga */}
       {downloadStatus && (
-        <div className="border-1 border-border border-round p-3 bg-surface-50 dark:bg-surface-900">
+        <div className={`border-1 border-border border-round p-3 ${downloadStatus === 'downloading' ? 'bg-primary-alpha-10' : 'bg-surface-50 dark:bg-surface-900'}`}>
           {downloadStatus === 'pending' && (
             <div className="flex align-items-center gap-3">
               <ProgressSpinner style={{ width: '30px', height: '30px' }} strokeWidth="4" />
@@ -265,17 +304,38 @@ const DescargaForm = ({ onDownloadComplete }) => {
           )}
 
           {downloadStatus === 'downloading' && (
-            <div className="flex flex-column gap-2">
-              <div className="flex justify-content-between align-items-center">
-                <span className="font-medium text-sm">{statusMessage}</span>
-                <span className="text-sm text-color-secondary">
-                  {safeProgress > 0 ? `${safeProgress}%` : 'Procesando...'}
-                </span>
+            <div className="flex flex-column gap-3">
+              <div className="flex align-items-center gap-3">
+                <i className="pi pi-spin pi-download text-2xl text-primary"></i>
+                <div className="flex flex-column flex-1">
+                  <span className="font-medium text-primary">
+                    Descargando audio...
+                  </span>
+                  <small className="text-secondary">
+                    Esto puede tomar varios minutos dependiendo del tamaño del video
+                  </small>
+                </div>
               </div>
-              {safeProgress > 0 ? (
-                <ProgressBar value={safeProgress} showValue={false} />
-              ) : (
-                <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
+
+              <div className="flex flex-column gap-2">
+                <div className="flex justify-content-between align-items-center">
+                  <span className="text-sm font-medium">{statusMessage}</span>
+                  <span className="text-sm text-color-secondary">
+                    {safeProgress > 0 ? `${safeProgress}%` : ''}
+                  </span>
+                </div>
+                <ProgressBar
+                  value={safeProgress > 0 ? safeProgress : null}
+                  mode={safeProgress > 0 ? 'determinate' : 'indeterminate'}
+                  style={{ height: '6px' }}
+                  showValue={false}
+                />
+              </div>
+
+              {estimatedSize && (
+                <small className="text-primary font-medium">
+                  Tamaño estimado: {estimatedSize}
+                </small>
               )}
             </div>
           )}
@@ -290,12 +350,17 @@ const DescargaForm = ({ onDownloadComplete }) => {
           )}
 
           {downloadStatus === 'failed' && (
-            <Message
-              severity="error"
-              text={statusMessage}
-              icon="pi pi-times-circle"
-              className="w-full"
-            />
+            <div className="flex flex-column gap-2">
+              <Message
+                severity="error"
+                text={statusMessage}
+                icon="pi pi-times-circle"
+                className="w-full"
+              />
+              {downloadError && downloadError !== statusMessage && (
+                <small className="text-error ml-2">{downloadError}</small>
+              )}
+            </div>
           )}
 
           {(downloadStatus === 'downloading' || downloadStatus === 'failed') && (
