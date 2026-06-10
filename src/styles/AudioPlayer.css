@@ -328,31 +328,64 @@ body[class*="dark"] .rhap_header .bg-primary,
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.4) !important;
 }
 
-/* Responsive */
+/* Responsive para móvil */
 @media (max-width: 768px) {
   .rhap_container {
     padding: 10px 15px !important;
+    font-size: 12px !important;
   }
-  
+
   .rhap_play-pause-button {
-    width: 40px !important;
-    height: 40px !important;
+    width: 45px !important;
+    height: 45px !important;
   }
-  
+
   .rhap_time {
-    font-size: 0.8rem !important;
+    font-size: 11px !important;
     min-width: 35px !important;
   }
-  
+
+  .rhap_header {
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .rhap_header .font-medium {
+    font-size: 13px !important;
+    max-width: 200px !important;
+  }
+
+  .rhap_header small {
+    font-size: 10px !important;
+    display: none !important; /* Ocultar filename en móvil */
+  }
+
+  .rhap_additional-controls select {
+    font-size: 12px !important;
+    padding: 4px 6px !important;
+  }
+
+  /* Botones más grandes para touch */
   .rhap_forward-button,
   .rhap_rewind-button {
-    width: 32px !important;
-    height: 32px !important;
+    width: 35px !important;
+    height: 35px !important;
   }
-  
-  .rhap_header {
-    margin-bottom: 8px !important;
-    padding-bottom: 8px !important;
+
+  /* Barra de volumen más pequeña */
+  .rhap_volume-bar {
+    width: 60px !important;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .rhap_container {
+    padding: 15px 20px !important;
+  }
+
+  .rhap_header .font-medium {
+    max-width: 250px !important;
   }
 }
 

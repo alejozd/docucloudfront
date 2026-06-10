@@ -266,6 +266,7 @@ const AudiosYouTubePage = () => {
       >
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
+          loadFiles={loadFiles}
         />
       </Card>
 
