@@ -9,7 +9,7 @@ import audioDownloadService from '../../services/audioDownloadService';
 /**
  * Lista de archivos de audio descargados
  */
-const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
+const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
 
   // Detectar tamaño de pantalla para vista responsive
@@ -144,6 +144,12 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
                 tooltip="Descargar"
               />
               <Button
+                icon="pi pi-cog"
+                className="p-button-rounded p-button-secondary p-button-sm"
+                onClick={() => onProcess(audio)}
+                tooltip="Procesar"
+              />
+              <Button
                 icon="pi pi-trash"
                 className="p-button-rounded p-button-danger p-button-sm"
                 onClick={() => confirmDelete(audio)}
@@ -184,6 +190,23 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
         rounded
         onClick={() => handleDownload(rowData)}
         tooltip="Descargar MP3"
+        tooltipOptions={{ position: 'top' }}
+      />
+    );
+  };
+
+  /**
+   * Botón de procesamiento
+   */
+  const processActionTemplate = (rowData) => {
+    return (
+      <Button
+        icon="pi pi-cog"
+        className="p-button-sm"
+        severity="secondary"
+        rounded
+        onClick={() => onProcess(rowData)}
+        tooltip="Procesar Audio"
         tooltipOptions={{ position: 'top' }}
       />
     );
@@ -295,10 +318,11 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
               <div className="flex gap-2">
                 {playActionTemplate(rowData)}
                 {downloadActionTemplate(rowData)}
+                {processActionTemplate(rowData)}
                 {deleteActionTemplate(rowData)}
               </div>
             )}
-            style={{ width: '20%' }}
+            style={{ width: '25%' }}
           />
         </DataTable>
       ) : (
