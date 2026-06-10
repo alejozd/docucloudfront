@@ -186,7 +186,7 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
   /**
    * Iniciar descarga del audio
    */
-  const handleStartDownload = async (targetUrl = url) => {
+  const handleStartDownload = async (targetUrl = url, isRetry = false) => {
     if (!isValidUrl && !targetUrl) return;
 
     clearPolling();
@@ -194,7 +194,9 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
     setIsLoading(true);
     setDownloadStatus('pending');
     setDownloadError(null);
-    setRetryCount(0);
+    if (!isRetry) {
+      setRetryCount(0);
+    }
     setStatusMessage('Iniciando descarga...');
     setProgress(0);
 
@@ -242,7 +244,7 @@ const DescargaForm = ({ onDownloadComplete, loadFiles }) => {
       if (retryCount < 2) {
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
-          handleStartDownload(targetUrl);
+          handleStartDownload(targetUrl, true);
         }, 3000);
       }
     }
