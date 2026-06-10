@@ -5,6 +5,7 @@ import PasswordModal from '../../components/audios-youtube/PasswordModal';
 import DescargaForm from '../../components/audios-youtube/DescargaForm';
 import ListaAudios from '../../components/audios-youtube/ListaAudios';
 import ReproductorAudio from '../../components/audios-youtube/ReproductorAudio';
+import ProcesamientoModal from '../../components/audios-youtube/ProcesamientoModal';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import audioDownloadService from '../../services/audioDownloadService';
 
@@ -29,6 +30,15 @@ const AudiosYouTubePage = () => {
   
   // Hook del reproductor
   const player = useAudioPlayer();
+
+  // Estado para el modal de procesamiento
+  const [showProcessModal, setShowProcessModal] = useState(false);
+  const [selectedAudio, setSelectedAudio] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processProgress, setProcessProgress] = useState(0);
+  const [processStatusMessage, setProcessStatusMessage] = useState('');
+  const [processError, setProcessError] = useState(null);
+  const processPollingRef = useRef(null);
 
   /**
    * Verificar si ya está autenticado en sessionStorage
@@ -164,6 +174,106 @@ const AudiosYouTubePage = () => {
   };
 
   /**
+   * Limpiar polling de procesamiento
+   */
+  const clearProcessPolling = useCallback(() => {
+    if (processPollingRef.current) {
+      clearInterval(processPollingRef.current);
+      processPollingRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Iniciar polling de estado de procesamiento
+   */
+  const startProcessStatusPolling = useCallback((processId) => {
+    clearProcessPolling();
+
+    processPollingRef.current = setInterval(async () => {
+      try {
+        const response = await audioDownloadService.getProcessStatus(processId);
+        const { status, progress, message, error } = response.data;
+
+        if (status === 'completed') {
+          clearProcessPolling();
+          setIsProcessing(false);
+          setProcessProgress(100);
+
+          toastRef.current?.show({
+            severity: 'success',
+            summary: 'Procesamiento Completado',
+            detail: 'El audio se ha procesado exitosamente',
+            life: 5000
+          });
+
+          // Recargar lista para ver nuevos archivos
+          loadFiles();
+
+          // Cerrar modal después de un momento
+          setTimeout(() => {
+            setShowProcessModal(false);
+            setSelectedAudio(null);
+          }, 2000);
+
+        } else if (status === 'failed') {
+          clearProcessPolling();
+          setIsProcessing(false);
+          setProcessError(error || 'Error desconocido durante el procesamiento');
+        } else {
+          // Actualizar progreso
+          setProcessProgress(progress || 0);
+          setProcessStatusMessage(message || 'Procesando...');
+        }
+      } catch (error) {
+        console.error('Error al consultar estado de procesamiento:', error);
+      }
+    }, 3000);
+  }, [clearProcessPolling, loadFiles]);
+
+  /**
+   * Manejar inicio de procesamiento
+   */
+  const handleProcessAudio = async (filename, options) => {
+    setIsProcessing(true);
+    setProcessProgress(0);
+    setProcessStatusMessage('Iniciando procesamiento...');
+    setProcessError(null);
+
+    try {
+      const response = await audioDownloadService.processAudio(filename, options);
+      const { processId } = response.data;
+
+      if (processId) {
+        startProcessStatusPolling(processId);
+      } else {
+        throw new Error('No se recibió ID de proceso');
+      }
+    } catch (error) {
+      console.error('Error al iniciar procesamiento:', error);
+      setIsProcessing(false);
+      setProcessError(error.response?.data?.error || 'Error al iniciar el procesamiento');
+
+      toastRef.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo iniciar el procesamiento de audio',
+        life: 3000
+      });
+    }
+  };
+
+  /**
+   * Abrir modal de procesamiento
+   */
+  const openProcessModal = (audio) => {
+    setSelectedAudio(audio);
+    setShowProcessModal(true);
+    setProcessError(null);
+    setProcessProgress(0);
+    setProcessStatusMessage('');
+  };
+
+  /**
    * Manejar eliminación de archivo
    */
   const handleDelete = async (audioData) => {
@@ -230,6 +340,13 @@ const AudiosYouTubePage = () => {
     player.setShowResumeDialog(false);
   };
 
+  /**
+   * Limpiar al desmontar
+   */
+  useEffect(() => {
+    return () => clearProcessPolling();
+  }, [clearProcessPolling]);
+
   // Mostrar modal de password si no está autenticado
   if (!isAuthenticated) {
     return (
@@ -279,9 +396,22 @@ const AudiosYouTubePage = () => {
           files={files}
           onPlay={handlePlay}
           onDelete={handleDelete}
+          onProcess={openProcessModal}
           loading={filesLoading}
         />
       </Card>
+
+      {/* Modal de Procesamiento */}
+      <ProcesamientoModal
+        visible={showProcessModal}
+        onHide={() => !isProcessing && setShowProcessModal(false)}
+        audio={selectedAudio}
+        onProcess={handleProcessAudio}
+        processing={isProcessing}
+        progress={processProgress}
+        statusMessage={processStatusMessage}
+        error={processError}
+      />
 
       {/* Espacio para el reproductor fijo */}
       <div style={{ height: '120px' }}></div>

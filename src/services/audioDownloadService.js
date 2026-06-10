@@ -107,6 +107,30 @@ const audioDownloadService = {
       throw error;
     }
   },
+
+  /**
+   * Iniciar procesamiento de audio (volumen, split, etc.)
+   * @param {string} filename - Nombre del archivo original
+   * @param {object} options - Opciones de procesamiento { volumeIncrease, splitInterval }
+   */
+  processAudio: (filename, options) => {
+    return axios.post(
+      `${API_BASE_URL}/api/audio-download/process`,
+      { filename, ...options },
+      { headers: { "x-api-key": API_KEY } },
+    );
+  },
+
+  /**
+   * Verificar estado de un procesamiento
+   * @param {string} processId - ID del proceso
+   */
+  getProcessStatus: (processId) => {
+    return axios.get(
+      `${API_BASE_URL}/api/audio-download/process-status/${encodeURIComponent(processId)}`,
+      { headers: { "x-api-key": API_KEY } },
+    );
+  },
 };
 
 export default audioDownloadService;
