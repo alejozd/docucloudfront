@@ -178,7 +178,7 @@ const AudiosYouTubePage = () => {
    */
   const clearProcessPolling = useCallback(() => {
     if (processPollingRef.current) {
-      clearInterval(processPollingRef.current);
+      clearTimeout(processPollingRef.current);
       processPollingRef.current = null;
     }
   }, []);
@@ -189,12 +189,17 @@ const AudiosYouTubePage = () => {
   const startProcessStatusPolling = useCallback((taskId) => {
     clearProcessPolling();
 
-    processPollingRef.current = setInterval(async () => {
-      try {
-        const response = await audioDownloadService.getProcessStatus(taskId);
-        const { status, progress, message, error } = response.data;
+    let attempts = 0;
+    const maxAttempts = 150; // ~7.5 minutos
 
-        if (status === 'completed') {
+    const poll = async () => {
+      try {
+        attempts++;
+        const response = await audioDownloadService.getProcessStatus(taskId);
+        const data = response.data;
+        const { status, progress, message, error } = data;
+
+        if (status === 'completed' || data.completed === true) {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessProgress(100);
@@ -215,19 +220,30 @@ const AudiosYouTubePage = () => {
             setSelectedAudio(null);
           }, 2000);
 
-        } else if (status === 'failed') {
+          return;
+        }
+
+        if (status === 'failed' || status === 'error' || attempts >= maxAttempts) {
           clearProcessPolling();
           setIsProcessing(false);
-          setProcessError(error || 'Error desconocido durante el procesamiento');
-        } else {
-          // Actualizar progreso
-          setProcessProgress(progress || 0);
-          setProcessStatusMessage(message || 'Procesando...');
+          setProcessError(error || (attempts >= maxAttempts ? 'Tiempo de espera agotado' : 'Error en el procesamiento'));
+          return;
         }
+
+        // Actualizar progreso
+        setProcessProgress(progress || 0);
+        setProcessStatusMessage(message || 'Procesando...');
+
+        // Siguiente poll
+        processPollingRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error al consultar estado de procesamiento:', error);
+        // Reintentar en caso de error de red
+        processPollingRef.current = setTimeout(poll, 3000);
       }
-    }, 3000);
+    };
+
+    poll();
   }, [clearProcessPolling, loadFiles]);
 
   /**
@@ -251,7 +267,7 @@ const AudiosYouTubePage = () => {
     } catch (error) {
       console.error('Error al iniciar procesamiento:', error);
       setIsProcessing(false);
-      setProcessError(error.response?.data?.error || 'Error al iniciar el procesamiento');
+      setProcessError(error.response?.data?.error || 'Error al iniciar the procesamiento');
 
       toastRef.current?.show({
         severity: 'error',
@@ -383,7 +399,6 @@ const AudiosYouTubePage = () => {
       >
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
-          loadFiles={loadFiles}
         />
       </Card>
 
