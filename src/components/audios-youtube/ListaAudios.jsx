@@ -106,10 +106,26 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
   };
 
   /**
+   * Botón de reproducir
+   */
+  const playActionTemplate = (rowData) => {
+    return (
+      <Button
+        icon="pi pi-play"
+        className="p-button-sm"
+        severity="success"
+        rounded
+        onClick={() => onPlay(rowData)}
+        tooltip="Reproducir"
+        tooltipOptions={{ position: 'top' }}
+      />
+    );
+  };
+
+  /**
    * Renderizar cards para móvil
    */
   const renderCard = (audio) => {
-    const audioName = getAudioName(audio);
     return (
       <div className="col-12 mb-3">
         <div className="card p-3 shadow-2 surface-card border-round">
@@ -163,23 +179,6 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
   };
 
   /**
-   * Botón de reproducir
-   */
-  const playActionTemplate = (rowData) => {
-    return (
-      <Button
-        icon="pi pi-play"
-        className="p-button-sm"
-        severity="success"
-        rounded
-        onClick={() => onPlay(rowData)}
-        tooltip="Reproducir"
-        tooltipOptions={{ position: 'top' }}
-      />
-    );
-  };
-
-  /**
    * Botón de descargar
    */
   const downloadActionTemplate = (rowData) => {
@@ -190,23 +189,6 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
         rounded
         onClick={() => handleDownload(rowData)}
         tooltip="Descargar MP3"
-        tooltipOptions={{ position: 'top' }}
-      />
-    );
-  };
-
-  /**
-   * Botón de procesamiento
-   */
-  const processActionTemplate = (rowData) => {
-    return (
-      <Button
-        icon="pi pi-cog"
-        className="p-button-sm"
-        severity="secondary"
-        rounded
-        onClick={() => onProcess(rowData)}
-        tooltip="Procesar Audio"
         tooltipOptions={{ position: 'top' }}
       />
     );
@@ -318,20 +300,23 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
               <div className="flex gap-2">
                 {playActionTemplate(rowData)}
                 {downloadActionTemplate(rowData)}
-                {processActionTemplate(rowData)}
+              <Button
+                icon="pi pi-cog"
+                className="p-button-sm"
+                severity="secondary"
+                rounded
+                onClick={() => onProcess(rowData)}
+                tooltip="Procesar Audio"
+                tooltipOptions={{ position: 'top' }}
+              />
                 {deleteActionTemplate(rowData)}
               </div>
             )}
-            style={{ width: '25%' }}
+          style={{ width: '25%' }}
           />
         </DataTable>
       ) : (
-        <DataView
-          value={sortedFiles}
-          itemTemplate={renderCard}
-          paginator
-          rows={6}
-        />
+        <DataView value={sortedFiles} itemTemplate={renderCard} paginator rows={6} />
       )}
     </>
   );
