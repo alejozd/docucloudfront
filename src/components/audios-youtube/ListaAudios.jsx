@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { DataView } from 'primereact/dataview';
 import audioDownloadService from '../../services/audioDownloadService';
 
 /**
  * Lista de archivos de audio descargados
  */
-const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
+const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
+  const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
+
+  // Detectar tamaño de pantalla para vista responsive
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth < 768) {
+        setViewMode('cards');
+      } else {
+        setViewMode('table');
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
   
   /**
@@ -105,6 +123,62 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
   };
 
   /**
+   * Renderizar cards para móvil
+   */
+  const renderCard = (audio) => {
+    return (
+      <div className="col-12 mb-3">
+        <div className="card p-3 shadow-2 surface-card border-round">
+          <div className="flex flex-column gap-3">
+            {/* Título */}
+            <div className="flex align-items-center gap-3">
+              <div className="w-3rem h-3rem bg-primary border-circle flex align-items-center justify-content-center flex-shrink-0">
+                <i className="pi pi-music text-white text-xl"></i>
+              </div>
+              <div className="flex flex-column flex-1" style={{ overflow: 'hidden' }}>
+                <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                  {audio.title || audio.name}
+                </span>
+                <small className="text-secondary text-xs mt-1">
+                  {formatSize(audio.size)} • {formatDate(audio.createdAt)}
+                </small>
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="flex gap-2 justify-content-end">
+              <Button
+                icon="pi pi-play"
+                className="p-button-rounded p-button-success p-button-sm"
+                onClick={() => onPlay(audio)}
+                tooltip="Reproducir"
+              />
+              <Button
+                icon="pi pi-download"
+                className="p-button-rounded p-button-info p-button-sm"
+                onClick={() => handleDownload(audio)}
+                tooltip="Descargar"
+              />
+              <Button
+                icon="pi pi-cog"
+                className="p-button-rounded p-button-secondary p-button-sm"
+                onClick={() => onProcess(audio)}
+                tooltip="Procesar"
+              />
+              <Button
+                icon="pi pi-trash"
+                className="p-button-rounded p-button-danger p-button-sm"
+                onClick={() => confirmDelete(audio)}
+                tooltip="Eliminar"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /**
    * Botón de descargar
    */
   const downloadActionTemplate = (rowData) => {
@@ -171,54 +245,79 @@ const ListaAudios = ({ files, onPlay, onDelete, loading }) => {
   return (
     <>
       <ConfirmDialog />
-      <DataTable
-        value={sortedFiles}
-        tableStyle={{ minWidth: '600px' }}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        emptyMessage="No hay audios disponibles"
-        responsiveLayout="scroll"
-      >
-        <Column
-          field="title"
-          header="Título"
-          sortable
-          style={{ width: '40%' }}
-          body={(rowData) => (
-            <div style={{ maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <strong>{rowData.title || rowData.name}</strong>
-              <br />
-              <small style={{ color: '#666' }}>{rowData.name}</small>
-            </div>
-          )}
+
+      {/* Selector de vista */}
+      <div className="flex justify-content-end mb-3">
+        <Button
+          icon={viewMode === 'table' ? 'pi pi-th-large' : 'pi pi-list'}
+          className="p-button-text p-button-sm"
+          onClick={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
+          tooltip={viewMode === 'table' ? 'Vista Cards' : 'Vista Lista'}
+          tooltipOptions={{ position: 'left' }}
         />
-        <Column
-          field="size"
-          header="Tamaño"
-          sortable
-          body={(rowData) => formatSize(rowData.size)}
-          style={{ width: '15%' }}
-        />
-        <Column
-          field="createdAt"
-          header="Fecha de Creación"
-          sortable
-          body={(rowData) => formatDate(rowData.createdAt)}
+      </div>
+
+      {viewMode === 'table' ? (
+        <DataTable
+          value={sortedFiles}
+          tableStyle={{ minWidth: '600px' }}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 20]}
+          emptyMessage="No hay audios disponibles"
+          responsiveLayout="scroll"
+        >
+          <Column
+            field="title"
+            header="Título"
+            sortable
+            style={{ width: '40%' }}
+            body={(rowData) => (
+              <div style={{ maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <strong>{rowData.title || rowData.name}</strong>
+                <br />
+                <small style={{ color: '#666' }}>{rowData.name}</small>
+              </div>
+            )}
+          />
+          <Column
+            field="size"
+            header="Tamaño"
+            sortable
+            body={(rowData) => formatSize(rowData.size)}
+            style={{ width: '15%' }}
+          />
+          <Column
+            field="createdAt"
+            header="Fecha de Creación"
+            sortable
+            body={(rowData) => formatDate(rowData.createdAt)}
+            style={{ width: '25%' }}
+          />
+          <Column
+            header="Acciones"
+            body={(rowData) => (
+              <div className="flex gap-2">
+                {playActionTemplate(rowData)}
+                {downloadActionTemplate(rowData)}
+              <Button
+                icon="pi pi-cog"
+                className="p-button-sm"
+                severity="secondary"
+                rounded
+                onClick={() => onProcess(rowData)}
+                tooltip="Procesar Audio"
+                tooltipOptions={{ position: 'top' }}
+              />
+                {deleteActionTemplate(rowData)}
+              </div>
+            )}
           style={{ width: '25%' }}
-        />
-        <Column
-          header="Acciones"
-          body={(rowData) => (
-            <div className="flex gap-2">
-              {playActionTemplate(rowData)}
-              {downloadActionTemplate(rowData)}
-              {deleteActionTemplate(rowData)}
-            </div>
-          )}
-          style={{ width: '20%' }}
-        />
-      </DataTable>
+          />
+        </DataTable>
+      ) : (
+        <DataView value={sortedFiles} itemTemplate={renderCard} paginator rows={6} />
+      )}
     </>
   );
 };
