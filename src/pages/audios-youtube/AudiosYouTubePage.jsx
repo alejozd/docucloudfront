@@ -199,7 +199,14 @@ const AudiosYouTubePage = () => {
         const data = response.data;
         const { status, progress, message, error } = data;
 
-        if (status === 'completed' || data.completed === true) {
+        // Terminal success states
+        const isCompleted = status === 'completed' ||
+                           status === 'finished' ||
+                           status === 'success' ||
+                           data.completed === true ||
+                           data.finished === true;
+
+        if (isCompleted) {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessProgress(100);
