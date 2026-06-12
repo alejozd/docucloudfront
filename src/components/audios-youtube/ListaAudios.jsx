@@ -101,7 +101,9 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
       icon: 'pi pi-exclamation-triangle',
       acceptClassName: 'p-button-danger',
       accept: () => onDelete({ ...rowData, filename: audioName }),
-      reject: () => {}
+      reject: () => {},
+      closeOnEscape: true,
+      dismissableMask: true
     });
   };
 
@@ -244,7 +246,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
 
   return (
     <>
-      <ConfirmDialog />
+      <ConfirmDialog className="confirm-dialog-responsive" />
 
       {/* Selector de vista */}
       <div className="flex justify-content-end mb-3">
