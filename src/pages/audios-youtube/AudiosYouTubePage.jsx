@@ -461,13 +461,13 @@ const AudiosYouTubePage = () => {
         }
 
         /* ConfirmDialog responsive para móviles */
-        .p-confirmdialog {
+        .p-confirmdialog .p-dialog {
           max-width: 90vw !important;
           width: 90vw !important;
         }
 
         @media (max-width: 768px) {
-          .p-confirmdialog {
+          .p-confirmdialog .p-dialog {
             max-width: 95vw !important;
             width: 95vw !important;
             margin: 0.5rem !important;
