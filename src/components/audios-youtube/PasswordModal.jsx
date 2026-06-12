@@ -20,7 +20,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
   React.useEffect(() => {
     if (!REACT_APP_API_KEY) {
       console.warn('⚠️ ADVERTENCIA: REACT_APP_API_KEY no está definida en el archivo .env');
-      console.warn('Por favor, configura REACT_APP_API_KEY en tu archivo .env con la misma clave que el backend (ZAM_API_KEY)');
+      console.warn('Por favor, configura REACT_APP_API_KEY en tu archivo .env con la misma clave que el backend');
     }
   }, []);
 
@@ -87,7 +87,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
           </div>
           <span className="password-modal-title">Autenticación Requerida</span>
           <p className="password-modal-description">
-            Ingrese su <strong>ZAM_API_KEY</strong> para habilitar las herramientas de descarga y procesamiento.
+            Ingrese su <strong>clave de acceso</strong> para habilitar las herramientas de descarga y procesamiento.
           </p>
         </div>
         
@@ -97,7 +97,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
             <div className="flex flex-column">
               <span className="password-modal-warning-title">Falta Configuración</span>
               <span className="password-modal-warning-text">
-                REACT_APP_API_KEY no encontrada en el entorno.
+                API Key no encontrada en el entorno.
               </span>
             </div>
           </div>
@@ -114,7 +114,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
                 setErrorMsg('');
               }}
               onKeyPress={handleKeyPress}
-              placeholder="ZAM_API_KEY"
+              placeholder="Clave de acceso"
               toggleMask
               feedback={false}
               autoFocus
