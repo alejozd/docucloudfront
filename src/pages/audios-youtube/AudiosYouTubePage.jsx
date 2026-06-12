@@ -309,8 +309,8 @@ const AudiosYouTubePage = () => {
         life: 3000
       });
       
-      // Recargar lista
-      loadFiles();
+      // Recargar lista sin causar parpadeo - actualizar estado directamente
+      setFiles(prevFiles => prevFiles.filter(f => f.filename !== audioData.filename));
       
       // Si el audio eliminado es el que se está reproduciendo, detener
       if (player.currentAudio?.filename === audioData.filename) {
@@ -458,6 +458,41 @@ const AudiosYouTubePage = () => {
         
         .bg-primary-alpha-10 {
           background-color: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        /* ConfirmDialog responsive para móviles */
+        .confirm-dialog-responsive.p-dialog {
+          max-width: 90vw !important;
+          width: 90vw !important;
+        }
+
+        @media (max-width: 768px) {
+          .confirm-dialog-responsive.p-dialog {
+            max-width: 95vw !important;
+            width: 95vw !important;
+            margin: 0.5rem !important;
+          }
+
+          .confirm-dialog-responsive .p-dialog-header {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+          }
+
+          .confirm-dialog-responsive .p-dialog-content {
+            padding: 1.5rem 1rem !important;
+            font-size: 0.95rem !important;
+          }
+
+          .confirm-dialog-responsive .p-dialog-footer {
+            padding: 0.5rem 1rem 1rem !important;
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+          }
+
+          .confirm-dialog-responsive .p-button {
+            width: 100%;
+            margin: 0 !important;
+          }
         }
       `}</style>
     </div>
