@@ -246,7 +246,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
 
   return (
     <>
-      <ConfirmDialog className="confirm-dialog-responsive" />
+      <ConfirmDialog className="confirm-dialog-responsive" containerClassName="confirm-dialog-responsive" />
 
       {/* Selector de vista */}
       <div className="flex justify-content-end mb-3">
