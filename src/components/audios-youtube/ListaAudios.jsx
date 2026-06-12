@@ -101,7 +101,11 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
       icon: 'pi pi-exclamation-triangle',
       acceptClassName: 'p-button-danger',
       accept: () => onDelete({ ...rowData, filename: audioName }),
-      reject: () => {}
+      reject: () => {},
+      closeOnEscape: true,
+      dismissableMask: true,
+      breakpoints: { '960px': '75vw', '640px': '90vw' },
+      style: { width: '30vw' }
     });
   };
 
@@ -244,7 +248,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
 
   return (
     <>
-      <ConfirmDialog />
+      <ConfirmDialog breakpoints={{ '960px': '75vw', '640px': '90vw' }} style={{ width: '30vw' }} />
 
       {/* Selector de vista */}
       <div className="flex justify-content-end mb-3">

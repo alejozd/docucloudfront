@@ -302,15 +302,16 @@ const AudiosYouTubePage = () => {
   const handleDelete = async (audioData) => {
     try {
       await audioDownloadService.deleteFile(audioData.filename);
+      
+      // Eliminar el archivo de la lista localmente sin recargar toda la lista
+      setFiles(prevFiles => prevFiles.filter(f => f.filename !== audioData.filename));
+      
       toastRef.current?.show({
         severity: 'success',
         summary: 'Archivo Eliminado',
         detail: `El archivo "${audioData.filename}" ha sido eliminado`,
         life: 3000
       });
-      
-      // Recargar lista
-      loadFiles();
       
       // Si el audio eliminado es el que se está reproduciendo, detener
       if (player.currentAudio?.filename === audioData.filename) {
