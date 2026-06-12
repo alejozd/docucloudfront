@@ -461,35 +461,35 @@ const AudiosYouTubePage = () => {
         }
 
         /* ConfirmDialog responsive para móviles */
-        .p-confirmdialog .p-dialog {
+        .confirm-dialog-responsive.p-dialog {
           max-width: 90vw !important;
           width: 90vw !important;
         }
 
         @media (max-width: 768px) {
-          .p-confirmdialog .p-dialog {
+          .confirm-dialog-responsive.p-dialog {
             max-width: 95vw !important;
             width: 95vw !important;
             margin: 0.5rem !important;
           }
 
-          .p-confirmdialog .p-dialog-header {
+          .confirm-dialog-responsive .p-dialog-header {
             padding: 1rem !important;
             font-size: 1rem !important;
           }
 
-          .p-confirmdialog .p-dialog-content {
+          .confirm-dialog-responsive .p-dialog-content {
             padding: 1.5rem 1rem !important;
             font-size: 0.95rem !important;
           }
 
-          .p-confirmdialog .p-dialog-footer {
+          .confirm-dialog-responsive .p-dialog-footer {
             padding: 0.5rem 1rem 1rem !important;
             flex-direction: column-reverse;
             gap: 0.5rem;
           }
 
-          .p-confirmdialog .p-button {
+          .confirm-dialog-responsive .p-button {
             width: 100%;
             margin: 0 !important;
           }
