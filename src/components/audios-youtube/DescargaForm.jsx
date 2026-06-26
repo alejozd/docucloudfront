@@ -33,9 +33,18 @@ const matchesAudioFilename = (fileName, targetName) => {
 };
 
 /**
+ * Extraer ID de video de una URL de YouTube
+ */
+const getYoutubeVideoId = (url) => {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
+
+/**
  * Formulario para descargar audio desde YouTube
  */
-const DescargaForm = ({ onDownloadComplete }) => {
+const DescargaForm = ({ onDownloadComplete, files = [] }) => {
   const toast = useRef(null);
   const [url, setUrl] = useState('');
   const [isValidUrl, setIsValidUrl] = useState(false);
@@ -83,6 +92,9 @@ const DescargaForm = ({ onDownloadComplete }) => {
     clearPolling();
     setIsLoading(false);
 
+    // Limpiar localStorage al completar
+    localStorage.removeItem('activeAudioDownload');
+
     if (onDownloadComplete) {
       onDownloadComplete({ ...data, filename: completedFilename });
     }
@@ -94,23 +106,36 @@ const DescargaForm = ({ onDownloadComplete }) => {
     setIsValidUrl(youtubeRegex.test(url.trim()));
   }, [url]);
 
-  // Limpiar intervalo al desmontar
+  // Recuperar descarga activa al montar
   useEffect(() => {
+    const activeDownload = localStorage.getItem('activeAudioDownload');
+    if (activeDownload) {
+      try {
+        const { filename, url: savedUrl } = JSON.parse(activeDownload);
+        if (filename) {
+          setUrl(savedUrl || '');
+          setIsLoading(true);
+          setDownloadStatus('downloading');
+          setStatusMessage('Reanudando seguimiento de descarga...');
+          checkStatus(filename);
+        }
+      } catch (e) {
+        console.error('Error al parsear activeAudioDownload:', e);
+        localStorage.removeItem('activeAudioDownload');
+      }
+    }
+
     return () => {
       clearPolling();
     };
-  }, [clearPolling]);
+  }, []); // Solo al montar
 
   /**
    * Verificar estado de la descarga mediante polling
    */
   const checkStatus = useCallback(async (filename) => {
-    let attempts = 0;
-    const maxAttempts = 100; // 100 intentos = ~5 minutos con polling cada 3s
-
     const poll = async () => {
       try {
-        attempts++;
         const response = await audioDownloadService.getStatus(filename);
         const data = response.data;
         const { status, sizeFormatted, error, progress: backendProgress, completed, exists } = data;
@@ -142,27 +167,14 @@ const DescargaForm = ({ onDownloadComplete }) => {
           clearPolling();
           setIsLoading(false);
 
+          // Limpiar localStorage al fallar
+          localStorage.removeItem('activeAudioDownload');
+
           toast.current?.show({
             severity: 'error',
             summary: 'Error en Descarga',
             detail: error || 'La descarga falló',
             life: 5000
-          });
-          return;
-        }
-
-        if (attempts >= maxAttempts) {
-          setDownloadStatus('failed');
-          setDownloadError('Tiempo de espera agotado. La descarga puede estar en progreso.');
-          setStatusMessage('Tiempo de espera agotado');
-          clearPolling();
-          setIsLoading(false);
-
-          toast.current?.show({
-            severity: 'warn',
-            summary: 'Descarga Lenta',
-            detail: 'La descarga está tomando más tiempo de lo esperado. Verifica en la lista de archivos.',
-            life: 8000
           });
           return;
         }
@@ -194,6 +206,45 @@ const DescargaForm = ({ onDownloadComplete }) => {
     const trimmedUrl = targetUrl.trim();
     if (!trimmedUrl) return;
 
+    // 1. Verificar si ya hay una descarga en progreso para esta URL
+    const activeDownload = localStorage.getItem('activeAudioDownload');
+    if (activeDownload) {
+      try {
+        const { url: activeUrl } = JSON.parse(activeDownload);
+        if (activeUrl === trimmedUrl) {
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'Descarga en Progreso',
+            detail: 'Ya hay una descarga activa para este video.',
+            life: 3000
+          });
+          return;
+        }
+      } catch (e) {}
+    }
+
+    // 2. Verificar si el archivo ya existe (por ID de video)
+    const videoId = getYoutubeVideoId(trimmedUrl);
+    if (videoId) {
+      const alreadyDownloaded = files.some(file =>
+        (file.filename && file.filename.includes(videoId)) ||
+        (file.name && file.name.includes(videoId)) ||
+        (file.title && file.title.includes(videoId))
+      );
+
+      if (alreadyDownloaded) {
+        toast.current?.show({
+          severity: 'info',
+          summary: 'Video ya descargado',
+          detail: 'Este video ya se encuentra en la lista de audios.',
+          life: 5000
+        });
+        // Opcionalmente podrías no detener y permitir descargar de nuevo,
+        // pero el requisito pide prevención de duplicados.
+        return;
+      }
+    }
+
     clearPolling();
     completionNotifiedRef.current = false;
     setIsLoading(true);
@@ -214,6 +265,13 @@ const DescargaForm = ({ onDownloadComplete }) => {
           completeDownload(data, filename);
           return;
         }
+
+        // Guardar en localStorage
+        localStorage.setItem('activeAudioDownload', JSON.stringify({
+          filename,
+          url: trimmedUrl,
+          timestamp: new Date().getTime()
+        }));
 
         setDownloadStatus('downloading');
         checkStatus(filename);
@@ -263,6 +321,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
     setStatusMessage('');
     setProgress(0);
     setIsLoading(false);
+    localStorage.removeItem('activeAudioDownload');
   };
 
   const safeProgress = getSafeProgress(progress);
@@ -310,7 +369,7 @@ const DescargaForm = ({ onDownloadComplete }) => {
                   {statusMessage || 'Descargando audio...'}
                 </span>
                 <small className="text-secondary">
-                  Esto puede tomar varios minutos dependiendo del tamaño del video
+                  La descarga puede tomar varios minutos/horas dependiendo del tamaño del video. Puedes cerrar esta ventana y volver más tarde.
                 </small>
               </div>
               {safeProgress > 0 && (
