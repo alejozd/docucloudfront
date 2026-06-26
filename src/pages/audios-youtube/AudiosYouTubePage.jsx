@@ -92,8 +92,26 @@ const AudiosYouTubePage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       loadFiles();
+
+      // Verificar si hay un procesamiento activo al cargar
+      const activeProcess = localStorage.getItem('activeAudioProcess');
+      if (activeProcess) {
+        try {
+          const { taskId, audio } = JSON.parse(activeProcess);
+          if (taskId) {
+            setSelectedAudio(audio);
+            setShowProcessModal(true);
+            setIsProcessing(true);
+            setProcessStatusMessage('Reanudando seguimiento de procesamiento...');
+            startProcessStatusPolling(taskId, audio);
+          }
+        } catch (e) {
+          console.error('Error al parsear activeAudioProcess:', e);
+          localStorage.removeItem('activeAudioProcess');
+        }
+      }
     }
-  }, [isAuthenticated, loadFiles]);
+  }, [isAuthenticated, loadFiles, startProcessStatusPolling]);
 
   /**
    * Manejar autenticación
@@ -186,15 +204,11 @@ const AudiosYouTubePage = () => {
   /**
    * Iniciar polling de estado de procesamiento
    */
-  const startProcessStatusPolling = useCallback((taskId) => {
+  const startProcessStatusPolling = useCallback((taskId, audioData = null) => {
     clearProcessPolling();
-
-    let attempts = 0;
-    const maxAttempts = 150; // ~7.5 minutos
 
     const poll = async () => {
       try {
-        attempts++;
         const response = await audioDownloadService.getProcessStatus(taskId);
         const data = response.data;
         const { status, progress, message, error } = data;
@@ -210,6 +224,7 @@ const AudiosYouTubePage = () => {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessProgress(100);
+          localStorage.removeItem('activeAudioProcess');
 
           toastRef.current?.show({
             severity: 'success',
@@ -230,10 +245,11 @@ const AudiosYouTubePage = () => {
           return;
         }
 
-        if (status === 'failed' || status === 'error' || attempts >= maxAttempts) {
+        if (status === 'failed' || status === 'error') {
           clearProcessPolling();
           setIsProcessing(false);
-          setProcessError(error || (attempts >= maxAttempts ? 'Tiempo de espera agotado' : 'Error en el procesamiento'));
+          setProcessError(error || 'Error en el procesamiento');
+          localStorage.removeItem('activeAudioProcess');
           return;
         }
 
@@ -267,7 +283,14 @@ const AudiosYouTubePage = () => {
       const { taskId } = response.data;
 
       if (taskId) {
-        startProcessStatusPolling(taskId);
+        // Guardar en localStorage
+        localStorage.setItem('activeAudioProcess', JSON.stringify({
+          taskId,
+          audio: selectedAudio,
+          timestamp: new Date().getTime()
+        }));
+
+        startProcessStatusPolling(taskId, selectedAudio);
       } else {
         throw new Error('No se recibió ID de proceso');
       }
@@ -406,6 +429,7 @@ const AudiosYouTubePage = () => {
       >
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
+          files={files}
         />
       </Card>
 
