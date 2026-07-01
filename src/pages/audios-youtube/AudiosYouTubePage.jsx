@@ -200,14 +200,6 @@ const AudiosYouTubePage = () => {
     setTimeout(() => loadFiles(), 1000);
   }, [loadFiles, refreshActiveTasks]);
 
-  /**
-   * Manejar progreso de descarga
-   */
-  const handleProgressUpdate = useCallback((filename, progress) => {
-    setTasksProgress(prev => ({ ...prev, [filename]: progress }));
-    // Si no está en la lista de activos, refrescarla
-    setActiveFilenames(prev => prev.includes(filename) ? prev : [...prev, filename]);
-  }, []);
 
   /**
    * Manejar reproducción de audio
@@ -459,7 +451,7 @@ const AudiosYouTubePage = () => {
 
       return () => clearInterval(listRefreshInterval);
     }
-  }, [isAuthenticated, loadFiles, startProcessStatusPolling]);
+  }, [isAuthenticated, loadFiles, startProcessStatusPolling, startDownloadStatusPolling, refreshActiveTasks]);
 
   /**
    * Manejar inicio de procesamiento
@@ -542,16 +534,6 @@ const AudiosYouTubePage = () => {
     }
   }, [player]);
 
-  /**
-   * Manejar play/pause desde el reproductor
-   */
-  const handlePlayPause = () => {
-    if (player.isPlaying) {
-      player.pause();
-    } else {
-      player.resume();
-    }
-  };
 
   /**
    * Manejar reanudar desde el inicio
