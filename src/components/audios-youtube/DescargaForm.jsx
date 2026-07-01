@@ -191,8 +191,8 @@ const DescargaForm = ({ onDownloadComplete, files = [] }) => {
         pollingTimeoutRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error al verificar estado:', error);
-        // Reintentar poll en caso de error de red
-        pollingTimeoutRef.current = setTimeout(poll, 3000);
+        // NO detener polling por errores de red, reintentar automáticamente
+        pollingTimeoutRef.current = setTimeout(poll, 5000);
       }
     };
 
