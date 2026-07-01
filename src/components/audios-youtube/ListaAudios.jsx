@@ -12,7 +12,7 @@ import audioDownloadService from '../../services/audioDownloadService';
 const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilenames = [], tasksProgress = {} }) => {
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
 
-  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
+  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || rowData?.title || '';
 
   // Detectar tamaño de pantalla para vista responsive
   useEffect(() => {
@@ -128,6 +128,10 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
    * Renderizar cards para móvil
    */
   const renderCard = (audio) => {
+    const audioName = getAudioName(audio);
+    const isActive = activeFilenames.includes(audioName);
+    const progress = tasksProgress[audioName];
+
     return (
       <div className="col-12 mb-3">
         <div className="card p-3 shadow-2 surface-card border-round">
@@ -143,11 +147,11 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
                 </span>
                 <small className="text-secondary text-xs mt-1 flex align-items-center gap-2">
                   {formatSize(audio.size)}
-                  {activeFilenames.includes(getAudioName(audio)) && (
+                  {isActive && (
                     <>
                       <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
-                      {tasksProgress[getAudioName(audio)] !== undefined && (
-                        <span className="text-primary font-bold">{tasksProgress[getAudioName(audio)]}%</span>
+                      {progress !== undefined && (
+                        <span className="text-primary font-bold">{progress}%</span>
                       )}
                     </>
                   )}
@@ -296,9 +300,9 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
             header="Tamaño"
             sortable
             body={(rowData) => {
-              const filename = getAudioName(rowData);
-              const isActive = activeFilenames.includes(filename);
-              const progress = tasksProgress[filename];
+              const audioName = getAudioName(rowData);
+              const isActive = activeFilenames.includes(audioName);
+              const progress = tasksProgress[audioName];
 
               return (
                 <div className="flex align-items-center gap-2">
