@@ -29,8 +29,6 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
-  
   /**
    * Formatear tamaño de archivo
    */
