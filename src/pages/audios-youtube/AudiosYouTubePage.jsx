@@ -86,32 +86,6 @@ const AudiosYouTubePage = () => {
     }
   }, [isAuthenticated]);
 
-  /**
-   * Cargar archivos al autenticarse
-   */
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadFiles();
-
-      // Verificar si hay un procesamiento activo al cargar
-      const activeProcess = localStorage.getItem('activeAudioProcess');
-      if (activeProcess) {
-        try {
-          const { taskId, audio } = JSON.parse(activeProcess);
-          if (taskId) {
-            setSelectedAudio(audio);
-            setShowProcessModal(true);
-            setIsProcessing(true);
-            setProcessStatusMessage('Reanudando seguimiento de procesamiento...');
-            startProcessStatusPolling(taskId, audio);
-          }
-        } catch (e) {
-          console.error('Error al parsear activeAudioProcess:', e);
-          localStorage.removeItem('activeAudioProcess');
-        }
-      }
-    }
-  }, [isAuthenticated, loadFiles, startProcessStatusPolling]);
 
   /**
    * Manejar autenticación
@@ -204,7 +178,7 @@ const AudiosYouTubePage = () => {
   /**
    * Iniciar polling de estado de procesamiento
    */
-  const startProcessStatusPolling = useCallback((taskId, audioData = null) => {
+  const startProcessStatusPolling = useCallback((taskId) => {
     clearProcessPolling();
 
     const poll = async () => {
@@ -261,13 +235,40 @@ const AudiosYouTubePage = () => {
         processPollingRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error al consultar estado de procesamiento:', error);
-        // Reintentar en caso de error de red
-        processPollingRef.current = setTimeout(poll, 3000);
+        // NO detener polling por errores de red, reintentar automáticamente
+        processPollingRef.current = setTimeout(poll, 5000);
       }
     };
 
     poll();
   }, [clearProcessPolling, loadFiles]);
+
+  /**
+   * Cargar archivos al autenticarse
+   */
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFiles();
+
+      // Verificar si hay un procesamiento activo al cargar
+      const activeProcess = localStorage.getItem('activeAudioProcess');
+      if (activeProcess) {
+        try {
+          const { taskId, audio } = JSON.parse(activeProcess);
+          if (taskId) {
+            setSelectedAudio(audio);
+            setShowProcessModal(true);
+            setIsProcessing(true);
+            setProcessStatusMessage('Reanudando seguimiento de procesamiento...');
+            startProcessStatusPolling(taskId, audio);
+          }
+        } catch (e) {
+          console.error('Error al parsear activeAudioProcess:', e);
+          localStorage.removeItem('activeAudioProcess');
+        }
+      }
+    }
+  }, [isAuthenticated, loadFiles, startProcessStatusPolling]);
 
   /**
    * Manejar inicio de procesamiento
@@ -290,7 +291,7 @@ const AudiosYouTubePage = () => {
           timestamp: new Date().getTime()
         }));
 
-        startProcessStatusPolling(taskId, selectedAudio);
+        startProcessStatusPolling(taskId);
       } else {
         throw new Error('No se recibió ID de proceso');
       }
