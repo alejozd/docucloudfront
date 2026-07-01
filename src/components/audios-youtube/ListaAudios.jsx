@@ -9,7 +9,7 @@ import audioDownloadService from '../../services/audioDownloadService';
 /**
  * Lista de archivos de audio descargados
  */
-const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
+const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilenames = [] }) => {
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
 
   // Detectar tamaño de pantalla para vista responsive
@@ -141,8 +141,12 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
                 <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
                   {audio.title || audio.name}
                 </span>
-                <small className="text-secondary text-xs mt-1">
-                  {formatSize(audio.size)} • {formatDate(audio.createdAt)}
+                <small className="text-secondary text-xs mt-1 flex align-items-center gap-2">
+                  {formatSize(audio.size)}
+                  {activeFilenames.includes(getAudioName(audio)) && (
+                    <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
+                  )}
+                  • {formatDate(audio.createdAt)}
                 </small>
               </div>
             </div>
@@ -286,7 +290,14 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
             field="size"
             header="Tamaño"
             sortable
-            body={(rowData) => formatSize(rowData.size)}
+            body={(rowData) => (
+              <div className="flex align-items-center gap-2">
+                <span>{formatSize(rowData.size)}</span>
+                {activeFilenames.includes(getAudioName(rowData)) && (
+                  <i className="pi pi-spin pi-spinner text-primary" title="Archivo en proceso/descarga"></i>
+                )}
+              </div>
+            )}
             style={{ width: '15%' }}
           />
           <Column
