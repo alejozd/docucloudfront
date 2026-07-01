@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Toast } from 'primereact/toast';
 import PasswordModal from '../../components/audios-youtube/PasswordModal';
@@ -18,6 +19,7 @@ const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
  */
 const AudiosYouTubePage = () => {
   const toastRef = useRef(null);
+  const navigate = useNavigate();
   
   // Estado de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +42,42 @@ const AudiosYouTubePage = () => {
   const [processError, setProcessError] = useState(null);
   const processPollingRef = useRef(null);
 
+  // Estado para polling de descarga
+  const downloadPollingRef = useRef(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadStatusMessage, setDownloadStatusMessage] = useState('');
+  const [downloadError, setDownloadError] = useState(null);
+
+  // Estado para rastrear archivos activos (descarga o proceso)
+  const [activeFilenames, setActiveFilenames] = useState([]);
+  const [tasksProgress, setTasksProgress] = useState({}); // { filename: progress }
+
+  /**
+   * Actualizar lista de archivos activos desde localStorage
+   */
+  const refreshActiveTasks = useCallback(() => {
+    const activeDownload = localStorage.getItem('activeAudioDownload');
+    const activeProcess = localStorage.getItem('activeAudioProcess');
+
+    const activeList = [];
+    if (activeDownload) {
+      try {
+        const { filename } = JSON.parse(activeDownload);
+        if (filename) activeList.push(filename);
+      } catch (e) {}
+    }
+    if (activeProcess) {
+      try {
+        const { audio } = JSON.parse(activeProcess);
+        if (audio?.filename) activeList.push(audio.filename);
+      } catch (e) {}
+    }
+
+    setActiveFilenames(activeList);
+    return activeList;
+  }, []);
+
   /**
    * Verificar si ya está autenticado en sessionStorage
    */
@@ -54,10 +92,10 @@ const AudiosYouTubePage = () => {
   /**
    * Cargar lista de archivos
    */
-  const loadFiles = useCallback(async () => {
+  const loadFiles = useCallback(async (isSilent = false) => {
     if (!isAuthenticated) return;
     
-    setFilesLoading(true);
+    if (!isSilent) setFilesLoading(true);
     try {
       const response = await audioDownloadService.listFiles();
       const data = response.data;
@@ -86,14 +124,6 @@ const AudiosYouTubePage = () => {
     }
   }, [isAuthenticated]);
 
-  /**
-   * Cargar archivos al autenticarse
-   */
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadFiles();
-    }
-  }, [isAuthenticated, loadFiles]);
 
   /**
    * Manejar autenticación
@@ -138,19 +168,27 @@ const AudiosYouTubePage = () => {
   };
 
   /**
-   * Manejar cierre del modal de password
+   * Manejar cierre del modal de password (clic en Cancelar)
    */
   const handlePasswordModalHide = () => {
-    // No permitir cerrar sin autenticar
     if (!isAuthenticated) {
-      setShowPasswordModal(true);
+      navigate('/'); // Redirigir a Inicio
     }
   };
 
   /**
    * Manejar descarga completada
    */
-  const handleDownloadComplete = (data) => {
+  const handleDownloadComplete = useCallback((data) => {
+    // Limpiar progreso de la lista
+    if (data.filename) {
+      setTasksProgress(prev => {
+        const newState = { ...prev };
+        delete newState[data.filename];
+        return newState;
+      });
+    }
+
     toastRef.current?.show({
       severity: 'success',
       summary: 'Descarga Completada',
@@ -158,20 +196,22 @@ const AudiosYouTubePage = () => {
       life: 5000
     });
     
-    // Recargar lista de archivos
+    // Recargar lista de archivos y tareas activas
+    refreshActiveTasks();
     setTimeout(() => loadFiles(), 1000);
-  };
+  }, [loadFiles, refreshActiveTasks]);
+
 
   /**
    * Manejar reproducción de audio
    */
-  const handlePlay = (audioData) => {
+  const handlePlay = useCallback((audioData) => {
     player.play({
       filename: audioData.filename,
       title: audioData.title || audioData.filename
       // NO incluir streamUrl ni duration, se generarán dinámicamente
     });
-  };
+  }, [player]);
 
   /**
    * Limpiar polling de procesamiento
@@ -184,20 +224,93 @@ const AudiosYouTubePage = () => {
   }, []);
 
   /**
+   * Limpiar polling de descarga
+   */
+  const clearDownloadPolling = useCallback(() => {
+    if (downloadPollingRef.current) {
+      clearTimeout(downloadPollingRef.current);
+      downloadPollingRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Iniciar polling de estado de descarga
+   */
+  const startDownloadStatusPolling = useCallback((filename) => {
+    clearDownloadPolling();
+
+    const poll = async () => {
+      try {
+        const response = await audioDownloadService.getStatus(filename);
+        const data = response.data;
+        const { status, progress, message, error, completed, exists } = data;
+
+        if (progress !== undefined) {
+          setTasksProgress(prev => ({ ...prev, [filename]: progress }));
+          setDownloadProgress(progress);
+        }
+
+        if (status === 'completed' || completed === true || exists === true) {
+          clearDownloadPolling();
+          setIsDownloading(false);
+          setDownloadProgress(100);
+
+          handleDownloadComplete(data);
+          localStorage.removeItem('activeAudioDownload');
+          refreshActiveTasks();
+          return;
+        }
+
+        if (status === 'failed' || status === 'error') {
+          clearDownloadPolling();
+          setIsDownloading(false);
+          setDownloadError(error || 'Error en la descarga');
+          setDownloadStatusMessage(error || 'Error en la descarga');
+
+          setTasksProgress(prev => {
+            const newState = { ...prev };
+            delete newState[filename];
+            return newState;
+          });
+
+          localStorage.removeItem('activeAudioDownload');
+          refreshActiveTasks();
+          return;
+        }
+
+        setDownloadStatusMessage(message || 'Descargando...');
+        downloadPollingRef.current = setTimeout(poll, 3000);
+      } catch (error) {
+        console.error('Error polling descarga:', error);
+        downloadPollingRef.current = setTimeout(poll, 5000);
+      }
+    };
+
+    poll();
+  }, [clearDownloadPolling, handleDownloadComplete, refreshActiveTasks]);
+
+  /**
    * Iniciar polling de estado de procesamiento
    */
   const startProcessStatusPolling = useCallback((taskId) => {
     clearProcessPolling();
 
-    let attempts = 0;
-    const maxAttempts = 150; // ~7.5 minutos
-
     const poll = async () => {
       try {
-        attempts++;
         const response = await audioDownloadService.getProcessStatus(taskId);
         const data = response.data;
         const { status, progress, message, error } = data;
+
+        // Actualizar progreso para la lista
+        const activeProcessData = localStorage.getItem('activeAudioProcess');
+        if (activeProcessData) {
+          try {
+            const { audio } = JSON.parse(activeProcessData);
+            if (audio?.filename && progress !== undefined) {
+              setTasksProgress(prev => ({ ...prev, [audio.filename]: progress }));
+            }
+          } catch (e) {}
+        }
 
         // Terminal success states
         const isCompleted = status === 'completed' ||
@@ -210,6 +323,23 @@ const AudiosYouTubePage = () => {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessProgress(100);
+
+          // Limpiar progreso al completar
+          const activeProcessDataClear = localStorage.getItem('activeAudioProcess');
+          if (activeProcessDataClear) {
+            try {
+              const { audio } = JSON.parse(activeProcessDataClear);
+              if (audio?.filename) {
+                setTasksProgress(prev => {
+                  const newState = { ...prev };
+                  delete newState[audio.filename];
+                  return newState;
+                });
+              }
+            } catch (e) {}
+          }
+
+          localStorage.removeItem('activeAudioProcess');
 
           toastRef.current?.show({
             severity: 'success',
@@ -230,10 +360,27 @@ const AudiosYouTubePage = () => {
           return;
         }
 
-        if (status === 'failed' || status === 'error' || attempts >= maxAttempts) {
+        if (status === 'failed' || status === 'error') {
           clearProcessPolling();
           setIsProcessing(false);
-          setProcessError(error || (attempts >= maxAttempts ? 'Tiempo de espera agotado' : 'Error en el procesamiento'));
+          setProcessError(error || 'Error en el procesamiento');
+
+          // Limpiar progreso al fallar
+          const activeProcessDataFail = localStorage.getItem('activeAudioProcess');
+          if (activeProcessDataFail) {
+            try {
+              const { audio } = JSON.parse(activeProcessDataFail);
+              if (audio?.filename) {
+                setTasksProgress(prev => {
+                  const newState = { ...prev };
+                  delete newState[audio.filename];
+                  return newState;
+                });
+              }
+            } catch (e) {}
+          }
+
+          localStorage.removeItem('activeAudioProcess');
           return;
         }
 
@@ -245,8 +392,8 @@ const AudiosYouTubePage = () => {
         processPollingRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error al consultar estado de procesamiento:', error);
-        // Reintentar en caso de error de red
-        processPollingRef.current = setTimeout(poll, 3000);
+        // NO detener polling por errores de red, reintentar automáticamente
+        processPollingRef.current = setTimeout(poll, 5000);
       }
     };
 
@@ -254,9 +401,63 @@ const AudiosYouTubePage = () => {
   }, [clearProcessPolling, loadFiles]);
 
   /**
+   * Cargar archivos al autenticarse
+   */
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFiles();
+      refreshActiveTasks();
+
+      // Polling periódico de la lista si hay tareas activas
+      const listRefreshInterval = setInterval(() => {
+        const activeList = refreshActiveTasks();
+
+        if (activeList.length > 0) {
+          loadFiles(true); // Silent refresh
+        }
+      }, 10000); // Cada 10 segundos
+
+      // Verificar si hay una descarga activa al cargar
+      const activeDownload = localStorage.getItem('activeAudioDownload');
+      if (activeDownload) {
+        try {
+          const { filename } = JSON.parse(activeDownload);
+          if (filename) {
+            setIsDownloading(true);
+            setDownloadStatusMessage('Reanudando seguimiento de descarga...');
+            startDownloadStatusPolling(filename);
+          }
+        } catch (e) {
+          localStorage.removeItem('activeAudioDownload');
+        }
+      }
+
+      // Verificar si hay un procesamiento activo al cargar
+      const activeProcess = localStorage.getItem('activeAudioProcess');
+      if (activeProcess) {
+        try {
+          const { taskId, audio } = JSON.parse(activeProcess);
+          if (taskId) {
+            setSelectedAudio(audio);
+            setShowProcessModal(true);
+            setIsProcessing(true);
+            setProcessStatusMessage('Reanudando seguimiento de procesamiento...');
+            startProcessStatusPolling(taskId);
+          }
+        } catch (e) {
+          console.error('Error al parsear activeAudioProcess:', e);
+          localStorage.removeItem('activeAudioProcess');
+        }
+      }
+
+      return () => clearInterval(listRefreshInterval);
+    }
+  }, [isAuthenticated, loadFiles, startProcessStatusPolling, startDownloadStatusPolling, refreshActiveTasks]);
+
+  /**
    * Manejar inicio de procesamiento
    */
-  const handleProcessAudio = async (filename, operations) => {
+  const handleProcessAudio = useCallback(async (filename, operations) => {
     setIsProcessing(true);
     setProcessProgress(0);
     setProcessStatusMessage('Iniciando procesamiento...');
@@ -267,6 +468,13 @@ const AudiosYouTubePage = () => {
       const { taskId } = response.data;
 
       if (taskId) {
+        // Guardar en localStorage
+        localStorage.setItem('activeAudioProcess', JSON.stringify({
+          taskId,
+          audio: selectedAudio,
+          timestamp: new Date().getTime()
+        }));
+
         startProcessStatusPolling(taskId);
       } else {
         throw new Error('No se recibió ID de proceso');
@@ -283,23 +491,23 @@ const AudiosYouTubePage = () => {
         life: 3000
       });
     }
-  };
+  }, [selectedAudio, startProcessStatusPolling]);
 
   /**
    * Abrir modal de procesamiento
    */
-  const openProcessModal = (audio) => {
+  const openProcessModal = useCallback((audio) => {
     setSelectedAudio(audio);
     setShowProcessModal(true);
     setProcessError(null);
     setProcessProgress(0);
     setProcessStatusMessage('');
-  };
+  }, []);
 
   /**
    * Manejar eliminación de archivo
    */
-  const handleDelete = async (audioData) => {
+  const handleDelete = useCallback(async (audioData) => {
     try {
       await audioDownloadService.deleteFile(audioData.filename);
       toastRef.current?.show({
@@ -325,18 +533,8 @@ const AudiosYouTubePage = () => {
         life: 3000
       });
     }
-  };
+  }, [player]);
 
-  /**
-   * Manejar play/pause desde el reproductor
-   */
-  const handlePlayPause = () => {
-    if (player.isPlaying) {
-      player.pause();
-    } else {
-      player.resume();
-    }
-  };
 
   /**
    * Manejar reanudar desde el inicio
@@ -367,8 +565,11 @@ const AudiosYouTubePage = () => {
    * Limpiar al desmontar
    */
   useEffect(() => {
-    return () => clearProcessPolling();
-  }, [clearProcessPolling]);
+    return () => {
+      clearProcessPolling();
+      clearDownloadPolling();
+    };
+  }, [clearProcessPolling, clearDownloadPolling]);
 
   // Mostrar modal de password si no está autenticado
   if (!isAuthenticated) {
@@ -406,6 +607,24 @@ const AudiosYouTubePage = () => {
       >
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
+          files={files}
+          onDownloadStart={(filename) => {
+            refreshActiveTasks();
+            setIsDownloading(true);
+            setDownloadProgress(0);
+            setDownloadStatusMessage('Iniciando...');
+            startDownloadStatusPolling(filename);
+          }}
+          isDownloading={isDownloading}
+          downloadProgress={downloadProgress}
+          downloadStatusMessage={downloadStatusMessage}
+          downloadError={downloadError}
+          onCancelDownload={() => {
+            clearDownloadPolling();
+            setIsDownloading(false);
+            localStorage.removeItem('activeAudioDownload');
+            refreshActiveTasks();
+          }}
         />
       </Card>
 
@@ -420,13 +639,15 @@ const AudiosYouTubePage = () => {
           onDelete={handleDelete}
           onProcess={openProcessModal}
           loading={filesLoading}
+          activeFilenames={activeFilenames}
+          tasksProgress={tasksProgress}
         />
       </Card>
 
       {/* Modal de Procesamiento */}
       <ProcesamientoModal
         visible={showProcessModal}
-        onHide={() => !isProcessing && setShowProcessModal(false)}
+        onHide={() => setShowProcessModal(false)}
         audio={selectedAudio}
         onProcess={handleProcessAudio}
         processing={isProcessing}

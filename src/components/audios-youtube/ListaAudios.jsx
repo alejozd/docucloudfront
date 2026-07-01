@@ -9,8 +9,10 @@ import audioDownloadService from '../../services/audioDownloadService';
 /**
  * Lista de archivos de audio descargados
  */
-const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
+const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilenames = [], tasksProgress = {} }) => {
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
+
+  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || rowData?.title || '';
 
   // Detectar tamaño de pantalla para vista responsive
   useEffect(() => {
@@ -27,8 +29,6 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
-  
   /**
    * Formatear tamaño de archivo
    */
@@ -128,6 +128,10 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
    * Renderizar cards para móvil
    */
   const renderCard = (audio) => {
+    const audioName = getAudioName(audio);
+    const isActive = activeFilenames.includes(audioName);
+    const progress = tasksProgress[audioName];
+
     return (
       <div className="col-12 mb-3">
         <div className="card p-3 shadow-2 surface-card border-round">
@@ -141,8 +145,17 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
                 <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
                   {audio.title || audio.name}
                 </span>
-                <small className="text-secondary text-xs mt-1">
-                  {formatSize(audio.size)} • {formatDate(audio.createdAt)}
+                <small className="text-secondary text-xs mt-1 flex align-items-center gap-2">
+                  {formatSize(audio.size)}
+                  {isActive && (
+                    <>
+                      <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
+                      {progress !== undefined && (
+                        <span className="text-primary font-bold">{progress}%</span>
+                      )}
+                    </>
+                  )}
+                  • {formatDate(audio.createdAt)}
                 </small>
               </div>
             </div>
@@ -246,7 +259,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
 
   return (
     <>
-      <ConfirmDialog className="confirm-dialog-responsive" containerClassName="confirm-dialog-responsive" />
+      <ConfirmDialog className="confirm-dialog-responsive" />
 
       {/* Selector de vista */}
       <div className="flex justify-content-end mb-3">
@@ -286,8 +299,26 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading }) => {
             field="size"
             header="Tamaño"
             sortable
-            body={(rowData) => formatSize(rowData.size)}
-            style={{ width: '15%' }}
+            body={(rowData) => {
+              const audioName = getAudioName(rowData);
+              const isActive = activeFilenames.includes(audioName);
+              const progress = tasksProgress[audioName];
+
+              return (
+                <div className="flex align-items-center gap-2">
+                  <span>{formatSize(rowData.size)}</span>
+                  {isActive && (
+                    <>
+                      <i className="pi pi-spin pi-spinner text-primary" title="Archivo en proceso/descarga"></i>
+                      {progress !== undefined && (
+                        <span className="text-primary font-bold text-xs">{progress}%</span>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            }}
+            style={{ width: '18%' }}
           />
           <Column
             field="createdAt"
