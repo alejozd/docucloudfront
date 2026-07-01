@@ -42,6 +42,7 @@ const AudiosYouTubePage = () => {
 
   // Estado para rastrear archivos activos (descarga o proceso)
   const [activeFilenames, setActiveFilenames] = useState([]);
+  const [tasksProgress, setTasksProgress] = useState({}); // { filename: progress }
 
   /**
    * Verificar si ya está autenticado en sessionStorage
@@ -146,6 +147,15 @@ const AudiosYouTubePage = () => {
    * Manejar descarga completada
    */
   const handleDownloadComplete = (data) => {
+    // Limpiar progreso de la lista
+    if (data.filename) {
+      setTasksProgress(prev => {
+        const newState = { ...prev };
+        delete newState[data.filename];
+        return newState;
+      });
+    }
+
     toastRef.current?.show({
       severity: 'success',
       summary: 'Descarga Completada',
@@ -190,6 +200,17 @@ const AudiosYouTubePage = () => {
         const data = response.data;
         const { status, progress, message, error } = data;
 
+        // Actualizar progreso para la lista
+        const activeProcessData = localStorage.getItem('activeAudioProcess');
+        if (activeProcessData) {
+          try {
+            const { audio } = JSON.parse(activeProcessData);
+            if (audio?.filename && progress !== undefined) {
+              setTasksProgress(prev => ({ ...prev, [audio.filename]: progress }));
+            }
+          } catch (e) {}
+        }
+
         // Terminal success states
         const isCompleted = status === 'completed' ||
                            status === 'finished' ||
@@ -201,6 +222,22 @@ const AudiosYouTubePage = () => {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessProgress(100);
+
+          // Limpiar progreso al completar
+          const activeProcessDataClear = localStorage.getItem('activeAudioProcess');
+          if (activeProcessDataClear) {
+            try {
+              const { audio } = JSON.parse(activeProcessDataClear);
+              if (audio?.filename) {
+                setTasksProgress(prev => {
+                  const newState = { ...prev };
+                  delete newState[audio.filename];
+                  return newState;
+                });
+              }
+            } catch (e) {}
+          }
+
           localStorage.removeItem('activeAudioProcess');
 
           toastRef.current?.show({
@@ -226,6 +263,22 @@ const AudiosYouTubePage = () => {
           clearProcessPolling();
           setIsProcessing(false);
           setProcessError(error || 'Error en el procesamiento');
+
+          // Limpiar progreso al fallar
+          const activeProcessDataFail = localStorage.getItem('activeAudioProcess');
+          if (activeProcessDataFail) {
+            try {
+              const { audio } = JSON.parse(activeProcessDataFail);
+              if (audio?.filename) {
+                setTasksProgress(prev => {
+                  const newState = { ...prev };
+                  delete newState[audio.filename];
+                  return newState;
+                });
+              }
+            } catch (e) {}
+          }
+
           localStorage.removeItem('activeAudioProcess');
           return;
         }
@@ -289,7 +342,7 @@ const AudiosYouTubePage = () => {
             setShowProcessModal(true);
             setIsProcessing(true);
             setProcessStatusMessage('Reanudando seguimiento de procesamiento...');
-            startProcessStatusPolling(taskId, audio);
+            startProcessStatusPolling(taskId);
           }
         } catch (e) {
           console.error('Error al parsear activeAudioProcess:', e);
@@ -462,6 +515,9 @@ const AudiosYouTubePage = () => {
         <DescargaForm 
           onDownloadComplete={handleDownloadComplete}
           files={files}
+          onProgressUpdate={(filename, progress) => {
+            setTasksProgress(prev => ({ ...prev, [filename]: progress }));
+          }}
         />
       </Card>
 
@@ -477,6 +533,7 @@ const AudiosYouTubePage = () => {
           onProcess={openProcessModal}
           loading={filesLoading}
           activeFilenames={activeFilenames}
+          tasksProgress={tasksProgress}
         />
       </Card>
 

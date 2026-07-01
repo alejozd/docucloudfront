@@ -9,8 +9,10 @@ import audioDownloadService from '../../services/audioDownloadService';
 /**
  * Lista de archivos de audio descargados
  */
-const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilenames = [] }) => {
+const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilenames = [], tasksProgress = {} }) => {
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
+
+  const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || '';
 
   // Detectar tamaño de pantalla para vista responsive
   useEffect(() => {
@@ -144,7 +146,12 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
                 <small className="text-secondary text-xs mt-1 flex align-items-center gap-2">
                   {formatSize(audio.size)}
                   {activeFilenames.includes(getAudioName(audio)) && (
-                    <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
+                    <>
+                      <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
+                      {tasksProgress[getAudioName(audio)] !== undefined && (
+                        <span className="text-primary font-bold">{tasksProgress[getAudioName(audio)]}%</span>
+                      )}
+                    </>
                   )}
                   • {formatDate(audio.createdAt)}
                 </small>
@@ -290,15 +297,26 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
             field="size"
             header="Tamaño"
             sortable
-            body={(rowData) => (
-              <div className="flex align-items-center gap-2">
-                <span>{formatSize(rowData.size)}</span>
-                {activeFilenames.includes(getAudioName(rowData)) && (
-                  <i className="pi pi-spin pi-spinner text-primary" title="Archivo en proceso/descarga"></i>
-                )}
-              </div>
-            )}
-            style={{ width: '15%' }}
+            body={(rowData) => {
+              const filename = getAudioName(rowData);
+              const isActive = activeFilenames.includes(filename);
+              const progress = tasksProgress[filename];
+
+              return (
+                <div className="flex align-items-center gap-2">
+                  <span>{formatSize(rowData.size)}</span>
+                  {isActive && (
+                    <>
+                      <i className="pi pi-spin pi-spinner text-primary" title="Archivo en proceso/descarga"></i>
+                      {progress !== undefined && (
+                        <span className="text-primary font-bold text-xs">{progress}%</span>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            }}
+            style={{ width: '18%' }}
           />
           <Column
             field="createdAt"

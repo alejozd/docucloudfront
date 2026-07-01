@@ -44,7 +44,7 @@ const getYoutubeVideoId = (url) => {
 /**
  * Formulario para descargar audio desde YouTube
  */
-const DescargaForm = ({ onDownloadComplete, files = [] }) => {
+const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
   const toast = useRef(null);
   const [url, setUrl] = useState('');
   const [isValidUrl, setIsValidUrl] = useState(false);
@@ -184,6 +184,9 @@ const DescargaForm = ({ onDownloadComplete, files = [] }) => {
           setStatusMessage(data.message || 'Descargando audio...');
           if (backendProgress !== undefined) {
             setProgress(backendProgress);
+            if (onProgressUpdate) {
+              onProgressUpdate(filename, backendProgress);
+            }
           }
         }
 
@@ -312,7 +315,20 @@ const DescargaForm = ({ onDownloadComplete, files = [] }) => {
   };
 
   /**
-   * Cancelar descarga actual
+   * Limpiar estado local sin cancelar el proceso en el backend
+   */
+  const handleClose = () => {
+    clearPolling();
+    completionNotifiedRef.current = false;
+    setDownloadStatus(null);
+    setStatusMessage('');
+    setProgress(0);
+    setIsLoading(false);
+    // IMPORTANTE: NO eliminar de localStorage para permitir persistencia
+  };
+
+  /**
+   * Cancelar descarga actual (limpieza total)
    */
   const handleCancel = () => {
     clearPolling();
@@ -390,12 +406,22 @@ const DescargaForm = ({ onDownloadComplete, files = [] }) => {
               </small>
             )}
 
-            <Button
-              label="Cancelar"
-              icon="pi pi-times"
-              className="p-button-text p-button-sm align-self-end"
-              onClick={handleCancel}
-            />
+            <div className="flex gap-2 align-self-end">
+              <Button
+                label="Cerrar"
+                icon="pi pi-external-link"
+                className="p-button-text p-button-sm"
+                onClick={handleClose}
+                tooltip="Seguir proceso en segundo plano"
+                tooltipOptions={{ position: 'top' }}
+              />
+              <Button
+                label="Detener Polling"
+                icon="pi pi-times"
+                className="p-button-text p-button-sm p-button-danger"
+                onClick={handleCancel}
+              />
+            </div>
           </div>
         </div>
       )}
