@@ -40,6 +40,9 @@ const AudiosYouTubePage = () => {
   const [processError, setProcessError] = useState(null);
   const processPollingRef = useRef(null);
 
+  // Estado para rastrear archivos activos (descarga o proceso)
+  const [activeFilenames, setActiveFilenames] = useState([]);
+
   /**
    * Verificar si ya está autenticado en sessionStorage
    */
@@ -54,10 +57,10 @@ const AudiosYouTubePage = () => {
   /**
    * Cargar lista de archivos
    */
-  const loadFiles = useCallback(async () => {
+  const loadFiles = useCallback(async (isSilent = false) => {
     if (!isAuthenticated) return;
     
-    setFilesLoading(true);
+    if (!isSilent) setFilesLoading(true);
     try {
       const response = await audioDownloadService.listFiles();
       const data = response.data;
@@ -250,6 +253,32 @@ const AudiosYouTubePage = () => {
     if (isAuthenticated) {
       loadFiles();
 
+      // Polling periódico de la lista si hay tareas activas
+      const listRefreshInterval = setInterval(() => {
+        const activeDownload = localStorage.getItem('activeAudioDownload');
+        const activeProcess = localStorage.getItem('activeAudioProcess');
+
+        const activeList = [];
+        if (activeDownload) {
+          try {
+            const { filename } = JSON.parse(activeDownload);
+            if (filename) activeList.push(filename);
+          } catch (e) {}
+        }
+        if (activeProcess) {
+          try {
+            const { audio } = JSON.parse(activeProcess);
+            if (audio?.filename) activeList.push(audio.filename);
+          } catch (e) {}
+        }
+
+        setActiveFilenames(activeList);
+
+        if (activeList.length > 0) {
+          loadFiles(true); // Silent refresh
+        }
+      }, 10000); // Cada 10 segundos
+
       // Verificar si hay un procesamiento activo al cargar
       const activeProcess = localStorage.getItem('activeAudioProcess');
       if (activeProcess) {
@@ -267,6 +296,8 @@ const AudiosYouTubePage = () => {
           localStorage.removeItem('activeAudioProcess');
         }
       }
+
+      return () => clearInterval(listRefreshInterval);
     }
   }, [isAuthenticated, loadFiles, startProcessStatusPolling]);
 
@@ -445,6 +476,7 @@ const AudiosYouTubePage = () => {
           onDelete={handleDelete}
           onProcess={openProcessModal}
           loading={filesLoading}
+          activeFilenames={activeFilenames}
         />
       </Card>
 
