@@ -1,6 +1,7 @@
 import axios from "axios";
+import Config from "../components/features/Config";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3100";
+const API_BASE_URL = process.env.REACT_APP_API_URL || Config.apiUrl || "http://localhost:3100";
 const API_KEY = process.env.REACT_APP_API_KEY;
 
 // Verificar si API_KEY está definida
