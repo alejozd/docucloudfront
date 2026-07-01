@@ -44,61 +44,22 @@ const getYoutubeVideoId = (url) => {
 /**
  * Formulario para descargar audio desde YouTube
  */
-const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
+const DescargaForm = ({
+  onDownloadComplete,
+  files = [],
+  onDownloadStart,
+  isDownloading,
+  downloadProgress,
+  downloadStatusMessage,
+  downloadError: externalError,
+  onCancelDownload
+}) => {
   const toast = useRef(null);
   const [url, setUrl] = useState('');
   const [isValidUrl, setIsValidUrl] = useState(false);
-  const [downloadStatus, setDownloadStatus] = useState(null); // null, 'pending', 'downloading', 'completed', 'failed'
-  const [statusMessage, setStatusMessage] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [downloadError, setDownloadError] = useState(null);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [localError, setLocalError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
-  const [estimatedSize, setEstimatedSize] = useState(null);
-  const pollingIntervalRef = useRef(null);
-  const pollingTimeoutRef = useRef(null);
-  const completionNotifiedRef = useRef(false);
-
-  const clearPolling = useCallback(() => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-
-    if (pollingTimeoutRef.current) {
-      clearTimeout(pollingTimeoutRef.current);
-      pollingTimeoutRef.current = null;
-    }
-  }, []);
-
-  const findDownloadedFile = useCallback(async (filename) => {
-    if (!filename) return null;
-
-    const response = await audioDownloadService.listFiles();
-    const data = response.data;
-    const files = Array.isArray(data) ? data : (data.files || []);
-
-    return files.find((file) => matchesAudioFilename(getAudioName(file), filename)) || null;
-  }, []);
-
-  const completeDownload = useCallback((data, fallbackFilename) => {
-    if (completionNotifiedRef.current) return;
-
-    const completedFilename = data?.filename || getAudioName(data) || fallbackFilename;
-    completionNotifiedRef.current = true;
-    setDownloadStatus('completed');
-    setStatusMessage(`Audio completado: ${completedFilename}`);
-    setProgress(100);
-    clearPolling();
-    setIsLoading(false);
-
-    // Limpiar localStorage al completar
-    localStorage.removeItem('activeAudioDownload');
-
-    if (onDownloadComplete) {
-      onDownloadComplete({ ...data, filename: completedFilename });
-    }
-  }, [clearPolling, onDownloadComplete]);
 
   // Validar URL de YouTube en tiempo real
   useEffect(() => {
@@ -106,204 +67,111 @@ const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
     setIsValidUrl(youtubeRegex.test(url.trim()));
   }, [url]);
 
-  // Recuperar descarga activa al montar
+  // Recuperar URL de descarga activa al montar si existe
   useEffect(() => {
     const activeDownload = localStorage.getItem('activeAudioDownload');
     if (activeDownload) {
       try {
-        const { filename, url: savedUrl } = JSON.parse(activeDownload);
-        if (filename) {
-          setUrl(savedUrl || '');
-          setIsLoading(true);
-          setDownloadStatus('downloading');
-          setStatusMessage('Reanudando seguimiento de descarga...');
-          checkStatus(filename);
-        }
-      } catch (e) {
-        console.error('Error al parsear activeAudioDownload:', e);
-        localStorage.removeItem('activeAudioDownload');
-      }
+        const { url: savedUrl } = JSON.parse(activeDownload);
+        if (savedUrl) setUrl(savedUrl);
+      } catch (e) {}
     }
-
-    return () => {
-      clearPolling();
-    };
-  }, []); // Solo al montar
-
-  /**
-   * Verificar estado de la descarga mediante polling
-   */
-  const checkStatus = useCallback(async (filename) => {
-    const poll = async () => {
-      try {
-        const response = await audioDownloadService.getStatus(filename);
-        const data = response.data;
-        const { status, sizeFormatted, error, progress: backendProgress, completed, exists } = data;
-
-        if (status === 'completed' || completed === true || exists === true) {
-          setEstimatedSize(sizeFormatted);
-          completeDownload(data, filename);
-
-          toast.current?.show({
-            severity: 'success',
-            summary: 'Descarga Completada',
-            detail: `Archivo: ${sizeFormatted || filename}`,
-            life: 5000
-          });
-
-          return;
-        }
-
-        if (status === 'failed' || status === 'error') {
-          const downloadedFile = await findDownloadedFile(filename);
-          if (downloadedFile) {
-            completeDownload(downloadedFile, filename);
-            return;
-          }
-
-          setDownloadStatus('failed');
-          setDownloadError(error || 'Error en la descarga');
-          setStatusMessage(error || 'Error en la descarga');
-          clearPolling();
-          setIsLoading(false);
-
-          // Limpiar localStorage al fallar
-          localStorage.removeItem('activeAudioDownload');
-
-          toast.current?.show({
-            severity: 'error',
-            summary: 'Error en Descarga',
-            detail: error || 'La descarga falló',
-            life: 5000
-          });
-          return;
-        }
-
-        if (status === 'downloading' || status === 'processing' || status === 'pending') {
-          setDownloadStatus('downloading');
-          setStatusMessage(data.message || 'Descargando audio...');
-          if (backendProgress !== undefined) {
-            setProgress(backendProgress);
-            if (onProgressUpdate) {
-              onProgressUpdate(filename, backendProgress);
-            }
-          }
-        }
-
-        // Siguiente poll
-        pollingTimeoutRef.current = setTimeout(poll, 3000);
-      } catch (error) {
-        console.error('Error al verificar estado:', error);
-        // NO detener polling por errores de red, reintentar automáticamente
-        pollingTimeoutRef.current = setTimeout(poll, 5000);
-      }
-    };
-
-    poll();
-  }, [clearPolling, completeDownload, findDownloadedFile]);
+  }, []);
 
   /**
    * Iniciar descarga del audio
    */
-  const handleStartDownload = async (targetUrl = url) => {
+  const handleStartDownload = async (targetUrl = url, isRetry = false) => {
     const trimmedUrl = targetUrl.trim();
     if (!trimmedUrl) return;
 
-    // 1. Verificar si ya hay una descarga en progreso para esta URL
-    const activeDownload = localStorage.getItem('activeAudioDownload');
-    if (activeDownload) {
-      try {
-        const { url: activeUrl } = JSON.parse(activeDownload);
-        if (activeUrl === trimmedUrl) {
+    if (!isRetry) {
+      setRetryCount(0);
+      setLocalError(null);
+
+      // 1. Verificar si ya hay una descarga en progreso en localStorage
+      const activeDownload = localStorage.getItem('activeAudioDownload');
+      if (activeDownload) {
+        try {
+          const parsed = JSON.parse(activeDownload);
+          if (parsed.url === trimmedUrl && parsed.filename) {
+            toast.current?.show({
+              severity: 'info',
+              summary: 'Reanudando seguimiento',
+              detail: 'Ya hay una descarga activa. Reanudando seguimiento...',
+              life: 3000
+            });
+            onDownloadStart(parsed.filename);
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem('activeAudioDownload');
+        }
+      }
+
+      // 2. Verificar si el archivo ya existe (por ID de video)
+      const videoId = getYoutubeVideoId(trimmedUrl);
+      if (videoId) {
+        const alreadyDownloaded = files.some(file => getAudioName(file).includes(videoId));
+        if (alreadyDownloaded) {
           toast.current?.show({
-            severity: 'warn',
-            summary: 'Descarga en Progreso',
-            detail: 'Ya hay una descarga activa para este video.',
-            life: 3000
+            severity: 'info',
+            summary: 'Video ya descargado',
+            detail: 'Este video ya se encuentra en la lista de audios.',
+            life: 5000
           });
           return;
         }
-      } catch (e) {}
-    }
-
-    // 2. Verificar si el archivo ya existe (por ID de video)
-    const videoId = getYoutubeVideoId(trimmedUrl);
-    if (videoId) {
-      const alreadyDownloaded = files.some(file =>
-        (file.filename && file.filename.includes(videoId)) ||
-        (file.name && file.name.includes(videoId)) ||
-        (file.title && file.title.includes(videoId))
-      );
-
-      if (alreadyDownloaded) {
-        toast.current?.show({
-          severity: 'info',
-          summary: 'Video ya descargado',
-          detail: 'Este video ya se encuentra en la lista de audios.',
-          life: 5000
-        });
-        // Opcionalmente podrías no detener y permitir descargar de nuevo,
-        // pero el requisito pide prevención de duplicados.
-        return;
       }
     }
 
-    clearPolling();
-    completionNotifiedRef.current = false;
-    setIsLoading(true);
-    setDownloadStatus('pending');
-    setStatusMessage('Iniciando descarga...');
-    setDownloadError(null);
-    setEstimatedSize(null);
-    setProgress(0);
+    setInternalLoading(true);
 
     try {
-      const response = await audioDownloadService.startDownload(trimmedUrl);
+      console.log(`[DescargaForm] Solicitando: ${trimmedUrl}`);
+
+      const response = await Promise.race([
+        audioDownloadService.startDownload(trimmedUrl),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('El servidor tardó demasiado en responder al inicio de la descarga.')), 45000))
+      ]);
+
       const data = response.data;
       const filename = data.filename || data.fileName || data.name || data.titulo || data.title;
 
       if (filename) {
         if (data.status === 'completed' || data.completed === true || data.exists === true) {
-          setEstimatedSize(data.sizeFormatted);
-          completeDownload(data, filename);
+          if (onDownloadComplete) onDownloadComplete(data);
+          setInternalLoading(false);
           return;
         }
 
-        // Guardar en localStorage
+        // Guardar en localStorage para persistencia
         localStorage.setItem('activeAudioDownload', JSON.stringify({
           filename,
           url: trimmedUrl,
           timestamp: new Date().getTime()
         }));
 
-        setDownloadStatus('downloading');
-        checkStatus(filename);
+        if (onDownloadStart) onDownloadStart();
       } else {
         throw new Error('No se recibió el nombre del archivo');
       }
     } catch (error) {
       console.error('Error al iniciar descarga:', error);
-      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Error al iniciar descarga';
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message || 'Error al iniciar descarga';
 
-      setDownloadStatus('failed');
-      setDownloadError(errorMsg);
-      setStatusMessage(errorMsg);
-      setIsLoading(false);
-
-      // Ofrecer reintento automático
       if (retryCount < 2) {
+        const nextRetry = retryCount + 1;
+        setRetryCount(nextRetry);
         toast.current?.show({
-          severity: 'info',
+          severity: 'warn',
           summary: 'Reintentando...',
-          detail: 'No se pudo iniciar la descarga. Reintentando automáticamente...',
+          detail: `No se pudo iniciar (Intento ${nextRetry}/2). Reintentando...`,
           life: 3000
         });
-
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          handleStartDownload(trimmedUrl);
-        }, 3000);
+        setTimeout(() => handleStartDownload(trimmedUrl, true), 3000);
       } else {
+        setLocalError(errorMsg);
         toast.current?.show({
           severity: 'error',
           summary: 'Error',
@@ -311,36 +179,12 @@ const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
           life: 5000
         });
       }
+    } finally {
+      setInternalLoading(false);
     }
   };
 
-  /**
-   * Limpiar estado local sin cancelar el proceso en el backend
-   */
-  const handleClose = () => {
-    clearPolling();
-    completionNotifiedRef.current = false;
-    setDownloadStatus(null);
-    setStatusMessage('');
-    setProgress(0);
-    setIsLoading(false);
-    // IMPORTANTE: NO eliminar de localStorage para permitir persistencia
-  };
-
-  /**
-   * Cancelar descarga actual (limpieza total)
-   */
-  const handleCancel = () => {
-    clearPolling();
-    completionNotifiedRef.current = false;
-    setDownloadStatus(null);
-    setStatusMessage('');
-    setProgress(0);
-    setIsLoading(false);
-    localStorage.removeItem('activeAudioDownload');
-  };
-
-  const safeProgress = getSafeProgress(progress);
+  const safeProgress = getSafeProgress(downloadProgress);
 
   return (
     <div className="flex flex-column gap-4">
@@ -369,20 +213,20 @@ const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
           label="Iniciar Descarga"
           icon="pi pi-download"
           onClick={() => handleStartDownload()}
-          disabled={!isValidUrl || isLoading}
-          loading={isLoading && downloadStatus === 'pending'}
+          disabled={!isValidUrl || internalLoading || isDownloading}
+          loading={internalLoading}
         />
       </div>
 
       {/* Estado de la descarga */}
-      {downloadStatus === 'downloading' && (
+      {isDownloading && (
         <div className="card mt-2 p-4 bg-primary-alpha-10 border-round">
           <div className="flex flex-column gap-3">
             <div className="flex align-items-center gap-3">
               <i className="pi pi-spin pi-download text-2xl text-primary"></i>
               <div className="flex flex-column flex-1">
                 <span className="font-medium text-primary">
-                  {statusMessage || 'Descargando audio...'}
+                  {downloadStatusMessage || 'Descargando audio...'}
                 </span>
                 <small className="text-secondary">
                   La descarga puede tomar varios minutos/horas dependiendo del tamaño del video. Puedes cerrar esta ventana y volver más tarde.
@@ -400,52 +244,26 @@ const DescargaForm = ({ onDownloadComplete, files = [], onProgressUpdate }) => {
               showValue={false}
             />
 
-            {estimatedSize && (
-              <small className="text-primary font-medium">
-                Tamaño estimado: {estimatedSize}
-              </small>
-            )}
-
             <div className="flex gap-2 align-self-end">
               <Button
-                label="Cerrar"
-                icon="pi pi-external-link"
-                className="p-button-text p-button-sm"
-                onClick={handleClose}
-                tooltip="Seguir proceso en segundo plano"
-                tooltipOptions={{ position: 'top' }}
-              />
-              <Button
-                label="Detener Polling"
+                label="Detener Seguimiento"
                 icon="pi pi-times"
                 className="p-button-text p-button-sm p-button-danger"
-                onClick={handleCancel}
+                onClick={onCancelDownload}
               />
             </div>
           </div>
         </div>
       )}
 
-      {downloadStatus === 'completed' && (
-        <Message
-          severity="success"
-          text={statusMessage}
-          icon="pi pi-check-circle"
-          className="w-full"
-        />
-      )}
-
-      {(downloadStatus === 'failed' || downloadError) && (
+      {(localError || externalError) && (
         <Message
           severity="error"
-          text={downloadError || statusMessage}
+          text={localError || externalError}
           icon="pi pi-times-circle"
           className="w-full"
           closable
-          onClear={() => {
-            setDownloadError(null);
-            if (downloadStatus === 'failed') setDownloadStatus(null);
-          }}
+          onClear={() => setLocalError(null)}
         />
       )}
     </div>
