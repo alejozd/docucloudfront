@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Toast } from 'primereact/toast';
 import PasswordModal from '../../components/audios-youtube/PasswordModal';
@@ -18,6 +19,7 @@ const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
  */
 const AudiosYouTubePage = () => {
   const toastRef = useRef(null);
+  const navigate = useNavigate();
   
   // Estado de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -166,12 +168,11 @@ const AudiosYouTubePage = () => {
   };
 
   /**
-   * Manejar cierre del modal de password
+   * Manejar cierre del modal de password (clic en Cancelar)
    */
   const handlePasswordModalHide = () => {
-    // No permitir cerrar sin autenticar
     if (!isAuthenticated) {
-      setShowPasswordModal(true);
+      navigate('/'); // Redirigir a Inicio
     }
   };
 

@@ -135,7 +135,7 @@ const DescargaForm = ({
           timestamp: new Date().getTime()
         }));
 
-        if (onDownloadStart) onDownloadStart();
+        if (onDownloadStart) onDownloadStart(filename);
       } else {
         throw new Error('No se recibió el nombre del archivo');
       }
