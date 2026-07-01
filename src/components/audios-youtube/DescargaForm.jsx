@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import { Toast } from 'primereact/toast';
 import audioDownloadService from '../../services/audioDownloadService';
@@ -15,28 +14,12 @@ const getSafeProgress = (value) => {
 
 const getAudioName = (file) => file?.filename || file?.fileName || file?.name || file?.titulo || file?.title || '';
 
-const normalizeFilename = (filename) => {
-  try {
-    return decodeURIComponent(filename || '').trim().toLowerCase();
-  } catch (error) {
-    return (filename || '').trim().toLowerCase();
-  }
-};
-
-const matchesAudioFilename = (fileName, targetName) => {
-  const normalizedFile = normalizeFilename(fileName);
-  const normalizedTarget = normalizeFilename(targetName);
-
-  return normalizedFile === normalizedTarget ||
-    normalizedFile.startsWith(`${normalizedTarget}.`) ||
-    normalizedTarget.startsWith(`${normalizedFile}.`);
-};
-
 /**
  * Extraer ID de video de una URL de YouTube
  */
 const getYoutubeVideoId = (url) => {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  // eslint-disable-next-line no-useless-escape
+  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = url.match(regex);
   return match ? match[1] : null;
 };
@@ -200,7 +183,7 @@ const DescargaForm = ({
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://www.youtube.com/watch?v=..."
             className="w-full"
-            disabled={isLoading}
+            disabled={internalLoading || isDownloading}
           />
           {!isValidUrl && url.length > 0 && (
             <small className="p-error mt-1 block">
