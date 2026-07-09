@@ -224,6 +224,44 @@ const AudiosYouTubePage = () => {
   }, []);
 
   /**
+   * Cancelar el seguimiento del procesamiento y limpiar estados relacionados
+   */
+  const handleCancelProcessing = useCallback(() => {
+    clearProcessPolling();
+    setIsProcessing(false);
+    setProcessProgress(0);
+    setProcessStatusMessage('');
+    setProcessError(null);
+
+    // Obtener el filename de la tarea activa para quitarlo de tasksProgress
+    const activeProcessData = localStorage.getItem('activeAudioProcess');
+    if (activeProcessData) {
+      try {
+        const { audio } = JSON.parse(activeProcessData);
+        if (audio?.filename) {
+          setTasksProgress(prev => {
+            const newState = { ...prev };
+            delete newState[audio.filename];
+            return newState;
+          });
+        }
+      } catch (e) {}
+    }
+
+    localStorage.removeItem('activeAudioProcess');
+    setShowProcessModal(false);
+    setSelectedAudio(null);
+    refreshActiveTasks();
+
+    toastRef.current?.show({
+      severity: 'info',
+      summary: 'Seguimiento Cancelado',
+      detail: 'Se detuvo el seguimiento del procesamiento',
+      life: 3000
+    });
+  }, [clearProcessPolling, refreshActiveTasks]);
+
+  /**
    * Limpiar polling de descarga
    */
   const clearDownloadPolling = useCallback(() => {
@@ -282,6 +320,22 @@ const AudiosYouTubePage = () => {
         downloadPollingRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error polling descarga:', error);
+
+        // Si el error es 404 o 400 (ej. recurso no existe más), limpiamos el estado y detenemos polling
+        if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+          clearDownloadPolling();
+          setIsDownloading(false);
+          setDownloadError('El recurso de descarga no fue encontrado o la solicitud es inválida.');
+          localStorage.removeItem('activeAudioDownload');
+          setTasksProgress(prev => {
+            const newState = { ...prev };
+            delete newState[filename];
+            return newState;
+          });
+          refreshActiveTasks();
+          return;
+        }
+
         downloadPollingRef.current = setTimeout(poll, 5000);
       }
     };
@@ -392,13 +446,39 @@ const AudiosYouTubePage = () => {
         processPollingRef.current = setTimeout(poll, 3000);
       } catch (error) {
         console.error('Error al consultar estado de procesamiento:', error);
-        // NO detener polling por errores de red, reintentar automáticamente
+
+        // Si el error es 404 o 400 (ej. recurso no existe más), limpiamos el estado y detenemos polling
+        if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+          clearProcessPolling();
+          setIsProcessing(false);
+          setProcessError('La tarea de procesamiento no fue encontrada o la solicitud es inválida.');
+
+          const activeProcessDataClear = localStorage.getItem('activeAudioProcess');
+          if (activeProcessDataClear) {
+            try {
+              const { audio } = JSON.parse(activeProcessDataClear);
+              if (audio?.filename) {
+                setTasksProgress(prev => {
+                  const newState = { ...prev };
+                  delete newState[audio.filename];
+                  return newState;
+                });
+              }
+            } catch (e) {}
+          }
+
+          localStorage.removeItem('activeAudioProcess');
+          refreshActiveTasks();
+          return;
+        }
+
+        // NO detener polling por otros errores (ej. errores de red), reintentar automáticamente
         processPollingRef.current = setTimeout(poll, 5000);
       }
     };
 
     poll();
-  }, [clearProcessPolling, loadFiles]);
+  }, [clearProcessPolling, loadFiles, refreshActiveTasks]);
 
   /**
    * Cargar archivos al autenticarse
@@ -654,6 +734,7 @@ const AudiosYouTubePage = () => {
         progress={processProgress}
         statusMessage={processStatusMessage}
         error={processError}
+        onCancelProcessing={handleCancelProcessing}
       />
 
       {/* Espacio para el reproductor fijo */}

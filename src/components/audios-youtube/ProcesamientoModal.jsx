@@ -18,7 +18,8 @@ const ProcesamientoModal = ({
   processing,
   progress,
   statusMessage,
-  error
+  error,
+  onCancelProcessing
 }) => {
   // Opciones de volumen
   const volumeOptions = [
@@ -72,20 +73,36 @@ const ProcesamientoModal = ({
 
   const footer = (
     <div className="flex justify-content-end gap-2">
-      <Button
-        label="Cancelar"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={onHide}
-        disabled={processing}
-      />
-      {!processing && (
-        <Button
-          label="Procesar"
-          icon="pi pi-cog"
-          onClick={handleProcess}
-          disabled={!applyVolume && !applySplit}
-        />
+      {processing ? (
+        <>
+          <Button
+            label="Detener Seguimiento"
+            icon="pi pi-ban"
+            className="p-button-text p-button-danger"
+            onClick={onCancelProcessing}
+          />
+          <Button
+            label="Cerrar (Segundo Plano)"
+            icon="pi pi-times"
+            className="p-button-text"
+            onClick={onHide}
+          />
+        </>
+      ) : (
+        <>
+          <Button
+            label="Cancelar"
+            icon="pi pi-times"
+            className="p-button-text"
+            onClick={onHide}
+          />
+          <Button
+            label="Procesar"
+            icon="pi pi-cog"
+            onClick={handleProcess}
+            disabled={!applyVolume && !applySplit}
+          />
+        </>
       )}
     </div>
   );
@@ -98,7 +115,7 @@ const ProcesamientoModal = ({
       modal
       onHide={onHide}
       footer={footer}
-      closable={!processing}
+      closable={true}
     >
       <div className="flex flex-column gap-4 py-2">
         {processing ? (
