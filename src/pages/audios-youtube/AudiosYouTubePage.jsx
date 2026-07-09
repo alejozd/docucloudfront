@@ -370,8 +370,11 @@ const AudiosYouTubePage = () => {
         const isCompleted = status === 'completed' ||
                            status === 'finished' ||
                            status === 'success' ||
+                           status === 'done' ||
+                           status === 'ok' ||
                            data.completed === true ||
-                           data.finished === true;
+                           data.finished === true ||
+                           (progress !== undefined && progress >= 100);
 
         if (isCompleted) {
           clearProcessPolling();
