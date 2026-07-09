@@ -383,20 +383,28 @@ const AudiosYouTubePage = () => {
 
           // Limpiar progreso al completar
           const activeProcessDataClear = localStorage.getItem('activeAudioProcess');
+          let clearedFilename = null;
           if (activeProcessDataClear) {
             try {
               const { audio } = JSON.parse(activeProcessDataClear);
               if (audio?.filename) {
-                setTasksProgress(prev => {
-                  const newState = { ...prev };
-                  delete newState[audio.filename];
-                  return newState;
-                });
+                clearedFilename = audio.filename;
               }
             } catch (e) {}
           }
 
+          // Usar selectedAudio como fallback si no pudimos parsearlo de localStorage
+          const filenameToClear = clearedFilename || selectedAudio?.filename;
+          if (filenameToClear) {
+            setTasksProgress(prev => {
+              const newState = { ...prev };
+              delete newState[filenameToClear];
+              return newState;
+            });
+          }
+
           localStorage.removeItem('activeAudioProcess');
+          refreshActiveTasks();
 
           toastRef.current?.show({
             severity: 'success',
@@ -438,6 +446,7 @@ const AudiosYouTubePage = () => {
           }
 
           localStorage.removeItem('activeAudioProcess');
+          refreshActiveTasks();
           return;
         }
 
