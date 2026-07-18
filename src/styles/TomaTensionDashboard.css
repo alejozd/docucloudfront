@@ -55,6 +55,20 @@
     font-size: 0.75rem !important;
 }
 
+/* --- Mensaje de error --- */
+.toma-tension-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 /* --- Sección Filtros --- */
 .toma-tension-filters-card .p-card-body {
     padding: 0.75rem !important;
@@ -99,9 +113,16 @@
 /* --- Sección KPIs (DISEÑO COMPACTO Y RESPONSIVO) --- */
 .toma-tension-kpis {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); 
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 0.5rem;
+    transition: opacity 0.2s ease;
+}
+
+/* Atenúa los KPIs mientras se refrescan los datos (cambio de filtro, etc.) */
+.toma-tension-kpis.kpis-loading {
+    opacity: 0.55;
+    pointer-events: none;
 }
 
 .compact-kpi {
@@ -139,32 +160,6 @@
     text-align: center;
 }
 
-/* Valores principales */
-.kpi-value-lg {
-    font-size: 1.8rem;
-    font-weight: 800;
-    display: block;
-    text-align: center;
-}
-
-.stat-value-md {
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-/* Ajuste de los promedios y extremos para que no se desborden */
-.compact-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    text-align: center;
-}
-
-.kpi-card-extremes-sis .compact-grid,
-.kpi-card-extremes-dia .compact-grid {
-    grid-template-columns: repeat(2, 1fr);
-}
-
 /* Estilos de valores dentro de KPI */
 .compact-content {
     display: flex;
@@ -184,6 +179,8 @@
     font-weight: 800;
     color: var(--text-main);
     line-height: 1;
+    display: block;
+    text-align: center;
 }
 
 /* Grid interno de Promedios y Extremos */
@@ -198,7 +195,6 @@
 .kpi-card-extremes-sis .compact-grid,
 .kpi-card-extremes-dia .compact-grid {
     grid-template-columns: repeat(2, 1fr);
-    /* gap: 0.5rem; */
 }
 
 .kpi-stat {
@@ -223,8 +219,6 @@
 .stat-value-md {
     font-size: 1.3rem;
     font-weight: 700;
-    /* color: var(--text-main);
-    line-height: 1.1; */
 }
 
 /* Colores específicos para valores altos/bajos */
