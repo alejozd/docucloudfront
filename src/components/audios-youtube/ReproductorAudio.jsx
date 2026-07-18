@@ -113,12 +113,17 @@ const ReproductorAudio = ({
     }
   };
 
-  // Manejar descarga (genera nuevo token para descarga)
+  // Manejar descarga (genera un token temporal y abre la descarga en una nueva pestaña)
   const handleDownload = async () => {
     if (!currentAudio || !currentAudio.filename) return;
-    
+
     try {
-      await audioDownloadService.downloadAudio(currentAudio.filename);
+      const tokenData = await audioDownloadService.generateStreamToken(currentAudio.filename);
+      if (!tokenData?.streamUrl) {
+        console.error('No se pudo generar el token de descarga');
+        return;
+      }
+      window.open(`${tokenData.streamUrl}&download=true`, '_blank');
     } catch (error) {
       console.error('Error descargando audio:', error);
     }
