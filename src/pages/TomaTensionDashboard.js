@@ -147,6 +147,9 @@ const TomaTensionDashboard = () => {
         `${Config.apiUrl}/api/toma-tension/sync`,
         {
           params: queryParams,
+          headers: {
+            "x-api-key": process.env.REACT_APP_TOMA_TENSION_API_KEY,
+          },
         },
       );
 
