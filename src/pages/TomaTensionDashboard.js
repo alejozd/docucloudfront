@@ -85,14 +85,21 @@ const useWindowSize = () => {
   });
 
   useEffect(() => {
+    let debounceId = null;
     const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      clearTimeout(debounceId);
+      debounceId = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }, 150);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(debounceId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return windowSize;
@@ -191,7 +198,7 @@ const TomaTensionDashboard = () => {
   }, [registros]);
 
   // --- Memorización de Extremos (Sístole y Diástole) ---
-  const Extremes = useMemo(() => {
+  const extremes = useMemo(() => {
     const rowsWithMetrics = registros
       .map((registro) => ({
         sistole: toNumber(registro?.sistole),
@@ -413,7 +420,9 @@ const TomaTensionDashboard = () => {
       {error && <div className="toma-tension-error compact-error">{error}</div>}
 
       {/* --- SECCIÓN DE KPIs REESTRUCTURADA --- */}
-      <div className={`toma-tension-kpis ${isMobile ? "mobile-kpis" : ""}`}>
+      <div
+        className={`toma-tension-kpis ${isMobile ? "mobile-kpis" : ""} ${loading ? "kpis-loading" : ""}`}
+      >
         {/* 1. Total Registros */}
         <Card title="Total registros" className="kpi-card-total compact-kpi">
           <div className="compact-content">
@@ -467,19 +476,19 @@ const TomaTensionDashboard = () => {
             <div className="kpi-stat">
               <span className="stat-label-sm label-high">MÁX</span>
               <span className="stat-value-md val-high">
-                {Extremes.sistole.maxValue}
+                {extremes.sistole.maxValue}
               </span>
               <small className="stat-date">
-                {Extremes.sistole.max.split(",")[0]}
+                {extremes.sistole.max.split(",")[0]}
               </small>
             </div>
             <div className="kpi-stat">
               <span className="stat-label-sm label-low">MÍN</span>
               <span className="stat-value-md val-low">
-                {Extremes.sistole.minValue}
+                {extremes.sistole.minValue}
               </span>
               <small className="stat-date">
-                {Extremes.sistole.min.split(",")[0]}
+                {extremes.sistole.min.split(",")[0]}
               </small>
             </div>
           </div>
@@ -494,19 +503,19 @@ const TomaTensionDashboard = () => {
             <div className="kpi-stat">
               <span className="stat-label-sm label-high">MÁX</span>
               <span className="stat-value-md val-high">
-                {Extremes.diastole.maxValue}
+                {extremes.diastole.maxValue}
               </span>
               <small className="stat-date">
-                {Extremes.diastole.max.split(",")[0]}
+                {extremes.diastole.max.split(",")[0]}
               </small>
             </div>
             <div className="kpi-stat">
               <span className="stat-label-sm label-low">MÍN</span>
               <span className="stat-value-md val-low">
-                {Extremes.diastole.minValue}
+                {extremes.diastole.minValue}
               </span>
               <small className="stat-date">
-                {Extremes.diastole.min.split(",")[0]}
+                {extremes.diastole.min.split(",")[0]}
               </small>
             </div>
           </div>
