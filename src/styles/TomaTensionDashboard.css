@@ -14,6 +14,13 @@
     --accent-dia: #06b6d4;     /* Cian/Azul claro */
 }
 
+/* Adaptar variables locales de texto/fondo al modo oscuro global */
+body.dark-mode .toma-tension-dashboard {
+    --text-main: var(--text-primary);
+    --text-muted: var(--text-secondary);
+    --bg-main: var(--bg-primary);
+}
+
 /* --- Layout Principal --- */
 .toma-tension-dashboard {
     padding: 1rem; /* Reducido */
@@ -260,6 +267,10 @@
     margin-bottom: 0.75rem;
     padding: 0.75rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body.dark-mode .mobile-record-card {
+    background: var(--bg-card);
 }
 
 .mobile-record-header {

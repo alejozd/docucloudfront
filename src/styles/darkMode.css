@@ -34,7 +34,8 @@ body.dark-mode {
 }
 
 body.dark-mode .surface-card,
-body.dark-mode .card {
+body.dark-mode .card,
+body.dark-mode .p-card {
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
