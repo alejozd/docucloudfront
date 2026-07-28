@@ -6,6 +6,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
 // Importamos DataView para la vista móvil
 import { DataView } from "primereact/dataview";
 import Config from "../components/features/Config";
@@ -117,6 +118,7 @@ const TomaTensionDashboard = () => {
   const [filters, setFilters] = useState({
     fecha_inicio: defaultDateRange.fecha_inicio,
     fecha_fin: defaultDateRange.fecha_fin,
+    paciente_id: null,
     page: 1,
     limit: 20,
   });
@@ -129,6 +131,40 @@ const TomaTensionDashboard = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [pacientes, setPacientes] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    axios
+      .get(`${Config.apiUrl}/api/pacientes`, {
+        headers: {
+          "x-api-key": process.env.REACT_APP_TOMA_TENSION_API_KEY,
+        },
+      })
+      .then((response) => {
+        if (isMounted) setPacientes(getNormalizedData(response.data));
+      })
+      .catch(() => {
+        // La lista de pacientes es solo para el filtro; si falla, el
+        // dashboard sigue funcionando mostrando el id crudo.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const pacienteOptions = useMemo(
+    () => [
+      { label: "Todos", value: null },
+      ...pacientes.map((paciente) => ({
+        label: paciente.nombre,
+        value: paciente.id,
+      })),
+    ],
+    [pacientes],
+  );
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -142,6 +178,7 @@ const TomaTensionDashboard = () => {
 
       if (filters.fecha_inicio) queryParams.fecha_inicio = filters.fecha_inicio;
       if (filters.fecha_fin) queryParams.fecha_fin = filters.fecha_fin;
+      if (filters.paciente_id) queryParams.paciente_id = filters.paciente_id;
 
       const response = await axios.get(
         `${Config.apiUrl}/api/toma-tension/sync`,
@@ -293,6 +330,9 @@ const TomaTensionDashboard = () => {
       <div className="mobile-record-card">
         <div className="mobile-record-header">
           {statusBodyTemplate(rowData)}
+          <span className="mobile-record-patient">
+            {rowData.paciente?.nombre || `Paciente ${rowData.paciente_id}`}
+          </span>
           <span className="mobile-record-date">
             {formatDate(rowData.fecha_registro, true)}
           </span>
@@ -375,6 +415,24 @@ const TomaTensionDashboard = () => {
             />
           </div>
 
+          <div className="filter-field">
+            <label htmlFor="paciente_id">Paciente</label>
+            <Dropdown
+              inputId="paciente_id"
+              value={filters.paciente_id}
+              options={pacienteOptions}
+              onChange={(event) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  paciente_id: event.value,
+                  page: 1,
+                }));
+              }}
+              placeholder="Todos"
+              className="p-inputtext-sm"
+            />
+          </div>
+
           <div className="filter-actions">
             <Button
               label={isMobile ? "" : "Limpiar"}
@@ -385,6 +443,7 @@ const TomaTensionDashboard = () => {
                 setFilters((prev) => ({
                   ...prev,
                   ...defaultDateRange,
+                  paciente_id: null,
                   page: 1,
                 }));
                 setSelectedPreset(DEFAULT_PRESET_DAYS);
@@ -586,11 +645,12 @@ const TomaTensionDashboard = () => {
             />
             <Column
               field="paciente_id"
-              header="Paci."
+              header="Paciente"
               sortable
-              style={{ minWidth: "5rem" }}
+              style={{ minWidth: "8rem" }}
               headerStyle={{ justifyContent: "center" }}
               bodyStyle={{ textAlign: "center" }}
+              body={(rowData) => rowData.paciente?.nombre || rowData.paciente_id}
             />
             <Column
               field="sistole"
