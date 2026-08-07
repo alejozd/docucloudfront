@@ -37,7 +37,10 @@ const TIPOS_LICENCIA = [
 
 const LICENSE_APP = "PurchaseBridge";
 
-const APP_OPTIONS = [{ label: "PurchaseBridge", value: LICENSE_APP }];
+const APP_OPTIONS = [
+  { label: "PurchaseBridge", value: LICENSE_APP },
+  { label: "NexoPago", value: "NEXOPAGO" },
+];
 
 const INITIAL_CREATE = {
   nit: "",
@@ -303,7 +306,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     const payload = activateForm.online
       ? {
           nit: activateForm.nit,
-          app: LICENSE_APP,
+          app: activateForm.app || LICENSE_APP,
           instalacion_hash: activateForm.instalacion_hash,
           tipo_licencia: activateForm.tipo_licencia,
           dias_demo: Number(activateForm.dias_demo || 15),
@@ -314,7 +317,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       : {
           nit: activateForm.nit,
           instalacion_hash: activateForm.instalacion_hash,
-          app: LICENSE_APP,
+          app: activateForm.app || LICENSE_APP,
         };
 
     await runAction(
@@ -338,7 +341,7 @@ const PurchaseBridge = ({ jwtToken }) => {
 
     const payload = {
       nit: convertForm.nit,
-      app: LICENSE_APP,
+      app: convertForm.app || LICENSE_APP,
       tipo_licencia: convertForm.tipo_licencia,
       dias_licencia:
         convertForm.tipo_licencia === "anual"
@@ -370,7 +373,7 @@ const PurchaseBridge = ({ jwtToken }) => {
         `${Config.apiUrl}${ENDPOINTS.generarCodigo}`,
         {
           nit: codeForm.nit,
-          app: LICENSE_APP,
+          app: codeForm.app || LICENSE_APP,
           instalacion_hash: codeForm.instalacion_hash,
           dias: Number(codeForm.dias),
         },
