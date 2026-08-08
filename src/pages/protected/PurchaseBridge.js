@@ -56,6 +56,7 @@ const INITIAL_EDIT = {
   fecha_activacion: "",
   fecha_expiracion: "",
   dias_demo: 15,
+  dias_licencia: null,
   instalacion_hash: "",
   app: LICENSE_APP,
 };
@@ -111,6 +112,7 @@ const normalizeLicencias = (payload) => {
     fecha_activacion: formatDate(item.fecha_activacion),
     fecha_expiracion: formatDate(item.fecha_expiracion),
     dias_demo: item.dias_demo ?? 0,
+    dias_licencia: item.dias_licencia ?? null,
     instalacion_hash: item.instalacion_hash ?? "",
     app: item.app ?? LICENSE_APP,
   }));
@@ -197,6 +199,12 @@ const PurchaseBridge = ({ jwtToken }) => {
     if (!editForm.id) return "No se pudo identificar la licencia";
     if (!editForm.nit.trim()) return "El NIT es obligatorio";
     if (!editForm.tipo_licencia) return "El tipo de licencia es obligatorio";
+    if (
+      editForm.tipo_licencia === "anual" &&
+      (!editForm.dias_licencia || editForm.dias_licencia <= 0)
+    ) {
+      return "Para anual, días licencia debe ser mayor que 0";
+    }
     return "";
   };
 
@@ -206,6 +214,13 @@ const PurchaseBridge = ({ jwtToken }) => {
       return "El hash de instalación es obligatorio";
     if (activateForm.online && !activateForm.tipo_licencia)
       return "El tipo de licencia es obligatorio";
+    if (
+      activateForm.online &&
+      activateForm.tipo_licencia === "anual" &&
+      (!activateForm.dias_licencia || activateForm.dias_licencia <= 0)
+    ) {
+      return "Para anual, días licencia debe ser mayor que 0";
+    }
     return "";
   };
 
@@ -278,6 +293,10 @@ const PurchaseBridge = ({ jwtToken }) => {
       fecha_expiracion:
         editForm.fecha_expiracion_raw || editForm.fecha_expiracion || null,
       dias_demo: Number(editForm.dias_demo || 0),
+      dias_licencia:
+        editForm.tipo_licencia === "anual"
+          ? Number(editForm.dias_licencia || 0)
+          : null,
       instalacion_hash: editForm.instalacion_hash,
       app: LICENSE_APP,
     };
@@ -405,6 +424,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       instalacion_hash: row.instalacion_hash || "",
       tipo_licencia: row.tipo_licencia === "N/A" ? "demo" : row.tipo_licencia,
       dias_demo: row.dias_demo || 15,
+      dias_licencia: row.dias_licencia || null,
     });
     setActivateDialog(true);
   };
@@ -548,6 +568,7 @@ const PurchaseBridge = ({ jwtToken }) => {
           <Column field="fecha_activacion" header="Fecha Activación" sortable />
           <Column field="fecha_expiracion" header="Fecha Expiración" sortable />
           <Column field="dias_demo" header="Días Demo" sortable />
+          <Column field="dias_licencia" header="Días Licencia" sortable />
           <Column field="instalacion_hash" header="Instalación Hash" />
         </DataTable>
       </Card>
@@ -658,6 +679,22 @@ const PurchaseBridge = ({ jwtToken }) => {
             min={0}
           />
         </div>
+        {editForm.tipo_licencia === "anual" ? (
+          <div className="field">
+            <label htmlFor="edit_dias_licencia">Días Licencia *</label>
+            <InputNumber
+              id="edit_dias_licencia"
+              value={editForm.dias_licencia}
+              onValueChange={(e) =>
+                setEditForm((prev) => ({
+                  ...prev,
+                  dias_licencia: e.value || null,
+                }))
+              }
+              min={1}
+            />
+          </div>
+        ) : null}
         <div className="field">
           <label htmlFor="edit_hash">Instalación Hash</label>
           <InputText
