@@ -31,7 +31,7 @@ const audioDownloadService = {
    */
   getStatus: (filename) => {
     return axios.get(
-      `${API_BASE_URL}/api/audio-download/status/${encodeURIComponent(filename)}`,
+      `${API_BASE_URL}/api/audio-download/status/${encodeURIComponent(filename)}?t=${Date.now()}`,
       {
         headers: { "x-api-key": API_KEY },
       },
@@ -42,7 +42,7 @@ const audioDownloadService = {
    * Listar archivos descargados
    */
   listFiles: () => {
-    return axios.get(`${API_BASE_URL}/api/audio-download/files`, {
+    return axios.get(`${API_BASE_URL}/api/audio-download/files?t=${Date.now()}`, {
       headers: { "x-api-key": API_KEY },
     });
   },
@@ -128,7 +128,7 @@ const audioDownloadService = {
    */
   getProcessStatus: (taskId) => {
     return axios.get(
-      `${API_BASE_URL}/api/audio-download/process-status/${encodeURIComponent(taskId)}`,
+      `${API_BASE_URL}/api/audio-download/process-status/${encodeURIComponent(taskId)}?t=${Date.now()}`,
       { headers: { "x-api-key": API_KEY } },
     );
   },
