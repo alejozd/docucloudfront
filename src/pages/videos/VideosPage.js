@@ -14,13 +14,19 @@ import Config from "./../../components/features/Config";
 import "primeicons/primeicons.css";
 import "../../styles/VideosPage.css";
 
-const VideoThumbnail = ({ src, title, onClick }) => {
+const VideoThumbnail = ({ src, posterUrl, title, onClick }) => {
   const [hasFrame, setHasFrame] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [posterError, setPosterError] = useState(false);
   const [shouldLoadPreview, setShouldLoadPreview] = useState(false);
   const wrapperRef = useRef(null);
 
+  // Si el backend ya generó un póster estático, lo usamos: una imagen liviana en vez de
+  // tener que descargar bytes del video real solo para mostrar una miniatura.
+  const usePosterImage = !!posterUrl && !posterError;
+
   useEffect(() => {
+    if (usePosterImage) return; // el <img> usa loading="lazy" nativo, no necesita IntersectionObserver
     const target = wrapperRef.current;
     if (!target || shouldLoadPreview) return;
 
@@ -37,7 +43,7 @@ const VideoThumbnail = ({ src, title, onClick }) => {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [shouldLoadPreview]);
+  }, [shouldLoadPreview, usePosterImage]);
 
   const handleLoadedData = (event) => {
     const video = event.currentTarget;
@@ -63,7 +69,15 @@ const VideoThumbnail = ({ src, title, onClick }) => {
 
   return (
     <button className="video-thumb-button" type="button" onClick={onClick} ref={wrapperRef}>
-      {shouldLoadPreview && !hasError ? (
+      {usePosterImage ? (
+        <img
+          className="video-thumb-preview"
+          src={posterUrl}
+          alt=""
+          loading="lazy"
+          onError={() => setPosterError(true)}
+        />
+      ) : shouldLoadPreview && !hasError ? (
         <video
           className="video-thumb-preview"
           src={src}
@@ -83,8 +97,10 @@ const VideoThumbnail = ({ src, title, onClick }) => {
         <span className="video-thumb-label">Reproducir</span>
       </div>
 
-      {!hasFrame && !hasError ? <div className="video-thumb-skeleton" /> : null}
-      {hasError ? <div className="video-thumb-fallback">Vista previa no disponible</div> : null}
+      {!usePosterImage && !hasFrame && !hasError ? <div className="video-thumb-skeleton" /> : null}
+      {!usePosterImage && hasError ? (
+        <div className="video-thumb-fallback">Vista previa no disponible</div>
+      ) : null}
     </button>
   );
 };
@@ -97,6 +113,7 @@ const VideosPage = () => {
   const [layout, setLayout] = useState("grid");
   const [activeVideoUrl, setActiveVideoUrl] = useState(null);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [first, setFirst] = useState(0);
 
   const fetchVideos = useCallback(async () => {
     setLoading(true);
@@ -174,6 +191,7 @@ const VideosPage = () => {
           <>
             <VideoThumbnail
               src={videoUrl}
+              posterUrl={video.posterUrl ? `${Config.apiUrl}${video.posterUrl}` : null}
               title={video.titulo}
               onClick={() => setActiveVideoUrl(videoUrl)}
             />
@@ -198,7 +216,10 @@ const VideosPage = () => {
         <InputIcon className="pi pi-search" />
         <InputText
           value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          onChange={(e) => {
+            setGlobalFilter(e.target.value);
+            setFirst(0);
+          }}
           placeholder="Buscar por título, artista, año o género"
         />
       </IconField>
@@ -232,6 +253,7 @@ const VideosPage = () => {
                     onClick={() => {
                       setSelectedCategory(folderName);
                       setActiveVideoUrl(null);
+                      setFirst(0);
                     }}
                     style={{ cursor: "pointer", padding: "0.8rem 1rem" }}
                   />
@@ -246,8 +268,11 @@ const VideosPage = () => {
                 value={selectedVideos}
                 layout={layout}
                 itemTemplate={itemTemplate}
-                paginator={false}
+                paginator
+                alwaysShowPaginator={false}
                 rows={10}
+                first={first}
+                onPage={(e) => setFirst(e.first)}
                 header={header}
                 emptyMessage="No hay videos en esta categoría."
               />
