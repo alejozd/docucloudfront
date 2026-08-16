@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
 import { Card } from "primereact/card";
-import { Chip } from "primereact/chip";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { DataView, DataViewLayoutOptions } from "primereact/dataview";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -171,7 +170,7 @@ const VideosPage = () => {
       }, {});
 
       setGroupedVideos(newGroupedVideos);
-      const firstCategory = Object.keys(newGroupedVideos)[0];
+      const firstCategory = sortCategories(Object.keys(newGroupedVideos))[0];
       if (firstCategory && !selectedCategory) {
         setSelectedCategory(firstCategory);
       }
@@ -187,7 +186,7 @@ const VideosPage = () => {
     fetchVideos();
   }, [fetchVideos]);
 
-  const folderNames = Object.keys(groupedVideos);
+  const folderNames = sortCategories(Object.keys(groupedVideos));
 
   const selectedVideos = useMemo(() => {
     if (!selectedCategory) return [];
@@ -285,18 +284,17 @@ const VideosPage = () => {
             <ScrollPanel style={{ width: "100%", height: "auto", whiteSpace: "nowrap" }}>
               <div className="chips-container p-d-flex p-ai-center">
                 {folderNames.map((folderName) => (
-                  <Chip
+                  <CategoryPill
                     key={folderName}
                     label={folderName}
-                    className={`p-mr-2 p-mb-2 ${
-                      selectedCategory === folderName ? "active-category-chip" : "p-chip-sm"
-                    }`}
+                    icon={getCategoryIcon(folderName)}
+                    count={groupedVideos[folderName]?.length || 0}
+                    active={selectedCategory === folderName}
                     onClick={() => {
                       setSelectedCategory(folderName);
                       setActiveVideoUrl(null);
                       setFirst(0);
                     }}
-                    style={{ cursor: "pointer", padding: "0.8rem 1rem" }}
                   />
                 ))}
               </div>
