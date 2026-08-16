@@ -14,6 +14,35 @@ import Config from "./../../components/features/Config";
 import "primeicons/primeicons.css";
 import "../../styles/VideosPage.css";
 
+const normalizeName = (name) =>
+  (name || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+
+const CATEGORY_ICON_RULES = [
+  { match: "medita", icon: "pi-moon" },
+  { match: "pelicula", icon: "pi-video" },
+  { match: "tiempo", icon: "pi-clock" },
+  { match: "auto", icon: "pi-android" },
+];
+const DEFAULT_CATEGORY_ICON = "pi-folder";
+
+const getCategoryIcon = (name) => {
+  const normalized = normalizeName(name);
+  const rule = CATEGORY_ICON_RULES.find((r) => normalized.includes(r.match));
+  return rule ? rule.icon : DEFAULT_CATEGORY_ICON;
+};
+
+const sortCategories = (names) =>
+  [...names].sort((a, b) => {
+    const aIsMedita = normalizeName(a).includes("medita");
+    const bIsMedita = normalizeName(b).includes("medita");
+    if (aIsMedita && !bIsMedita) return -1;
+    if (!aIsMedita && bIsMedita) return 1;
+    return 0;
+  });
+
 const VideoThumbnail = ({ src, posterUrl, title, onClick }) => {
   const [hasFrame, setHasFrame] = useState(false);
   const [hasError, setHasError] = useState(false);
