@@ -43,6 +43,18 @@ const sortCategories = (names) =>
     return 0;
   });
 
+const CategoryPill = ({ label, icon, count, active, onClick }) => (
+  <button
+    type="button"
+    className={`category-pill ${active ? "category-pill-active" : ""}`}
+    onClick={onClick}
+  >
+    <i className={`pi ${icon}`} aria-hidden="true" />
+    <span className="category-pill-label">{label}</span>
+    <span className="category-pill-count">{count}</span>
+  </button>
+);
+
 const VideoThumbnail = ({ src, posterUrl, title, onClick }) => {
   const [hasFrame, setHasFrame] = useState(false);
   const [hasError, setHasError] = useState(false);
