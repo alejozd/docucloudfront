@@ -67,18 +67,18 @@ const Navbar = () => {
           id: "GrabacionesPage",
         },
         {
-          label: "Videos",
-          icon: "pi pi-video",
-          url: "/VideosPage",
-          id: "VideosPage",
-        },
-        {
           label: "Audios YouTube",
           icon: "pi pi-youtube",
           url: "/audios-youtube",
           id: "audios-youtube",
         },
       ],
+    },
+    {
+      label: "Videos",
+      icon: "pi pi-video",
+      url: "/VideosPage",
+      id: "VideosPage",
     },
     {
       label: "Registro-Solicitudes",
