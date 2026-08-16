@@ -20,14 +20,6 @@ import AudiosYouTubePage from "./pages/audios-youtube/AudiosYouTubePage";
 import SalesDashboard from "./pages/SalesDashboard";
 import TomaTensionDashboard from "./pages/TomaTensionDashboard";
 import ProtectedRoute from "././components/features/ProtectedRoute";
-import ClientesMedios from "./pages/protected/ClientesMedios";
-import SerialesERP from "./pages/protected/SerialesERP";
-import ClavesGeneradas from "./pages/protected/ClavesGeneradas";
-import GenerarClave from "./pages/protected/GenerarClave";
-import Vendedores from "./pages/protected/Vendedores";
-import DashboardVendedores from "./pages/protected/DashboardVendedores";
-import Ventas from "./pages/protected/Ventas";
-import Pagos from "./pages/protected/Pagos";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
 import PurchaseBridge from "./pages/protected/PurchaseBridge";
@@ -148,94 +140,6 @@ function App() {
                   jwtToken={jwtToken}
                 >
                   <SerialReportes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/clientes-medios"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <ClientesMedios />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seriales-erp"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <SerialesERP />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/claves-generadas"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <ClavesGeneradas />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/generar-clave"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <GenerarClave />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/vendedores"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <Vendedores />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/DashboardVendedores"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <DashboardVendedores />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ventas"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <Ventas />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pagos"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <Pagos />
                 </ProtectedRoute>
               }
             />

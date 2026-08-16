@@ -41,60 +41,6 @@ const Navbar = () => {
             },
           ],
         },
-        {
-          label: "Medios",
-          icon: "pi pi-folder",
-          items: [
-            {
-              label: "Clientes Medios",
-              icon: "pi pi-users",
-              url: "/clientes-medios",
-              id: "clientes-medios",
-            },
-            {
-              label: "Seriales ERP",
-              icon: "pi pi-key",
-              url: "/seriales-erp",
-              id: "seriales-erp",
-            },
-            {
-              label: "Claves Generadas",
-              icon: "pi pi-lock",
-              url: "/claves-generadas",
-              id: "claves-generadas",
-            },
-            {
-              label: "Generar Clave",
-              icon: "pi pi-key",
-              url: "/generar-clave",
-              id: "generar-clave",
-            },
-            {
-              label: "Vendedores",
-              icon: "pi pi-users",
-              url: "/vendedores",
-              id: "vendedores",
-            },
-            {
-              label: "Dashboard de Ventas",
-              icon: "pi pi-chart-bar",
-              url: "/DashboardVendedores",
-              id: "DashboardVendedores",
-            },
-            {
-              label: "Ventas",
-              icon: "pi pi-shopping-cart",
-              url: "/ventas",
-              id: "ventas",
-            },
-            {
-              label: "Pagos",
-              icon: "pi pi-dollar",
-              url: "/pagos",
-              id: "pagos",
-            },
-          ],
-        },
       ],
     },
 
