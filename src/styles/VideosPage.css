@@ -51,7 +51,7 @@
 }
 
 
-/* Estilos para la selección de categorías (Chips/Dropdown) */
+/* Estilos para la selección de categorías (CategoryPill) */
 .category-selection-container {
     margin-bottom: 2rem;
     text-align: center; /* Centrar el título y los chips */
@@ -75,27 +75,6 @@
     height: 70px; /* Altura fija para el scroll horizontal */
     padding-bottom: 10px; /* Asegura espacio para la barra de scroll */
 }
-
-/* Estilos para el chip seleccionado */
-.p-chip-selected {
-    background-color: var(--primary-color);
-    color: var(--primary-color-text);
-    font-weight: bold;
-    border: 1px solid var(--primary-color);
-}
-/* Asegurarse de que el chip tenga un estilo de hover/click */
-.p-chip {
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    border: 1px solid var(--surface-border);
-}
-.p-chip:hover {
-    background-color: var(--surface-200);
-}
-.p-chip-selected:hover {
-    background-color: var(--primary-hover-color); /* Un color de hover para el seleccionado */
-}
-
 
 /* Mensajes de carga, error y "no videos" */
 .loading-message,
@@ -133,12 +112,6 @@
 
     .chips-container {
         justify-content: flex-start; /* Alinea a la izquierda para scroll horizontal más claro */
-    }
-
-    .category-pill {
-        padding: 0.45rem 0.75rem;
-        font-size: 0.85rem;
-        min-height: 40px;
     }
 }
 
@@ -347,11 +320,19 @@
     font-size: 0.75rem;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--surface-300);
 }
 
 .category-pill-active .category-pill-count {
     background: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 767px) {
+    .category-pill {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
 }
 
 .video-item-card-content {
