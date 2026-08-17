@@ -134,6 +134,12 @@
     .chips-container {
         justify-content: flex-start; /* Alinea a la izquierda para scroll horizontal más claro */
     }
+
+    .category-pill {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
 }
 
 .loader-container {
@@ -303,4 +309,56 @@
 @keyframes thumbShimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    min-height: 40px;
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    background: var(--surface-100);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.category-pill:hover {
+    background: var(--surface-200);
+}
+
+.category-pill-active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-600, var(--primary-color)));
+    border-color: var(--primary-color);
+    color: var(--primary-color-text);
+    font-weight: bold;
+    box-shadow: var(--shadow-2);
+}
+
+.category-pill-label {
+    white-space: nowrap;
+}
+
+.category-pill-count {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.category-pill-active .category-pill-count {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.video-item-card-content {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-item-card-content:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-4);
 }
