@@ -60,16 +60,24 @@ const sendEmail = async (templateParams) => {
     EMAILJS_CONFIG.serviceId,
     EMAILJS_CONFIG.templateId,
     templateParams,
-    EMAILJS_CONFIG.publicKey
+    EMAILJS_CONFIG.publicKey,
   );
 };
 
-const ContactField = ({ id, label, formik, as: Component = InputText, ...props }) => {
+const ContactField = ({
+  id,
+  label,
+  formik,
+  as: Component = InputText,
+  icon,
+  ...props
+}) => {
   const hasError = Boolean(formik.touched[id] && formik.errors[id]);
 
   return (
     <div className="contactar-field">
       <label htmlFor={id} className="contactar-label">
+        {icon && <i className={`pi ${icon} contactar-label-icon`}></i>}
         {label}
       </label>
       <Component
@@ -78,10 +86,12 @@ const ContactField = ({ id, label, formik, as: Component = InputText, ...props }
         value={formik.values[id]}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
-        className={hasError ? "p-invalid" : ""}
+        className={`contactar-input ${hasError ? "p-invalid" : ""}`}
         {...props}
       />
-      {hasError && <small className="p-error">{formik.errors[id]}</small>}
+      {hasError && (
+        <small className="p-error contactar-error">{formik.errors[id]}</small>
+      )}
     </div>
   );
 };
@@ -97,7 +107,11 @@ const Contactar = () => {
         const templateParams = buildTemplateParams(values);
         const response = await sendEmail(templateParams);
 
-        console.log("Correo enviado correctamente:", response.status, response.text);
+        console.log(
+          "Correo enviado correctamente:",
+          response.status,
+          response.text,
+        );
         toast.current?.show({
           severity: "success",
           summary: "Formulario enviado",
@@ -127,20 +141,32 @@ const Contactar = () => {
           Cuéntanos qué necesitas y te responderemos lo antes posible.
         </p>
 
-        <form onSubmit={formik.handleSubmit} className="contactar-form" noValidate>
-          <ContactField id="nombre" label="Nombre" formik={formik} placeholder="Tu nombre" />
+        <form
+          onSubmit={formik.handleSubmit}
+          className="contactar-form"
+          noValidate
+        >
+          <ContactField
+            id="nombre"
+            label="Nombre"
+            formik={formik}
+            placeholder="Tu nombre"
+            icon="pi-user"
+          />
           <ContactField
             id="telefono"
             label="Teléfono"
             formik={formik}
             placeholder="Tu teléfono"
             keyfilter="pnum"
+            icon="pi-phone"
           />
           <ContactField
             id="email"
             label="Correo electrónico"
             formik={formik}
             placeholder="tu@correo.com"
+            icon="pi-envelope"
           />
           <ContactField
             id="mensaje"
@@ -148,8 +174,9 @@ const Contactar = () => {
             formik={formik}
             as={InputTextarea}
             placeholder="¿Cómo podemos ayudarte?"
-            rows={6}
+            rows={4}
             autoResize
+            icon="pi-message"
           />
 
           <div className="contactar-actions">
