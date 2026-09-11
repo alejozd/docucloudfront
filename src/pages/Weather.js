@@ -7,7 +7,7 @@ import { Message } from "primereact/message";
 import OpenWeatherMapComponent from "./OpenWeatherMapComponent";
 import "../styles/Weather.css";
 
-const quickCities = ["Bogotá", "Medellín", "Cali", "Madrid", "Miami"];
+const quickCities = ["Bogotá", "Medellín", "Cali", "Melgar", "Madrid", "Miami"];
 
 const Weather = () => {
   const [city, setCity] = useState("");
@@ -34,8 +34,8 @@ const Weather = () => {
         <div className="weather-header">
           <h2>Consulta del clima</h2>
           <p>
-            Escribe una ciudad y obtén la información meteorológica más
-            reciente con OpenWeatherMap.
+            Escribe una ciudad y obtén la información meteorológica más reciente
+            con OpenWeatherMap.
           </p>
         </div>
 
