@@ -53,7 +53,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
       <Button
         label="Cancelar"
         icon="pi pi-times"
-        className="p-button-text"
+        className="p-button-danger"
         onClick={onHide}
       />
       <Button
@@ -92,8 +92,8 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
             Autenticación Requerida
           </span>
           <p className="m-0 text-secondary line-height-3">
-            Ingrese su <strong>ZAM_API_KEY</strong> para habilitar las
-            herramientas de descarga y procesamiento.
+            Ingrese su contraseña para habilitar las herramientas de descarga y
+            procesamiento.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
               setErrorMsg("");
             }}
             onKeyPress={handleKeyPress}
-            placeholder="Ingrese su ZAM_API_KEY"
+            placeholder="Ingrese su contraseña"
             toggleMask
             feedback={false}
             autoFocus
