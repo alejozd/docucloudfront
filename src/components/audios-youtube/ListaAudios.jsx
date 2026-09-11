@@ -4,6 +4,8 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DataView } from 'primereact/dataview';
+import { InputText } from 'primereact/inputtext';
+import { Dropdown } from 'primereact/dropdown';
 import audioDownloadService from '../../services/audioDownloadService';
 import { formatDuration } from '../../utils/audioUtils';
 
@@ -18,6 +20,9 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
   const [expandedRows, setExpandedRows] = useState(null);
   const [expandedGroupKeys, setExpandedGroupKeys] = useState(() => new Set());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('fecha-desc');
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const getAudioName = (rowData) => rowData?.name || rowData?.filename || rowData?.titulo || rowData?.title || '';
 
@@ -206,8 +211,46 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
       };
     });
 
-    return [...groupItems, ...standalone].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-  }, [files]);
+    let items = [...groupItems, ...standalone];
+
+    // Aplicar búsqueda
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      items = items.filter(item => {
+        const title = (item.title || item.name || '').toLowerCase();
+        return title.includes(term);
+      });
+    }
+
+    // Aplicar ordenamiento
+    items.sort((a, b) => {
+      const titleA = (a.title || a.name || '').toLowerCase();
+      const titleB = (b.title || b.name || '').toLowerCase();
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      const sizeA = a.size || 0;
+      const sizeB = b.size || 0;
+
+      switch (sortBy) {
+        case 'fecha-desc':
+          return dateB - dateA;
+        case 'fecha-asc':
+          return dateA - dateB;
+        case 'nombre-asc':
+          return titleA.localeCompare(titleB, 'es');
+        case 'nombre-desc':
+          return titleB.localeCompare(titleA, 'es');
+        case 'tamaño-asc':
+          return sizeA - sizeB;
+        case 'tamaño-desc':
+          return sizeB - sizeA;
+        default:
+          return dateB - dateA;
+      }
+    });
+
+    return items;
+  }, [files, searchTerm, sortBy]);
 
   /**
    * Fila anidada con las partes de un grupo (vista tabla)
@@ -243,37 +286,52 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
    * Renderizar cards para móvil
    */
   const renderCard = (item) => {
+    const isSelected = selectedItems.some(si => si.key === item.key);
+
     if (item.isGroup) {
       const isExpanded = expandedGroupKeys.has(item.key);
       return (
         <div className="col-12 mb-3" key={item.key}>
-          <div className="card p-3 shadow-2 surface-card border-round">
-            <div
-              className="flex align-items-center gap-3 cursor-pointer"
-              onClick={() => {
-                setExpandedGroupKeys(prev => {
-                  const next = new Set(prev);
-                  next.has(item.key) ? next.delete(item.key) : next.add(item.key);
-                  return next;
-                });
-              }}
-            >
-              {item.thumbnail ? (
-                <img src={item.thumbnail} alt="" className="border-round flex-shrink-0" style={{ width: '3rem', height: '3rem', objectFit: 'cover' }} />
-              ) : (
-                <div className="w-3rem h-3rem bg-primary border-circle flex align-items-center justify-content-center flex-shrink-0">
-                  <i className="pi pi-th-large text-white text-xl"></i>
+          <div className={`card p-3 shadow-2 surface-card border-round ${isSelected ? 'border-2 border-primary' : ''}`}>
+            <div className="flex align-items-center gap-3 mb-3">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedItems([...selectedItems, item]);
+                  } else {
+                    setSelectedItems(selectedItems.filter(si => si.key !== item.key));
+                  }
+                }}
+              />
+              <div
+                className="flex-1 flex align-items-center gap-3 cursor-pointer"
+                onClick={() => {
+                  setExpandedGroupKeys(prev => {
+                    const next = new Set(prev);
+                    next.has(item.key) ? next.delete(item.key) : next.add(item.key);
+                    return next;
+                  });
+                }}
+              >
+                {item.thumbnail ? (
+                  <img src={item.thumbnail} alt="" className="border-round flex-shrink-0" style={{ width: '3rem', height: '3rem', objectFit: 'cover' }} />
+                ) : (
+                  <div className="w-3rem h-3rem bg-primary border-circle flex align-items-center justify-content-center flex-shrink-0">
+                    <i className="pi pi-th-large text-white text-xl"></i>
+                  </div>
+                )}
+                <div className="flex flex-column flex-1" style={{ overflow: 'hidden' }}>
+                  <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                    {item.title}
+                  </span>
+                  <small className="text-secondary text-xs mt-1">
+                    {item.parts.length} partes • {formatSize(item.size)} • {formatDate(item.createdAt)}
+                  </small>
                 </div>
-              )}
-              <div className="flex flex-column flex-1" style={{ overflow: 'hidden' }}>
-                <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
-                  {item.title}
-                </span>
-                <small className="text-secondary text-xs mt-1">
-                  {item.parts.length} partes • {formatSize(item.size)} • {formatDate(item.createdAt)}
-                </small>
+                <i className={`pi ${isExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} text-color-secondary`}></i>
               </div>
-              <i className={`pi ${isExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} text-color-secondary`}></i>
             </div>
 
             {isExpanded && (
@@ -315,45 +373,74 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
 
     return (
       <div className="col-12 mb-3" key={item.key}>
-        <div className="card p-3 shadow-2 surface-card border-round">
-          <div className="flex flex-column gap-3">
-            {/* Título */}
-            <div className="flex align-items-center gap-3">
-              {audio.thumbnail ? (
-                <img
-                  src={audio.thumbnail}
-                  alt=""
-                  className="border-round flex-shrink-0"
-                  style={{ width: '3rem', height: '3rem', objectFit: 'cover' }}
-                />
-              ) : (
-                <div className="w-3rem h-3rem bg-primary border-circle flex align-items-center justify-content-center flex-shrink-0">
-                  <i className="pi pi-music text-white text-xl"></i>
+        <div className={`card p-3 shadow-2 surface-card border-round ${isSelected ? 'border-2 border-primary' : ''}`}>
+          <div className="flex align-items-center gap-2 mb-3">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedItems([...selectedItems, item]);
+                } else {
+                  setSelectedItems(
+                    selectedItems.filter((si) => si.key !== item.key),
+                  );
+                }
+              }}
+            />
+            <div className="flex flex-column flex-1 gap-3">
+              {/* Título */}
+              <div className="flex align-items-center gap-3">
+                {audio.thumbnail ? (
+                  <img
+                    src={audio.thumbnail}
+                    alt=""
+                    className="border-round flex-shrink-0"
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <div className="w-3rem h-3rem bg-primary border-circle flex align-items-center justify-content-center flex-shrink-0">
+                    <i className="pi pi-music text-white text-xl"></i>
+                  </div>
+                )}
+                <div
+                  className="flex flex-column flex-1"
+                  style={{ overflow: 'hidden' }}
+                >
+                  <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                    {audio.title || audio.name}
+                  </span>
+                  <small className="text-secondary text-xs mt-1 flex align-items-center gap-2 flex-wrap">
+                    {formatSize(audio.size)}
+                    {formatDuration(audio.duration) && (
+                      <span>• {formatDuration(audio.duration)}</span>
+                    )}
+                    {isActive && (
+                      <>
+                        <i
+                          className="pi pi-spin pi-spinner text-primary"
+                          style={{ fontSize: '0.7rem' }}
+                        ></i>
+                        {progress !== undefined && (
+                          <span className="text-primary font-bold">
+                            {progress}%
+                          </span>
+                        )}
+                      </>
+                    )}
+                    • {formatDate(audio.createdAt)}
+                  </small>
                 </div>
-              )}
-              <div className="flex flex-column flex-1" style={{ overflow: 'hidden' }}>
-                <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
-                  {audio.title || audio.name}
-                </span>
-                <small className="text-secondary text-xs mt-1 flex align-items-center gap-2 flex-wrap">
-                  {formatSize(audio.size)}
-                  {formatDuration(audio.duration) && <span>• {formatDuration(audio.duration)}</span>}
-                  {isActive && (
-                    <>
-                      <i className="pi pi-spin pi-spinner text-primary" style={{ fontSize: '0.7rem' }}></i>
-                      {progress !== undefined && (
-                        <span className="text-primary font-bold">{progress}%</span>
-                      )}
-                    </>
-                  )}
-                  • {formatDate(audio.createdAt)}
-                </small>
               </div>
-            </div>
 
-            {/* Botones de acción */}
-            <div className="flex justify-content-end">
-              <AudioActions audio={audio} />
+              {/* Botones de acción */}
+              <div className="flex justify-content-end">
+                <AudioActions audio={audio} />
+              </div>
             </div>
           </div>
         </div>
@@ -383,6 +470,49 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
     <>
       <ConfirmDialog className="confirm-dialog-responsive" />
 
+      {/* Barra de búsqueda y filtros */}
+      <div className="mb-4 flex flex-column md:flex-row gap-3 align-items-end">
+        <div className="flex-1 w-full">
+          <label className="block font-medium mb-2 text-sm">
+            Buscar audios
+          </label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <i className="pi pi-search text-color-secondary" style={{ position: 'absolute', left: '12px', pointerEvents: 'none' }}></i>
+            <InputText
+              placeholder="Buscar por nombre..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+              style={{ paddingLeft: '38px' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ minWidth: '200px' }}>
+          <label className="block font-medium mb-2 text-sm">Ordenar por</label>
+          <Dropdown
+            value={sortBy}
+            onChange={(e) => setSortBy(e.value)}
+            options={[
+              { label: 'Más Reciente', value: 'fecha-desc' },
+              { label: 'Más Antiguo', value: 'fecha-asc' },
+              { label: 'Nombre (A-Z)', value: 'nombre-asc' },
+              { label: 'Nombre (Z-A)', value: 'nombre-desc' },
+              { label: 'Tamaño (Menor)', value: 'tamaño-asc' },
+              { label: 'Tamaño (Mayor)', value: 'tamaño-desc' }
+            ]}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Info de búsqueda */}
+      {searchTerm && (
+        <div className="mb-3 text-sm text-color-secondary">
+          Mostrando {groupedItems.length} de {files?.length || 0} audios
+        </div>
+      )}
+
       {/* Selector de vista */}
       <div className="flex justify-content-end mb-3">
         <Button
@@ -407,7 +537,12 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
           expandedRows={expandedRows}
           onRowToggle={(e) => setExpandedRows(e.data)}
           rowExpansionTemplate={rowExpansionTemplate}
+          selection={selectedItems}
+          onSelectionChange={(e) => setSelectedItems(e.value)}
+          isDataSelectable={() => true}
+          selectionMode="checkbox"
         >
+          <Column selectionMode="multiple" style={{ width: '3rem' }} />
           <Column expander={(rowData) => rowData.isGroup} style={{ width: '3rem' }} />
           <Column
             field="title"
@@ -491,7 +626,9 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
           />
         </DataTable>
       ) : (
-        <DataView value={groupedItems} itemTemplate={renderCard} paginator rows={6} />
+        <div className="grid">
+          <DataView value={groupedItems} itemTemplate={renderCard} paginator rows={6} layout="grid" />
+        </div>
       )}
     </>
   );
