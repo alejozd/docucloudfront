@@ -23,7 +23,6 @@ import ProtectedRoute from "././components/features/ProtectedRoute";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
 import PurchaseBridge from "./pages/protected/PurchaseBridge";
-import Usuarios from "./pages/microservices/Usuarios";
 import ZamAirDashboard from "./components/ZamAirDashboard";
 import "././styles/App.css";
 import "./styles/darkMode.css";
@@ -51,7 +50,7 @@ function App() {
   });
 
   const [jwtToken, setJwtToken] = useState(
-    () => sessionStorage.getItem("jwtToken") || ""
+    () => sessionStorage.getItem("jwtToken") || "",
   );
 
   useEffect(() => {
@@ -89,77 +88,74 @@ function App() {
 
   return (
     <DarkModeProvider>
-    <Router>
-      <div className="App">
-        <Toast ref={toastRef} />
-        <Navbar onLogout={handleLogout} />
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/productos" element={<Productos />} />
-            <Route path="/contactos" element={<Contactos />} />
-            <Route path="/contactar" element={<Contactar />} />
-            <Route path="/weather" element={<Weather />} />
-            <Route
-              path="/AsociarClienteContacto"
-              element={<AsociarClienteContacto />}
-            />
-            <Route
-              path="/WorkTimeCalculator"
-              element={<WorkTimeCalculator />}
-            />
-            <Route
-              path="/RegistroSolicitudesPage"
-              element={<RegistroSolicitudesPage />}
-            />
-            <Route path="/BatteryStatus" element={<BatteryStatus />} />
-            <Route path="/GrabacionesPage" element={<GrabacionesPage />} />
-            <Route path="/VideosPage" element={<VideosPage />} />
-            <Route path="/audios-youtube" element={<AudiosYouTubePage />} />
-            <Route path="/SalesDashboard" element={<SalesDashboard />} />
-            <Route
-              path="/toma-tension-dashboard"
-              element={<TomaTensionDashboard />}
-            />
-            {/* Rutas de microservicios */}
-            <Route path="/Usuarios" element={<Usuarios />} />
+      <Router>
+        <div className="App">
+          <Toast ref={toastRef} />
+          <Navbar onLogout={handleLogout} />
+          <div className="content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/clientes" element={<Clientes />} />
+              <Route path="/productos" element={<Productos />} />
+              <Route path="/contactos" element={<Contactos />} />
+              <Route path="/contactar" element={<Contactar />} />
+              <Route path="/weather" element={<Weather />} />
+              <Route
+                path="/AsociarClienteContacto"
+                element={<AsociarClienteContacto />}
+              />
+              <Route
+                path="/WorkTimeCalculator"
+                element={<WorkTimeCalculator />}
+              />
+              <Route
+                path="/RegistroSolicitudesPage"
+                element={<RegistroSolicitudesPage />}
+              />
+              <Route path="/BatteryStatus" element={<BatteryStatus />} />
+              <Route path="/GrabacionesPage" element={<GrabacionesPage />} />
+              <Route path="/VideosPage" element={<VideosPage />} />
+              <Route path="/audios-youtube" element={<AudiosYouTubePage />} />
+              <Route path="/SalesDashboard" element={<SalesDashboard />} />
+              <Route
+                path="/toma-tension-dashboard"
+                element={<TomaTensionDashboard />}
+              />
+              {/* Ruta de autenticación */}
+              <Route
+                path="/login"
+                element={<Login onLogin={handleAuthenticate} />}
+              />
 
-            {/* Ruta de autenticación */}
-            <Route
-              path="/login"
-              element={<Login onLogin={handleAuthenticate} />}
-            />
-
-            {/* Rutas protegidas */}
-            <Route
-              path="/SerialReportes"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <SerialReportes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/purchase-bridge"
-              element={
-                <ProtectedRoute
-                  isAuthenticated={isAuthenticated}
-                  jwtToken={jwtToken}
-                >
-                  <PurchaseBridge />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/AutorizacionPage" element={<AutorizacionPage />} />
-            <Route path="/zam-air" element={<ZamAirDashboard />} />
-          </Routes>
+              {/* Rutas protegidas */}
+              <Route
+                path="/SerialReportes"
+                element={
+                  <ProtectedRoute
+                    isAuthenticated={isAuthenticated}
+                    jwtToken={jwtToken}
+                  >
+                    <SerialReportes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/purchase-bridge"
+                element={
+                  <ProtectedRoute
+                    isAuthenticated={isAuthenticated}
+                    jwtToken={jwtToken}
+                  >
+                    <PurchaseBridge />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/AutorizacionPage" element={<AutorizacionPage />} />
+              <Route path="/zam-air" element={<ZamAirDashboard />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
     </DarkModeProvider>
   );
 }
