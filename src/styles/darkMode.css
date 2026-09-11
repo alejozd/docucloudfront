@@ -156,19 +156,51 @@ body.dark-mode .p-button.p-button-outlined:hover {
 /* Dropdowns y Menús */
 body.dark-mode .p-dropdown-panel,
 body.dark-mode .p-menu,
-body.dark-mode .p-tieredmenu {
+body.dark-mode .p-tieredmenu,
+body.dark-mode .p-menubar .p-submenu-list {
   background-color: var(--bg-card) !important;
   border-color: var(--border-color) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.dark-mode .p-dropdown-item,
-body.dark-mode .p-menuitem-link {
+body.dark-mode .p-menuitem-link,
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-text,
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-icon,
+body.dark-mode .p-menubar .p-submenu-list .p-submenu-icon {
   color: var(--text-primary) !important;
 }
 
 body.dark-mode .p-dropdown-item:hover,
-body.dark-mode .p-menuitem-link:hover {
+body.dark-mode .p-menuitem-link:hover,
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover {
   background-color: var(--bg-secondary) !important;
+}
+
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-menuitem-text,
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-menuitem-icon,
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-submenu-icon {
+  color: var(--text-vibrant) !important;
+}
+
+/* Submenús anidados (nivel 2+) */
+body.dark-mode .p-menubar .p-submenu-list .p-submenu-list {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .p-menubar .p-submenu-list .p-submenu-list .p-menuitem-link {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .p-menubar .p-submenu-list .p-submenu-list .p-menuitem-link:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-vibrant) !important;
 }
 
 /* Dialogs */
