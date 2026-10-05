@@ -307,6 +307,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
               />
               <div
                 className="flex-1 flex align-items-center gap-3 cursor-pointer"
+                style={{ minWidth: 0 }}
                 onClick={() => {
                   setExpandedGroupKeys(prev => {
                     const next = new Set(prev);
@@ -322,11 +323,27 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
                     <i className="pi pi-th-large text-white text-xl"></i>
                   </div>
                 )}
-                <div className="flex flex-column flex-1" style={{ overflow: 'hidden' }}>
-                  <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                <div
+                  className="flex flex-column flex-1"
+                  style={{ minWidth: 0, overflow: 'hidden' }}
+                >
+                  <span
+                    className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap"
+                    style={{
+                      display: 'block',
+                      minWidth: 0,
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {item.title}
                   </span>
-                  <small className="text-secondary text-xs mt-1">
+                  <small
+                    className="text-secondary text-xs mt-1"
+                    style={{ overflowWrap: 'anywhere' }}
+                  >
                     {item.parts.length} partes • {formatSize(item.size)} • {formatDate(item.createdAt)}
                   </small>
                 </div>
@@ -388,9 +405,15 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
                 }
               }}
             />
-            <div className="flex flex-column flex-1 gap-3">
+            <div
+              className="flex flex-column flex-1 gap-3"
+              style={{ minWidth: 0 }}
+            >
               {/* Título */}
-              <div className="flex align-items-center gap-3">
+              <div
+                className="flex align-items-center gap-3"
+                style={{ minWidth: 0 }}
+              >
                 {audio.thumbnail ? (
                   <img
                     src={audio.thumbnail}
@@ -409,12 +432,25 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
                 )}
                 <div
                   className="flex flex-column flex-1"
-                  style={{ overflow: 'hidden' }}
+                  style={{ minWidth: 0, overflow: 'hidden' }}
                 >
-                  <span className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                  <span
+                    className="font-medium text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap"
+                    style={{
+                      display: 'block',
+                      minWidth: 0,
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {audio.title || audio.name}
                   </span>
-                  <small className="text-secondary text-xs mt-1 flex align-items-center gap-2 flex-wrap">
+                  <small
+                    className="text-secondary text-xs mt-1 flex align-items-center gap-2 flex-wrap"
+                    style={{ overflowWrap: 'anywhere' }}
+                  >
                     {formatSize(audio.size)}
                     {formatDuration(audio.duration) && (
                       <span>• {formatDuration(audio.duration)}</span>

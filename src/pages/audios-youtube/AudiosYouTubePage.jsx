@@ -905,6 +905,26 @@ const AudiosYouTubePage = () => {
         .audios-youtube-page {
           min-height: calc(100vh - 120px);
           padding-bottom: 140px;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+
+        .audios-youtube-page h1,
+        .audios-youtube-page p,
+        .audios-youtube-page small,
+        .audios-youtube-page .font-medium {
+          overflow-wrap: anywhere;
+        }
+
+        .audios-youtube-page .p-card-title {
+          min-width: 0;
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+
+        .audios-youtube-page .p-card-title > div {
+          min-width: 0;
+          flex-wrap: wrap;
         }
         
         .bg-primary-alpha-10 {
@@ -918,6 +938,16 @@ const AudiosYouTubePage = () => {
         }
 
         @media (max-width: 768px) {
+          .audios-youtube-page {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+          }
+
+          .audios-youtube-page h1 {
+            font-size: clamp(1.35rem, 5vw, 1.75rem);
+            line-height: 1.25;
+          }
+
           .confirm-dialog-responsive.p-dialog {
             max-width: 95vw !important;
             width: 95vw !important;
