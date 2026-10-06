@@ -26,13 +26,18 @@ const AudiosYouTubePage = () => {
   const navigate = useNavigate();
 
   // Estado de autenticación
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => sessionStorage.getItem("audioDownloadAuth") === "true",
+  );
+  const [showPasswordModal, setShowPasswordModal] = useState(
+    () => sessionStorage.getItem("audioDownloadAuth") !== "true",
+  );
   const [authLoading, setAuthLoading] = useState(false);
 
   // Estado de archivos
   const [files, setFiles] = useState([]);
   const [filesLoading, setFilesLoading] = useState(false);
+  const filesRequestRef = useRef(false);
 
   // Hook del reproductor
   const player = useAudioPlayer();
@@ -104,23 +109,13 @@ const AudiosYouTubePage = () => {
   }, []);
 
   /**
-   * Verificar si ya está autenticado en sessionStorage
-   */
-  useEffect(() => {
-    const authStatus = sessionStorage.getItem("audioDownloadAuth");
-    if (authStatus === "true") {
-      setIsAuthenticated(true);
-      setShowPasswordModal(false);
-    }
-  }, []);
-
-  /**
    * Cargar lista de archivos
    */
   const loadFiles = useCallback(
     async (isSilent = false) => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || filesRequestRef.current) return;
 
+      filesRequestRef.current = true;
       if (!isSilent) setFilesLoading(true);
       try {
         const response = await audioDownloadService.listFiles();
@@ -143,13 +138,16 @@ const AudiosYouTubePage = () => {
         setFiles(processedFiles);
       } catch (error) {
         console.error("Error al cargar archivos:", error);
-        toastRef.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "No se pudieron cargar los archivos descargados",
-          life: 3000,
-        });
+        if (!isSilent) {
+          toastRef.current?.show({
+            severity: "error",
+            summary: "Error",
+            detail: "No se pudieron cargar los archivos descargados",
+            life: 3000,
+          });
+        }
       } finally {
+        filesRequestRef.current = false;
         setFilesLoading(false);
       }
     },

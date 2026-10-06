@@ -507,7 +507,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
       <ConfirmDialog className="confirm-dialog-responsive" />
 
       {/* Barra de búsqueda y filtros */}
-      <div className="mb-4 flex flex-column md:flex-row gap-3 align-items-end">
+      <div className="mb-4 flex flex-column md:flex-row gap-3 align-items-stretch md:align-items-end">
         <div className="flex-1 w-full">
           <label className="block font-medium mb-2 text-sm">
             Buscar audios
@@ -524,7 +524,7 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
           </div>
         </div>
 
-        <div style={{ minWidth: '200px' }}>
+        <div className="w-full md:w-auto" style={{ minWidth: '200px' }}>
           <label className="block font-medium mb-2 text-sm">Ordenar por</label>
           <Dropdown
             value={sortBy}
