@@ -14,6 +14,28 @@ if (!API_KEY) {
 
 const audioDownloadService = {
   /**
+   * Valida la clave de acceso en el SERVIDOR y obtiene una sesión de 24 horas.
+   * La clave ya no se compara en el navegador: nunca queda en el bundle.
+   * Endpoint público (no requiere x-api-key).
+   * @param {string} password - Clave de acceso del módulo
+   * @returns {Promise} { ok, token, expiresAt, expiresInHours }
+   */
+  createSession: (password) => {
+    return axios.post(`${API_BASE_URL}/api/audio-download/session`, { password });
+  },
+
+  /**
+   * Verifica contra el servidor que un token de sesión siga siendo válido.
+   * Sirve para detectar revocaciones sin esperar las 24 horas.
+   * @param {string} token - Token de sesión
+   */
+  checkSession: (token) => {
+    return axios.get(`${API_BASE_URL}/api/audio-download/session`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
+
+  /**
    * Iniciar descarga de audio desde YouTube
    * @param {string} url - URL de YouTube
    */

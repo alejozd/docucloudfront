@@ -13,26 +13,35 @@ import {
   getActiveDownloads,
   removeActiveDownload,
 } from "../../utils/activeDownloadsStorage";
-
-// Obtener API Key desde variables de entorno
-const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
+import {
+  getStoredSession,
+  saveSession,
+  clearSession,
+  clearLegacyFlag,
+} from "../../utils/audioSessionStorage";
 
 /**
  * Página principal para descarga de audios desde YouTube
  * Integrada bajo "Utilidades" → "Audios YouTube"
+ *
+ * El acceso se pide UNA vez y queda habilitado en el dispositivo por 24 horas
+ * (token firmado por el backend, guardado en localStorage). Al vencer, se
+ * vuelve a solicitar la clave.
  */
 const AudiosYouTubePage = () => {
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
-  // Estado de autenticación
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => sessionStorage.getItem("audioDownloadAuth") === "true",
-  );
+  // Estado de autenticación (sesión de 24 h guardada en el dispositivo)
+  const [session, setSession] = useState(() => getStoredSession());
   const [showPasswordModal, setShowPasswordModal] = useState(
-    () => sessionStorage.getItem("audioDownloadAuth") !== "true",
+    () => !getStoredSession(),
   );
   const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+
+  const isAuthenticated = Boolean(session);
+  const sessionToken = session?.token || null;
 
   // Estado de archivos
   const [files, setFiles] = useState([]);
@@ -155,49 +164,138 @@ const AudiosYouTubePage = () => {
   );
 
   /**
-   * Manejar autenticación
+   * Manejar autenticación.
+   *
+   * La clave se envía al backend, que la valida en el servidor y devuelve un
+   * token firmado con 24 horas de vigencia. Ese token se guarda en el
+   * dispositivo (localStorage), así que el acceso sobrevive a recargas, a
+   * pestañas nuevas y al reinicio del navegador o del equipo.
    */
-  const handleAuthenticate = (password) => {
+  const handleAuthenticate = useCallback(async (password) => {
     setAuthLoading(true);
+    setAuthError("");
 
-    // Validar que el password coincida con REACT_APP_API_KEY
-    setTimeout(() => {
-      if (REACT_APP_API_KEY && password === REACT_APP_API_KEY) {
-        setIsAuthenticated(true);
-        setShowPasswordModal(false);
-        sessionStorage.setItem("audioDownloadAuth", "true");
-        toastRef.current?.show({
-          severity: "success",
-          summary: "Autenticación Exitosa",
-          detail: "Bienvenido al módulo de descarga de audios",
-          life: 3000,
-        });
-      } else if (!REACT_APP_API_KEY) {
-        // Si no hay REACT_APP_API_KEY definida, permitir acceso pero mostrar advertencia
-        console.warn(
-          "⚠️ REACT_APP_API_KEY no está definida. Permitiendo acceso sin validación.",
-        );
-        setIsAuthenticated(true);
-        setShowPasswordModal(false);
-        sessionStorage.setItem("audioDownloadAuth", "true");
-        toastRef.current?.show({
-          severity: "warn",
-          summary: "Advertencia",
-          detail:
-            "REACT_APP_API_KEY no configurada. Las llamadas a la API podrían fallar.",
-          life: 5000,
-        });
-      } else {
-        toastRef.current?.show({
-          severity: "error",
-          summary: "Autenticación Fallida",
-          detail: "API Key incorrecta",
-          life: 3000,
-        });
+    try {
+      const response = await audioDownloadService.createSession(password);
+      const { token, expiresAt, expiresInHours } = response.data || {};
+
+      if (!token || !expiresAt) {
+        throw new Error("El servidor no devolvió una sesión válida");
       }
+
+      const record = saveSession({ token, expiresAt });
+      setSession(record);
+      setShowPasswordModal(false);
+
+      toastRef.current?.show({
+        severity: "success",
+        summary: "Acceso Concedido",
+        detail: `Listo. Tendrás acceso por ${expiresInHours || 24} horas en este dispositivo.`,
+        life: 4000,
+      });
+    } catch (error) {
+      const status = error.response?.status;
+      const serverMessage = error.response?.data?.error;
+
+      let message;
+      if (status === 401) {
+        message = serverMessage || "Clave de acceso incorrecta";
+      } else if (status === 429) {
+        message =
+          serverMessage ||
+          "Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.";
+      } else if (status === 500) {
+        message =
+          serverMessage ||
+          "El servidor no tiene configurada la clave de acceso al módulo.";
+      } else if (error.response) {
+        message = serverMessage || "No se pudo validar la clave de acceso";
+      } else {
+        message =
+          "No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.";
+      }
+
+      console.warn("Autenticación de audios fallida:", message);
+      setAuthError(message);
+      setShowPasswordModal(true);
+
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Acceso Denegado",
+        detail: message,
+        life: 4000,
+      });
+    } finally {
       setAuthLoading(false);
-    }, 500);
-  };
+    }
+  }, []);
+
+  /**
+   * Cerrar la sesión del módulo (por vencimiento o revocación en el servidor).
+   */
+  const expireSession = useCallback((detail) => {
+    clearSession();
+    setSession(null);
+    setAuthError("");
+    setShowPasswordModal(true);
+
+    if (detail) {
+      toastRef.current?.show({
+        severity: "warn",
+        summary: "Sesión finalizada",
+        detail,
+        life: 6000,
+      });
+    }
+  }, []);
+
+  /**
+   * Vencimiento automático: cuando se cumplen las 24 horas, se vuelve a pedir
+   * la clave sin necesidad de recargar la página.
+   */
+  useEffect(() => {
+    if (!session) return undefined;
+
+    const remaining = session.expiresAtMs - Date.now();
+    if (remaining <= 0) {
+      expireSession("El acceso de 24 horas venció. Ingresa la clave nuevamente.");
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      expireSession("El acceso de 24 horas venció. Ingresa la clave nuevamente.");
+    }, remaining);
+
+    return () => clearTimeout(timer);
+  }, [session, expireSession]);
+
+  /**
+   * Revalidación silenciosa al abrir el módulo.
+   *
+   * Comprueba contra el servidor que la sesión siga vigente (por si se rotó el
+   * secreto). Si falla por red o servidor caído NO se cierra la sesión: no
+   * queremos volver a molestar con la clave por un problema temporal.
+   */
+  useEffect(() => {
+    clearLegacyFlag();
+
+    if (!sessionToken) return undefined;
+
+    let cancelled = false;
+
+    audioDownloadService
+      .checkSession(sessionToken)
+      .catch((error) => {
+        if (cancelled) return;
+        if (error.response?.status === 401) {
+          expireSession("Tu sesión ya no es válida. Ingresa la clave nuevamente.");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionToken, expireSession]);
 
   /**
    * Manejar cierre del modal de password (clic en Cancelar)
@@ -782,6 +880,8 @@ const AudiosYouTubePage = () => {
           onHide={handlePasswordModalHide}
           onAuthenticate={handleAuthenticate}
           loading={authLoading}
+          error={authError}
+          expiresInHours={24}
         />
       </>
     );

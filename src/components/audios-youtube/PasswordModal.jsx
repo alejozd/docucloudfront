@@ -3,42 +3,51 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
 
-// Obtener API Key desde variables de entorno
-const REACT_APP_API_KEY = process.env.REACT_APP_API_KEY;
-
 /**
- * Modal para pedir password de autenticación
- * Similar al módulo "Aerolínea" (ZamAir)
- * Usa la ZAM_API_KEY del backend para validación
+ * Modal para pedir la clave de acceso al módulo de audios de YouTube.
+ *
+ * La clave se envía al backend, que la valida y responde con una sesión de
+ * 24 horas. Ya NO se compara contra REACT_APP_API_KEY en el navegador, porque
+ * esa variable viaja compilada dentro del bundle JS y era visible para
+ * cualquiera desde las DevTools.
+ *
+ * @param {boolean}  visible
+ * @param {Function} onHide
+ * @param {Function} onAuthenticate - async (password) => void
+ * @param {boolean}  loading
+ * @param {string}   error - Mensaje de error devuelto por el backend
+ * @param {number}   expiresInHours - Duración de la sesión (para el texto informativo)
  */
-const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
+const PasswordModal = ({
+  visible,
+  onHide,
+  onAuthenticate,
+  loading,
+  error,
+  expiresInHours = 24,
+}) => {
   const [password, setPassword] = React.useState("");
-  const [errorMsg, setErrorMsg] = React.useState("");
+  const [localError, setLocalError] = React.useState("");
 
-  // Verificar si REACT_APP_API_KEY está definida
+  // Limpiar el campo al cerrar el modal
   React.useEffect(() => {
-    if (!REACT_APP_API_KEY) {
-      console.warn(
-        "⚠️ ADVERTENCIA: REACT_APP_API_KEY no está definida en el archivo .env",
-      );
-      console.warn(
-        "Por favor, configura REACT_APP_API_KEY en tu archivo .env con la misma clave que el backend (ZAM_API_KEY)",
-      );
+    if (!visible) {
+      setPassword("");
+      setLocalError("");
     }
-  }, []);
+  }, [visible]);
+
+  const errorMsg = localError || error;
 
   const handleAuthenticate = () => {
+    if (loading) return;
+
     if (!password.trim()) {
-      setErrorMsg("Por favor ingrese el password");
+      setLocalError("Por favor ingrese la clave de acceso");
       return;
     }
 
-    // Validar que el password coincida con REACT_APP_API_KEY
-    if (REACT_APP_API_KEY && password !== REACT_APP_API_KEY) {
-      setErrorMsg("Password incorrecto. Verifique la clave.");
-      return;
-    }
-
+    setLocalError("");
     onAuthenticate(password);
   };
 
@@ -55,13 +64,14 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
         icon="pi pi-times"
         className="p-button-danger"
         onClick={onHide}
+        disabled={loading}
       />
       <Button
         label="Ingresar"
         icon="pi pi-check"
         onClick={handleAuthenticate}
         loading={loading}
-        disabled={!password.trim()}
+        disabled={!password.trim() || loading}
       />
     </div>
   );
@@ -92,21 +102,19 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
             Autenticación Requerida
           </span>
           <p className="m-0 text-secondary line-height-3">
-            Ingrese su contraseña para habilitar las herramientas de descarga y
+            Ingrese su clave para habilitar las herramientas de descarga y
             procesamiento.
           </p>
         </div>
 
-        {!REACT_APP_API_KEY && (
-          <div className="p-3 bg-orange-50 border-round border-1 border-orange-200 flex align-items-start gap-3">
-            <i className="pi pi-exclamation-triangle text-orange-500 text-xl mt-1"></i>
+        {errorMsg && (
+          <div className="p-3 bg-red-50 border-round border-1 border-red-200 flex align-items-start gap-3">
+            <i className="pi pi-exclamation-circle text-red-500 text-xl mt-1"></i>
             <div className="flex flex-column">
-              <span className="text-orange-900 font-bold text-sm">
-                Falta Configuración
+              <span className="text-red-900 font-bold text-sm">
+                No se pudo ingresar
               </span>
-              <span className="text-orange-700 text-xs">
-                REACT_APP_API_KEY no encontrada en el entorno.
-              </span>
+              <span className="text-red-700 text-xs">{errorMsg}</span>
             </div>
           </div>
         )}
@@ -127,17 +135,26 @@ const PasswordModal = ({ visible, onHide, onAuthenticate, loading }) => {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              setErrorMsg("");
+              setLocalError("");
             }}
             onKeyPress={handleKeyPress}
-            placeholder="Ingrese su contraseña"
+            placeholder="Ingrese su clave de acceso"
             toggleMask
             feedback={false}
             autoFocus
+            disabled={loading}
             inputClassName="w-full"
             className="w-full"
             inputStyle={{ paddingLeft: "40px" }}
           />
+        </div>
+
+        <div className="flex align-items-center gap-2 text-xs text-color-secondary">
+          <i className="pi pi-clock"></i>
+          <span>
+            El acceso queda habilitado en este dispositivo por{" "}
+            {expiresInHours} horas.
+          </span>
         </div>
       </div>
     </Dialog>
