@@ -17,6 +17,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
+import { normalizarNit } from "../../utils/nit";
 import "../../styles/Clientes.css";
 
 const ENDPOINTS = {
@@ -188,7 +189,7 @@ const PurchaseBridge = ({ jwtToken }) => {
   }, [jwtToken, fetchLicencias]);
 
   const validateCreate = () => {
-    if (!createForm.nit.trim()) return "El NIT es obligatorio";
+    if (!normalizarNit(createForm.nit)) return "El NIT debe tener dígitos";
     if (!createForm.app) return "La aplicación es obligatoria";
     if (!createForm.dias_demo || createForm.dias_demo <= 0)
       return "días demo debe ser mayor que 0";
@@ -197,7 +198,7 @@ const PurchaseBridge = ({ jwtToken }) => {
 
   const validateEdit = () => {
     if (!editForm.id) return "No se pudo identificar la licencia";
-    if (!editForm.nit.trim()) return "El NIT es obligatorio";
+    if (!normalizarNit(editForm.nit)) return "El NIT debe tener dígitos";
     if (!editForm.tipo_licencia) return "El tipo de licencia es obligatorio";
     if (
       editForm.tipo_licencia === "anual" &&
@@ -209,7 +210,7 @@ const PurchaseBridge = ({ jwtToken }) => {
   };
 
   const validateActivate = () => {
-    if (!activateForm.nit.trim()) return "El NIT es obligatorio";
+    if (!normalizarNit(activateForm.nit)) return "El NIT debe tener dígitos";
     if (!activateForm.instalacion_hash.trim())
       return "El hash de instalación es obligatorio";
     if (activateForm.online && !activateForm.tipo_licencia)
@@ -225,7 +226,7 @@ const PurchaseBridge = ({ jwtToken }) => {
   };
 
   const validateConvert = () => {
-    if (!convertForm.nit.trim()) return "El NIT es obligatorio";
+    if (!normalizarNit(convertForm.nit)) return "El NIT debe tener dígitos";
     if (!convertForm.tipo_licencia) return "Selecciona tipo de licencia";
     if (
       convertForm.tipo_licencia === "anual" &&
@@ -237,7 +238,7 @@ const PurchaseBridge = ({ jwtToken }) => {
   };
 
   const validateCode = () => {
-    if (!codeForm.nit.trim()) return "El NIT es obligatorio";
+    if (!normalizarNit(codeForm.nit)) return "El NIT debe tener dígitos";
     if (!codeForm.app) return "La aplicación es obligatoria";
     if (!codeForm.instalacion_hash.trim())
       return "El hash de instalación es obligatorio";
@@ -269,7 +270,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     await runAction(async () => {
       await axios.post(
         `${Config.apiUrl}${ENDPOINTS.crear}`,
-        createForm,
+        { ...createForm, nit: normalizarNit(createForm.nit) },
         authHeaders,
       );
       setCreateDialog(false);
@@ -285,7 +286,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     }
 
     const payload = {
-      nit: editForm.nit,
+      nit: normalizarNit(editForm.nit),
       estado: editForm.estado,
       tipo_licencia: editForm.tipo_licencia,
       fecha_activacion:
@@ -324,7 +325,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       : ENDPOINTS.activar;
     const payload = activateForm.online
       ? {
-          nit: activateForm.nit,
+          nit: normalizarNit(activateForm.nit),
           app: activateForm.app || LICENSE_APP,
           instalacion_hash: activateForm.instalacion_hash,
           tipo_licencia: activateForm.tipo_licencia,
@@ -334,7 +335,7 @@ const PurchaseBridge = ({ jwtToken }) => {
             : undefined,
         }
       : {
-          nit: activateForm.nit,
+          nit: normalizarNit(activateForm.nit),
           instalacion_hash: activateForm.instalacion_hash,
           app: activateForm.app || LICENSE_APP,
         };
@@ -359,7 +360,7 @@ const PurchaseBridge = ({ jwtToken }) => {
     }
 
     const payload = {
-      nit: convertForm.nit,
+      nit: normalizarNit(convertForm.nit),
       app: convertForm.app || LICENSE_APP,
       tipo_licencia: convertForm.tipo_licencia,
       dias_licencia:
@@ -391,7 +392,7 @@ const PurchaseBridge = ({ jwtToken }) => {
       await axios.post(
         `${Config.apiUrl}${ENDPOINTS.generarCodigo}`,
         {
-          nit: codeForm.nit,
+          nit: normalizarNit(codeForm.nit),
           app: codeForm.app || LICENSE_APP,
           instalacion_hash: codeForm.instalacion_hash,
           dias: Number(codeForm.dias),
@@ -590,6 +591,7 @@ const PurchaseBridge = ({ jwtToken }) => {
               setCreateForm((prev) => ({ ...prev, nit: e.target.value }))
             }
           />
+          <small>Solo dígitos, sin dígito de verificación (ej. 900123456)</small>
         </div>
         <div className="field">
           <label htmlFor="create_app">App *</label>
@@ -646,6 +648,7 @@ const PurchaseBridge = ({ jwtToken }) => {
               setEditForm((prev) => ({ ...prev, nit: e.target.value }))
             }
           />
+          <small>Solo dígitos, sin dígito de verificación (ej. 900123456)</small>
         </div>
         <div className="field">
           <label htmlFor="edit_estado">Estado</label>
@@ -741,6 +744,7 @@ const PurchaseBridge = ({ jwtToken }) => {
               setActivateForm((prev) => ({ ...prev, nit: e.target.value }))
             }
           />
+          <small>Solo dígitos, sin dígito de verificación (ej. 900123456)</small>
         </div>
         <div className="field">
           <label htmlFor="activate_hash">Instalación Hash *</label>
@@ -849,6 +853,7 @@ const PurchaseBridge = ({ jwtToken }) => {
               setConvertForm((prev) => ({ ...prev, nit: e.target.value }))
             }
           />
+          <small>Solo dígitos, sin dígito de verificación (ej. 900123456)</small>
         </div>
         <div className="field">
           <label htmlFor="convert_tipo">Tipo Licencia *</label>
@@ -924,6 +929,7 @@ const PurchaseBridge = ({ jwtToken }) => {
               setCodeForm((prev) => ({ ...prev, nit: e.target.value }))
             }
           />
+          <small>Solo dígitos, sin dígito de verificación (ej. 900123456)</small>
         </div>
         <div className="field">
           <label htmlFor="code_app">App *</label>
