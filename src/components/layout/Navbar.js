@@ -39,6 +39,12 @@ const Navbar = () => {
               url: "/purchase-bridge",
               id: "purchase-bridge",
             },
+            {
+              label: "ERP",
+              icon: "pi pi-server",
+              url: "/ErpClave",
+              id: "ErpClave",
+            },
           ],
         },
       ],

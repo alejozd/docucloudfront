@@ -23,6 +23,7 @@ import ProtectedRoute from "././components/features/ProtectedRoute";
 import Login from "./pages/protected/Login";
 import AutorizacionPage from "./pages/protected/AutorizacionPage";
 import PurchaseBridge from "./pages/protected/PurchaseBridge";
+import ErpClave from "./pages/protected/ErpClave";
 import ZamAirDashboard from "./components/ZamAirDashboard";
 import "././styles/App.css";
 import "./styles/darkMode.css";
@@ -151,6 +152,17 @@ function App() {
                 }
               />
               <Route path="/AutorizacionPage" element={<AutorizacionPage />} />
+              <Route
+                path="/ErpClave"
+                element={
+                  <ProtectedRoute
+                    isAuthenticated={isAuthenticated}
+                    jwtToken={jwtToken}
+                  >
+                    <ErpClave />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/zam-air" element={<ZamAirDashboard />} />
             </Routes>
           </div>
