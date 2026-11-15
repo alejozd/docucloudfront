@@ -3,11 +3,11 @@ set -euo pipefail
 
 # Uso:
 #   bash scripts/deploy_frontend.sh
-#   PM2_PROCESS_NAME=frotnend bash scripts/deploy_frontend.sh
-#   PM2_PROCESS_NAME=frontend PROJECT_DIR=/var/www/docucloudfront bash scripts/deploy_frontend.sh
+#   PM2_PROCESS_NAME=frontend bash scripts/deploy_frontend.sh
+#   PM2_PROCESS_NAME=frontend PROJECT_DIR=/var/www/docucloudfront RUN_AS_SUDO=false bash scripts/deploy_frontend.sh
 
 PROJECT_DIR="${PROJECT_DIR:-/var/www/docucloudfront}"
-PM2_PROCESS_NAME="${PM2_PROCESS_NAME:-frotnend}"
+PM2_PROCESS_NAME="${PM2_PROCESS_NAME:-frontend}"
 BRANCH_NAME="${BRANCH_NAME:-$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
 RUN_AS_SUDO="${RUN_AS_SUDO:-true}"
 
