@@ -14,7 +14,6 @@ import SerialReportes from "./pages/protected/SerialReportes";
 import WorkTimeCalculator from "./pages/tools/WorkTimeCalculator";
 import RegistroSolicitudesPage from "./pages/RegistroSolicitudesPage";
 import BatteryStatus from "./pages/tools/BatteryStatus";
-import GrabacionesPage from "./pages/grabaciones/GrabacionesPage";
 import VideosPage from "./pages/videos/VideosPage";
 import AudiosYouTubePage from "./pages/audios-youtube/AudiosYouTubePage";
 import SalesDashboard from "./pages/SalesDashboard";
@@ -114,7 +113,6 @@ function App() {
                 element={<RegistroSolicitudesPage />}
               />
               <Route path="/BatteryStatus" element={<BatteryStatus />} />
-              <Route path="/GrabacionesPage" element={<GrabacionesPage />} />
               <Route path="/VideosPage" element={<VideosPage />} />
               <Route path="/audios-youtube" element={<AudiosYouTubePage />} />
               <Route path="/SalesDashboard" element={<SalesDashboard />} />
