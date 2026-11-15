@@ -4,11 +4,13 @@ import Config from "../../components/features/Config";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
-import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import "../../styles/ErpClave.css";
 
-// Genera la clave de ingreso de Helisa contable (Helisa NIIF).
+// Genera la clave de ingreso del ERP contable.
 // El algoritmo vive en el backend (POST /api/erp/generar-clave); aqui solo el formulario.
 const ErpClave = () => {
   const [jwtToken, setJwtToken] = useState(sessionStorage.getItem("jwtToken") || "");
@@ -23,6 +25,7 @@ const ErpClave = () => {
   const [copySuccess, setCopySuccess] = useState(null);
   const [error, setError] = useState(null);
   const toast = useRef(null);
+  const claveInputRef = useRef(null);
 
   const authHeaders = useMemo(
     () => ({ headers: { Authorization: `Bearer ${jwtToken}` } }),
@@ -105,15 +108,45 @@ const ErpClave = () => {
     }
   };
 
+  // Respaldo para navegadores sin Clipboard API disponible (contexto no seguro / permiso denegado).
+  const copyConRespaldo = () => {
+    const input = claveInputRef.current;
+    if (input) {
+      input.focus();
+      input.select();
+      input.setSelectionRange?.(0, input.value.length);
+      if (document.execCommand?.("copy")) return true;
+    }
+    const tmp = document.createElement("textarea");
+    tmp.value = responseData?.clave || "";
+    tmp.setAttribute("readonly", "");
+    tmp.style.position = "fixed";
+    tmp.style.top = "-1000px";
+    tmp.style.opacity = "0";
+    document.body.appendChild(tmp);
+    tmp.select();
+    tmp.setSelectionRange(0, tmp.value.length);
+    const ok = document.execCommand?.("copy");
+    document.body.removeChild(tmp);
+    return Boolean(ok);
+  };
+
   const copyKey = async () => {
     if (!responseData?.clave) return;
     try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard API no disponible");
       await navigator.clipboard.writeText(responseData.clave);
       setCopySuccess("Clave copiada al portapapeles");
       showToast("success", "Clave copiada al portapapeles");
     } catch {
-      setCopySuccess("Error al copiar la clave");
-      showToast("error", "Error al copiar la clave");
+      try {
+        if (!copyConRespaldo()) throw new Error("No se pudo copiar");
+        setCopySuccess("Clave copiada al portapapeles");
+        showToast("success", "Clave copiada al portapapeles");
+      } catch {
+        setCopySuccess("Error al copiar la clave");
+        showToast("error", "Error al copiar la clave");
+      }
     }
   };
 
@@ -123,13 +156,16 @@ const ErpClave = () => {
 
   if (!jwtToken) {
     return (
-      <div className="clientes-page">
+      <div className="erp-clave-page">
         <Toast ref={toast} />
-        <Card style={{ maxWidth: "500px", margin: "0 auto" }}>
-          <h2 style={{ marginTop: 0 }}>Protección con Contraseña</h2>
-          <p>Por favor, ingresa la contraseña para acceder.</p>
-          <div className="p-fluid">
-            <div className="p-field" style={{ marginBottom: "12px" }}>
+        <div className="erp-login-wrap">
+          <div className="erp-login-card">
+            <div className="erp-login-icon">
+              <i className="pi pi-lock" aria-hidden="true" />
+            </div>
+            <h2>Protección con Contraseña</h2>
+            <p>Por favor, ingresa la contraseña para acceder.</p>
+            <div className="erp-field">
               <Password
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
@@ -137,6 +173,7 @@ const ErpClave = () => {
                 toggleMask
                 feedback={false}
                 placeholder="Contraseña"
+                inputId="erp-password"
               />
             </div>
             <Button
@@ -147,18 +184,29 @@ const ErpClave = () => {
               disabled={loading}
             />
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="clientes-page">
+    <div className="erp-clave-page">
       <Toast ref={toast} />
 
-      <div className="clientes-header">
-        <h2>ERP · Clave de ingreso Helisa contable</h2>
-        <div className="clientes-actions">
+      <section className="erp-hero">
+        <div className="erp-hero-main">
+          <div className="erp-hero-icon">
+            <i className="pi pi-key" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="erp-hero-eyebrow">ERP contable</p>
+            <h2 className="erp-hero-title">Generar clave de acceso a ERP contable</h2>
+            <p className="erp-hero-subtitle">
+              Ingresa los datos de la licencia para obtener la clave de ingreso.
+            </p>
+          </div>
+        </div>
+        <div className="erp-hero-actions">
           <Button
             label={loading ? "Generando..." : "Generar Clave"}
             icon={loading ? "pi pi-spin pi-spinner" : "pi pi-key"}
@@ -168,63 +216,157 @@ const ErpClave = () => {
           />
           <Button label="Cerrar sesión" icon="pi pi-sign-out" severity="secondary" onClick={logout} />
         </div>
-      </div>
+      </section>
 
-      <Card className="clientes-table-card">
-        <div className="p-fluid">
-          <div className="p-field" style={{ marginBottom: "12px" }}>
-            <label htmlFor="licencia">Licencia (12, sin guion)</label>
-            <InputText
-              id="licencia"
-              value={licencia}
-              onChange={(e) => setLicencia(e.target.value.toUpperCase())}
-              placeholder="Ej: LCN3FF026050"
-            />
-          </div>
-          <div className="p-field" style={{ marginBottom: "12px" }}>
-            <label htmlFor="nit">Nit</label>
-            <InputText id="nit" value={nit} onChange={(e) => setNit(e.target.value)} placeholder="Ej: 800300600" />
-          </div>
-          <div className="p-field" style={{ marginBottom: "12px" }}>
-            <label htmlFor="pista">Pista (como la muestra el programa)</label>
-            <InputText id="pista" value={pista} onChange={(e) => setPista(e.target.value)} placeholder="Ej: EU68CTQB0" />
-          </div>
-          <div style={{ display: "flex", gap: "16px", marginBottom: "12px" }}>
-            <div className="p-field" style={{ flex: 1 }}>
-              <label htmlFor="sesiones">Sesiones</label>
-              <InputNumber id="sesiones" value={sesiones} onValueChange={(e) => setSesiones(e.value ?? 0)} min={0} max={255} />
+      <div className="erp-grid">
+        <section className="erp-panel">
+          <header className="erp-panel-header">
+            <span className="erp-panel-icon">
+              <i className="pi pi-pencil" aria-hidden="true" />
+            </span>
+            <div>
+              <h3>Datos de la licencia</h3>
+              <p>Licencia, Nit y Pista son obligatorios.</p>
             </div>
-            <div className="p-field" style={{ flex: 1 }}>
-              <label htmlFor="mora">Mora</label>
-              <InputNumber id="mora" value={mora} onValueChange={(e) => setMora(e.value ?? 0)} min={0} max={4095} />
-            </div>
-          </div>
+          </header>
 
-          {error && <p style={{ color: "red", marginTop: "4px" }}>{error}</p>}
-
-          {responseData && (
-            <Card style={{ marginTop: "14px" }}>
-              <h3 style={{ marginTop: 0 }}>Clave generada</h3>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+          <div className="erp-fields">
+            <div className="erp-field erp-field-wide">
+              <label htmlFor="licencia">Licencia (12, sin guion)</label>
+              <IconField iconPosition="left">
+                <InputIcon className="pi pi-id-card" />
                 <InputText
+                  id="licencia"
+                  value={licencia}
+                  onChange={(e) => setLicencia(e.target.value.toUpperCase())}
+                  placeholder="Ej: LCN3FF026050"
+                  autoComplete="off"
+                />
+              </IconField>
+            </div>
+
+            <div className="erp-field">
+              <label htmlFor="nit">Nit</label>
+              <IconField iconPosition="left">
+                <InputIcon className="pi pi-building" />
+                <InputText
+                  id="nit"
+                  value={nit}
+                  onChange={(e) => setNit(e.target.value)}
+                  placeholder="Ej: 800300600"
+                  autoComplete="off"
+                />
+              </IconField>
+            </div>
+
+            <div className="erp-field">
+              <label htmlFor="pista">Pista (como la muestra el programa)</label>
+              <IconField iconPosition="left">
+                <InputIcon className="pi pi-compass" />
+                <InputText
+                  id="pista"
+                  value={pista}
+                  onChange={(e) => setPista(e.target.value)}
+                  placeholder="Ej: EU68CTQB0"
+                  autoComplete="off"
+                />
+              </IconField>
+            </div>
+
+            <div className="erp-field">
+              <label htmlFor="sesiones">Sesiones</label>
+              <InputNumber
+                id="sesiones"
+                value={sesiones}
+                onValueChange={(e) => setSesiones(e.value ?? 0)}
+                min={0}
+                max={255}
+                showButtons
+                buttonLayout="horizontal"
+              />
+              <span className="erp-field-hint">Entre 0 y 255</span>
+            </div>
+
+            <div className="erp-field">
+              <label htmlFor="mora">Mora</label>
+              <InputNumber
+                id="mora"
+                value={mora}
+                onValueChange={(e) => setMora(e.value ?? 0)}
+                min={0}
+                max={4095}
+                showButtons
+                buttonLayout="horizontal"
+              />
+              <span className="erp-field-hint">Entre 0 y 4095</span>
+            </div>
+          </div>
+
+          {error && (
+            <p className="erp-alert" role="alert">
+              <i className="pi pi-exclamation-circle" aria-hidden="true" />
+              <span>{error}</span>
+            </p>
+          )}
+        </section>
+
+        <section className="erp-panel">
+          <header className="erp-panel-header">
+            <span className="erp-panel-icon">
+              <i className="pi pi-shield" aria-hidden="true" />
+            </span>
+            <div>
+              <h3>Clave generada</h3>
+              <p>Cópiala y úsala para el ingreso.</p>
+            </div>
+          </header>
+
+          {responseData ? (
+            <div className="erp-result erp-result-filled">
+              <p className="erp-result-label">
+                <i className="pi pi-check-circle" aria-hidden="true" />
+                Clave de acceso
+              </p>
+              <div className="erp-key-row">
+                <InputText
+                  ref={claveInputRef}
                   value={responseData.clave || ""}
                   readOnly
-                  style={{ width: "100%", fontFamily: "monospace", fontWeight: "bold", fontSize: "1.2rem" }}
+                  aria-label="Clave generada"
+                  onFocus={(e) => e.target.select()}
                 />
                 <Button label="Copiar" icon="pi pi-copy" onClick={copyKey} severity="warning" />
               </div>
               {copySuccess && (
-                <p style={{ color: copySuccess.includes("Error") ? "#dc3545" : "#28a745", marginTop: 0 }}>
+                <p className={`erp-copy-note${copySuccess.includes("Error") ? " erp-copy-note-error" : ""}`}>
                   {copySuccess}
                 </p>
               )}
-              <p style={{ margin: "6px 0" }}>
-                <strong>Sesiones:</strong> {responseData.sesiones} &nbsp; <strong>Mora:</strong> {responseData.mora}
-              </p>
-            </Card>
+              <div className="erp-meta">
+                <div className="erp-chip">
+                  <i className="pi pi-users" aria-hidden="true" />
+                  <div>
+                    <span className="erp-chip-label">Sesiones</span>
+                    <span className="erp-chip-value">{responseData.sesiones}</span>
+                  </div>
+                </div>
+                <div className="erp-chip">
+                  <i className="pi pi-clock" aria-hidden="true" />
+                  <div>
+                    <span className="erp-chip-label">Mora</span>
+                    <span className="erp-chip-value">{responseData.mora}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="erp-empty">
+              <i className="pi pi-key" aria-hidden="true" />
+              <p>Completa los datos de la licencia y presiona “Generar Clave” para ver aquí el resultado.</p>
+            </div>
           )}
-        </div>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 };
