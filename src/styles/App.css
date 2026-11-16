@@ -20,3 +20,19 @@
 body.dark-mode .app-cargando {
   color: #94a3b8;
 }
+
+/* Contraste: subtitulos de tarjeta y avatares */
+.p-card .p-card-subtitle {
+  color: #4b5563;
+}
+
+body.dark-mode .p-card .p-card-subtitle {
+  color: #cbd5e1;
+}
+
+/* La foto del avatar se recorta en lugar de deformarse */
+.p-avatar img,
+.p-avatar-image img {
+  object-fit: cover;
+}
+

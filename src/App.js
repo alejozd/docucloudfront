@@ -94,7 +94,7 @@ function App() {
         <div className="App">
           <Toast ref={toastRef} />
           <Navbar onLogout={handleLogout} />
-          <div className="content">
+          <main className="content">
             <Suspense
               fallback={
                 <div className="app-cargando" role="status" aria-live="polite">
@@ -174,7 +174,7 @@ function App() {
               <Route path="/zam-air" element={<ZamAirDashboard />} />
               </Routes>
             </Suspense>
-          </div>
+          </main>
         </div>
       </Router>
     </DarkModeProvider>

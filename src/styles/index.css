@@ -1,6 +1,9 @@
 /* css general */
 html {
   font-size: 14px;
+  /* Reserva el hueco de la barra de desplazamiento: evita el salto lateral
+     cuando el contenido crece y aparece la barra. */
+  scrollbar-gutter: stable;
 }
 
 /* ---------- View Transitions ---------- */
