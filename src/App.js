@@ -1,35 +1,37 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { DarkModeProvider } from "./hooks/useDarkMode";
 import Navbar from "././components/layout/Navbar";
 import Home from "././pages/Home";
-import Clientes from "./pages/Clientes";
-import Contactos from "./pages/Contactos";
-import Productos from "./pages/Productos";
-import Contactar from "./pages/Contactar";
-import Weather from "./pages/Weather";
-import AsociarClienteContacto from "./pages/AsociarClienteContacto";
-import SerialReportes from "./pages/protected/SerialReportes";
-import WorkTimeCalculator from "./pages/tools/WorkTimeCalculator";
-import RegistroSolicitudesPage from "./pages/RegistroSolicitudesPage";
-import BatteryStatus from "./pages/tools/BatteryStatus";
-import VideosPage from "./pages/videos/VideosPage";
-import AudiosYouTubePage from "./pages/audios-youtube/AudiosYouTubePage";
-import SalesDashboard from "./pages/SalesDashboard";
-import TomaTensionDashboard from "./pages/TomaTensionDashboard";
 import ProtectedRoute from "././components/features/ProtectedRoute";
-import Login from "./pages/protected/Login";
-import AutorizacionPage from "./pages/protected/AutorizacionPage";
-import PurchaseBridge from "./pages/protected/PurchaseBridge";
-import ErpClave from "./pages/protected/ErpClave";
-import ZamAirDashboard from "./components/ZamAirDashboard";
 import "././styles/App.css";
 import "./styles/darkMode.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+
+// Las demas paginas se cargan bajo demanda: el bundle inicial solo trae el inicio.
+const Clientes = lazy(() => import("./pages/Clientes"));
+const Contactos = lazy(() => import("./pages/Contactos"));
+const Productos = lazy(() => import("./pages/Productos"));
+const Contactar = lazy(() => import("./pages/Contactar"));
+const Weather = lazy(() => import("./pages/Weather"));
+const AsociarClienteContacto = lazy(() => import("./pages/AsociarClienteContacto"));
+const SerialReportes = lazy(() => import("./pages/protected/SerialReportes"));
+const WorkTimeCalculator = lazy(() => import("./pages/tools/WorkTimeCalculator"));
+const RegistroSolicitudesPage = lazy(() => import("./pages/RegistroSolicitudesPage"));
+const BatteryStatus = lazy(() => import("./pages/tools/BatteryStatus"));
+const VideosPage = lazy(() => import("./pages/videos/VideosPage"));
+const AudiosYouTubePage = lazy(() => import("./pages/audios-youtube/AudiosYouTubePage"));
+const SalesDashboard = lazy(() => import("./pages/SalesDashboard"));
+const TomaTensionDashboard = lazy(() => import("./pages/TomaTensionDashboard"));
+const Login = lazy(() => import("./pages/protected/Login"));
+const AutorizacionPage = lazy(() => import("./pages/protected/AutorizacionPage"));
+const PurchaseBridge = lazy(() => import("./pages/protected/PurchaseBridge"));
+const ErpClave = lazy(() => import("./pages/protected/ErpClave"));
+const ZamAirDashboard = lazy(() => import("./components/ZamAirDashboard"));
 
 // Función para obtener la fecha de expiración del token JWT
 const getTokenExpiration = (token) => {
@@ -93,7 +95,15 @@ function App() {
           <Toast ref={toastRef} />
           <Navbar onLogout={handleLogout} />
           <div className="content">
-            <Routes>
+            <Suspense
+              fallback={
+                <div className="app-cargando" role="status" aria-live="polite">
+                  <i className="pi pi-spin pi-spinner" aria-hidden="true" />
+                  <span>Cargando…</span>
+                </div>
+              }
+            >
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/clientes" element={<Clientes />} />
               <Route path="/productos" element={<Productos />} />
@@ -162,7 +172,8 @@ function App() {
                 }
               />
               <Route path="/zam-air" element={<ZamAirDashboard />} />
-            </Routes>
+              </Routes>
+            </Suspense>
           </div>
         </div>
       </Router>

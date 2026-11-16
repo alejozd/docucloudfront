@@ -154,6 +154,9 @@ const OpenWeatherMapComponent = ({ city, compact = false }) => {
           <img
             src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
             alt={weatherData.weather[0].description}
+            width="100"
+            height="100"
+            decoding="async"
             className="open-weather-icon"
           />
         </div>

@@ -110,6 +110,9 @@ const AccuWeatherComponent = ({ city }) => {
                     <img
                       src={weatherIconUrl(weatherData.WeatherIcon)}
                       alt={weatherData.WeatherText}
+                      width="64"
+                      height="64"
+                      decoding="async"
                       style={{ marginRight: "1em" }}
                     />
                     <div>

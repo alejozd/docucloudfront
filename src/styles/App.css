@@ -1,3 +1,22 @@
 .App {
   text-align: center;
 }
+
+/* Indicador mientras se carga una pagina bajo demanda (code splitting) */
+.app-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 3rem 1rem;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.app-cargando .pi {
+  font-size: 1.3rem;
+}
+
+body.dark-mode .app-cargando {
+  color: #94a3b8;
+}
