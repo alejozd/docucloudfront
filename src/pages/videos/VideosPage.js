@@ -8,6 +8,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
+import { conTransicion } from "../../utils/viewTransition";
 import VideoPlayer from "../../components/video/VideoPlayer";
 import Config from "./../../components/features/Config";
 import "primeicons/primeicons.css";
@@ -303,9 +304,11 @@ const VideosPage = () => {
                     count={groupedVideos[folderName]?.length || 0}
                     active={selectedCategory === folderName}
                     onClick={() => {
-                      setSelectedCategory(folderName);
-                      setActiveVideoUrl(null);
-                      setFirst(0);
+                      conTransicion(() => {
+                        setSelectedCategory(folderName);
+                        setActiveVideoUrl(null);
+                        setFirst(0);
+                      });
                     }}
                   />
                 ))}

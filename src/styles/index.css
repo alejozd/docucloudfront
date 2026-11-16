@@ -3,6 +3,39 @@ html {
   font-size: 14px;
 }
 
+/* ---------- View Transitions ---------- */
+/* Transicion nativa al cambiar de categoria, abrir visores o mostrar resultados.
+   Solo se anima si el usuario no pidio menos movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: vt-salida;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: vt-entrada;
+  }
+}
+
+@keyframes vt-salida {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes vt-entrada {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
 body {
   font-family: var(--font-family);
   font-weight: normal;
