@@ -196,7 +196,10 @@ const ListaAudios = ({ files, onPlay, onDelete, onProcess, loading, activeFilena
     });
 
     const groupItems = Array.from(groups.values()).map(group => {
-      const parts = [...group.parts].sort((a, b) => a.partNumber - b.partNumber);
+      const parts =
+        typeof group.parts.toSorted === "function"
+          ? group.parts.toSorted((a, b) => a.partNumber - b.partNumber)
+          : [...group.parts].sort((a, b) => a.partNumber - b.partNumber);
       const createdAt = parts.reduce((latest, p) => {
         const d = new Date(p.createdAt || 0);
         return d > latest ? d : latest;

@@ -550,9 +550,25 @@ body.dark-mode .erp-clave-page .erp-login-card > p {
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 992px) {
+/* Container queries: la pagina responde al ancho de su contenedor real (por ejemplo
+   cuando la barra lateral se colapsa) y no solo al del viewport. */
+.erp-clave-page {
+  container-type: inline-size;
+  container-name: erp;
+}
+
+@container erp (max-width: 992px) {
   .erp-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Navegadores sin container queries: misma regla con media query */
+@supports not (container-type: inline-size) {
+  @media (max-width: 992px) {
+    .erp-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 }
 

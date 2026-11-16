@@ -33,8 +33,15 @@ const getCategoryIcon = (name) => {
   return rule ? rule.icon : DEFAULT_CATEGORY_ICON;
 };
 
+// Ordena una copia. toSorted() es Baseline 2024: se usa cuando existe y si no,
+// se cae al clásico [...arr].sort() para navegadores antiguos.
+const ordenarCopia = (lista, comparador) =>
+  typeof lista.toSorted === "function"
+    ? lista.toSorted(comparador)
+    : [...lista].sort(comparador);
+
 const sortCategories = (names) =>
-  [...names].sort((a, b) => {
+  ordenarCopia(names, (a, b) => {
     const aIsMedita = normalizeName(a).includes("medita");
     const bIsMedita = normalizeName(b).includes("medita");
     if (aIsMedita && !bIsMedita) return -1;
@@ -162,12 +169,17 @@ const VideosPage = () => {
       const response = await axios.get(`${Config.apiUrl}/api/video/lista`);
       const videosData = response.data || [];
 
-      const newGroupedVideos = videosData.reduce((acc, video) => {
-        const folderName = video.carpeta || "Sin Categoría";
-        if (!acc[folderName]) acc[folderName] = [];
-        acc[folderName].push(video);
-        return acc;
-      }, {});
+      const carpetaDe = (video) => video.carpeta || "Sin Categoría";
+      // Object.groupBy() es Baseline 2024: se usa cuando existe y si no, se agrupa a mano.
+      const newGroupedVideos =
+        typeof Object.groupBy === "function"
+          ? Object.groupBy(videosData, carpetaDe)
+          : videosData.reduce((acc, video) => {
+              const clave = carpetaDe(video);
+              if (!acc[clave]) acc[clave] = [];
+              acc[clave].push(video);
+              return acc;
+            }, {});
 
       setGroupedVideos(newGroupedVideos);
       const firstCategory = sortCategories(Object.keys(newGroupedVideos))[0];
