@@ -158,6 +158,11 @@ const SerialesReportes = () => {
                 toggleMask
                 feedback={false}
                 placeholder="Contraseña"
+                inputId="serial-password"
+                inputProps={{
+                  "aria-label": "Contraseña",
+                  autoComplete: "current-password",
+                }}
               />
             </div>
             <Button

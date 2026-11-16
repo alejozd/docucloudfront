@@ -304,6 +304,17 @@ body.dark-mode .erp-clave-page .erp-field label {
   color: var(--erp-muted);
 }
 
+/* Validacion nativa: :user-invalid solo marca el campo despues de que el usuario
+   interactuo, asi no aparece en rojo al entrar. El selector por aria-invalid cubre
+   navegadores que aun no soportan :user-invalid. */
+.erp-field .p-inputtext:user-invalid,
+.erp-field .p-inputnumber-input:user-invalid,
+.erp-field .p-inputtext[aria-invalid="true"]:not(:focus),
+.erp-field .p-password-input[aria-invalid="true"]:not(:focus) {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.28);
+}
+
 /* ---------- Alerta de error ---------- */
 
 .erp-alert {

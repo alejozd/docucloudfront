@@ -166,7 +166,7 @@ const ErpClave = () => {
               <i className="pi pi-lock" aria-hidden="true" />
             </div>
             <h2>Protección con Contraseña</h2>
-            <p>Por favor, ingresa la contraseña para acceder.</p>
+            <p id="erp-login-hint">Por favor, ingresa la contraseña para acceder.</p>
             <div className="erp-field">
               <Password
                 value={password}
@@ -176,6 +176,11 @@ const ErpClave = () => {
                 feedback={false}
                 placeholder="Contraseña"
                 inputId="erp-password"
+                inputProps={{
+                  "aria-label": "Contraseña",
+                  "aria-describedby": "erp-login-hint",
+                  autoComplete: "current-password",
+                }}
               />
             </div>
             <Button
@@ -243,6 +248,9 @@ const ErpClave = () => {
                   onChange={(e) => setLicencia(e.target.value.toUpperCase())}
                   placeholder="Ej: LCN3FF026050"
                   autoComplete="off"
+                  required
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "erp-form-error" : undefined}
                 />
               </IconField>
             </div>
@@ -257,6 +265,9 @@ const ErpClave = () => {
                   onChange={(e) => setNit(e.target.value)}
                   placeholder="Ej: 800300600"
                   autoComplete="off"
+                  required
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "erp-form-error" : undefined}
                 />
               </IconField>
             </div>
@@ -271,6 +282,9 @@ const ErpClave = () => {
                   onChange={(e) => setPista(e.target.value)}
                   placeholder="Ej: EU68CTQB0"
                   autoComplete="off"
+                  required
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "erp-form-error" : undefined}
                 />
               </IconField>
             </div>
@@ -305,7 +319,7 @@ const ErpClave = () => {
           </div>
 
           {error && (
-            <p className="erp-alert" role="alert">
+            <p className="erp-alert" id="erp-form-error" role="alert" aria-live="assertive">
               <i className="pi pi-exclamation-circle" aria-hidden="true" />
               <span>{error}</span>
             </p>
