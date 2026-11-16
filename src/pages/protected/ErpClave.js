@@ -151,6 +151,8 @@ const ErpClave = () => {
   };
 
   const handlePasswordKeyDown = (event) => {
+    // No disparar mientras el usuario compone texto con IME (chino/japones/coreano)
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === "Enter") authenticate();
   };
 

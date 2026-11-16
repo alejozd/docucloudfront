@@ -98,6 +98,8 @@ const AutorizacionPage = () => {
   }, [claveIngresada, notify]);
 
   const handleAccessKeyDown = (event) => {
+    // No disparar mientras el usuario compone texto con IME (chino/japones/coreano)
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === "Enter") {
       verificarClave();
     }

@@ -220,23 +220,59 @@ body.dark-mode .p-toast-message {
   border-color: var(--border-color) !important;
 }
 
-/* Scrollbar personalizada para modo oscuro */
-body.dark-mode ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+/* ========================================
+   ESQUEMA DE COLOR Y CONTROLES NATIVOS
+   color-scheme en el elemento raiz hace que el navegador adapte los controles
+   nativos (inputs, scrollbars, canvas, date pickers) sin CSS adicional.
+   ======================================== */
+:root {
+  color-scheme: light;
+  accent-color: #4f46e5;
 }
 
-body.dark-mode ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+html.dark-mode,
+body.dark-mode {
+  color-scheme: dark;
+  accent-color: #00d4ff;
 }
 
-body.dark-mode ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 5px;
+/* Scrollbar con la propiedad estandar (compatible con Chrome 121+, Firefox y Safari).
+   El fallback WebKit solo se aplica donde scrollbar-color no existe. */
+html {
+  scrollbar-color: #94a3b8 #f1f5f9;
 }
 
-body.dark-mode ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+html.dark-mode {
+  scrollbar-color: #475569 #0f172a;
+}
+
+@supports not (scrollbar-color: auto) {
+  body.dark-mode ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 5px;
+  }
+
+  body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+}
+
+/* Seleccion de texto acorde al tema */
+::selection {
+  background-color: rgba(79, 70, 229, 0.22);
+}
+
+html.dark-mode ::selection {
+  background-color: rgba(0, 212, 255, 0.28);
 }
 
 /* Transiciones suaves */
@@ -244,4 +280,13 @@ body,
 .card,
 .p-component {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Respeta a quien pide menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .card,
+  .p-component {
+    transition: none !important;
+  }
 }

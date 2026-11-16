@@ -1,15 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <!-- Indica al navegador que la app soporta ambos temas: evita el destello blanco inicial -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#4f46e5" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a" />
     <meta
-      name="Aplicacion web para hacer documentos"
-      content="Web site created using create-react-app"
+      name="description"
+      content="Aplicacion web para generar y administrar documentos, reportes y claves de acceso."
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!-- Aplica el tema guardado antes del primer pintado para evitar el parpadeo -->
+    <script>
+      try {
+        if (localStorage.getItem("app_dark_mode") === "true") {
+          document.documentElement.classList.add("dark-mode");
+          document.documentElement.style.colorScheme = "dark";
+        }
+      } catch (e) {}
+    </script>
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
