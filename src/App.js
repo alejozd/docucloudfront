@@ -28,11 +28,13 @@ import "./styles/VideosPage.css";
 import "./styles/Weather.css";
 import "./styles/WorkTimeCalculator.css";
 import "./styles/ZamAirDashboard.css";
-import "./styles/darkMode.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+// El tema oscuro va al final a proposito: sin !important necesita ir despues del
+// tema de PrimeReact y de las utilidades para ganar en igualdad de especificidad.
+import "./styles/darkMode.css";
 
 // Las demas paginas se cargan bajo demanda: el bundle inicial solo trae el inicio.
 const Clientes = lazy(() => import("./pages/Clientes"));

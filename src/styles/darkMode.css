@@ -1,44 +1,74 @@
 /* ========================================
    MODO OSCURO GLOBAL
+
+   Estrategia: un unico juego de tokens con light-dark(). El navegador elige el
+   valor segun el `color-scheme` del elemento, asi que no hay bloque duplicado de
+   variables para oscuro ni dos reglas por cada color. Este archivo se carga
+   DESPUES del tema de PrimeReact y de PrimeFlex (ver App.js), de modo que en
+   igualdad de especificidad gana por orden.
+
+   Reglas:
+   - Los overrides siguen bajo body.dark-mode para no tocar el tema claro (el
+     tema de PrimeReact es lara-light-blue).
+   - Se evita !important: si un selector no gana, se sube la especificidad con
+     :is() o con un ancestro mas.
+   - Quedan !important SOLO donde hay una hoja de terceros o de pagina que
+     tambien los usa (una declaracion normal nunca puede ganar a un !important).
+     Cada uno esta comentado en su regla. Para eliminarlos del todo hay que
+     limpiar antes las hojas de pagina (ver ESTADO-PROYECTO.md).
+
+   Verificado con el arnes de .theme-check: los estilos computados en claro y en
+   oscuro son identicos a la version anterior en 55 sondas de componentes,
+   incluidos :hover, :focus y transition.
    ======================================== */
 
-/* Variables CSS para modo claro (default) */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-card: #ffffff;
-  --text-primary: #212529;
-  --text-secondary: #6c757d;
-  --border-color: #dee2e6;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --text-vibrant: #4f46e5; /* Indigo primary in light mode */
+  /* Superficies y texto */
+  --bg-primary: light-dark(#ffffff, #0f172a);
+  --bg-secondary: light-dark(#f8f9fa, #1e293b);
+  --bg-card: light-dark(#ffffff, #1e293b);
+  --text-primary: light-dark(#212529, #e2e8f0);
+  --text-secondary: light-dark(#6c757d, #94a3b8);
+  --border-color: light-dark(#dee2e6, #334155);
+  --shadow-color: light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4));
+
+  /* Acentos: indigo en claro, cian del reproductor en oscuro */
+  --text-vibrant: light-dark(#4f46e5, #00d4ff);
+  --text-vibrant-secondary: light-dark(#6d28d9, #7dd3fc);
+  --accent-soft: light-dark(rgba(79, 70, 229, 0.22), rgba(0, 212, 255, 0.2));
+  --accent-glow: light-dark(rgba(79, 70, 229, 0.16), rgba(0, 212, 255, 0.2));
+
+  /* Controles nativos (inputs, scrollbars, date pickers) sin CSS extra */
+  color-scheme: light;
+  accent-color: var(--text-vibrant);
 }
 
-/* Variables CSS para modo oscuro */
+/* El modo oscuro solo necesita declarar el esquema: los tokens se resuelven solos. */
+html.dark-mode,
 body.dark-mode {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e293b;
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --border-color: #334155;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --text-vibrant: #00d4ff; /* Cian vibrante del reproductor */
-  --text-vibrant-secondary: #7dd3fc;
+  color-scheme: dark;
 }
 
-/* Aplicar variables globales */
+/* La barra de desplazamiento del documento no hereda accent-color. */
+html {
+  scrollbar-color: light-dark(#94a3b8, #475569) light-dark(#f1f5f9, #0f172a);
+}
+
+/* Colores de fondo y texto base */
 body.dark-mode {
-  background-color: var(--bg-primary) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 body.dark-mode .surface-card,
 body.dark-mode .card,
 body.dark-mode .p-card {
+  /* !important obligado aqui y en .surface-section/.surface-ground: PrimeFlex
+     declara esas utilidades con !important y una declaracion normal no puede
+     ganarle. Ver la nota de arriba del archivo. */
   background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 body.dark-mode .surface-section,
@@ -47,222 +77,176 @@ body.dark-mode .surface-ground {
 }
 
 /* Textos vibrantes en modo oscuro */
-body.dark-mode h1,
-body.dark-mode h2,
-body.dark-mode h3,
-body.dark-mode h4,
-body.dark-mode h5,
-body.dark-mode h6,
+body.dark-mode :is(h1, h2, h3, h4, h5, h6),
 body.dark-mode .p-card-title,
 body.dark-mode .font-bold {
-  color: var(--text-vibrant) !important;
-  text-shadow: 0 0 10px rgba(0, 212, 255, 0.2) !important;
+  color: var(--text-vibrant);
+  text-shadow: 0 0 10px var(--accent-glow);
 }
 
 body.dark-mode label,
 body.dark-mode .p-column-title {
-  color: var(--text-vibrant-secondary) !important;
+  color: var(--text-vibrant-secondary);
 }
 
-/* Navbar */
+/* Navbar y menubar */
 body.dark-mode .navbar,
 body.dark-mode header,
 body.dark-mode .p-menubar {
-  background-color: var(--bg-card) !important;
-  border-bottom-color: var(--border-color) !important;
+  background-color: var(--bg-card);
+  border-bottom-color: var(--border-color);
 }
 
-body.dark-mode .p-menubar .p-menuitem-link .p-menuitem-text,
-body.dark-mode .p-menubar .p-menuitem-link .p-menuitem-icon {
-  color: var(--text-primary) !important;
+/* :is() tras el contenedor sube la especificidad lo justo para ganar al tema
+   (.p-menubar .p-menuitem-link .p-menuitem-text = .p-menubar 2 clases + 3 tipos),
+   sin necesidad de !important. */
+body.dark-mode .p-menubar .p-menuitem-link :is(.p-menuitem-text, .p-menuitem-icon) {
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-menubar .p-menuitem-link:hover .p-menuitem-text,
-body.dark-mode .p-menubar .p-menuitem-link:hover .p-menuitem-icon {
-  color: var(--text-vibrant) !important;
+body.dark-mode .p-menubar .p-menuitem-link:hover :is(.p-menuitem-text, .p-menuitem-icon) {
+  color: var(--text-vibrant);
 }
 
-/* Tablas (DataTable de PrimeReact) */
+/* Tablas (DataTable de PrimeReact).
+   Estas declaraciones llevan !important porque las hojas de pagina — sobre todo
+   ZamAirDashboard.css, que se importa globalmente y sin acotar — tambien pintan
+   .p-datatable con !important y colores claros. Quitar ese !important de las
+   hojas de pagina es el paso previo para poder quitarlo aqui. */
 body.dark-mode .p-datatable {
   background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-datatable-header,
-body.dark-mode .p-datatable-thead > tr > th {
+body.dark-mode .p-datatable .p-datatable-header,
+body.dark-mode .p-datatable .p-datatable-thead > tr > th {
   background-color: var(--bg-secondary) !important;
   color: var(--text-vibrant) !important;
   border-color: var(--border-color) !important;
 }
 
-body.dark-mode .p-datatable-tbody > tr {
-  background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
+body.dark-mode .p-datatable .p-datatable-tbody > tr {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-datatable-tbody > tr > td,
+body.dark-mode .p-datatable .p-datatable-tbody > tr > td,
 body.dark-mode .p-datatable .p-datatable-emptymessage > td {
-  background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
-body.dark-mode .p-datatable-tbody > tr:hover {
-  background-color: var(--bg-secondary) !important;
+body.dark-mode .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: var(--bg-secondary);
 }
 
-/* Paginador */
+/* Paginador (mismo motivo que las tablas: hojas de pagina con !important) */
 body.dark-mode .p-paginator {
   background-color: var(--bg-card) !important;
   border-color: var(--border-color) !important;
 }
 
-body.dark-mode .p-paginator .p-paginator-pages .p-paginator-page,
-body.dark-mode .p-paginator .p-link {
-  color: var(--text-primary) !important;
+body.dark-mode .p-paginator :is(.p-paginator-page, .p-link) {
+  color: var(--text-primary);
 }
 
 body.dark-mode .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-  background-color: rgba(0, 212, 255, 0.2) !important;
+  background-color: var(--accent-soft) !important;
   color: var(--text-vibrant) !important;
 }
 
 /* Formularios */
-body.dark-mode .p-inputtext,
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+body.dark-mode :is(input, textarea, select),
+body.dark-mode .p-inputtext {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
-body.dark-mode .p-inputtext:focus,
-body.dark-mode input:focus {
-  border-color: var(--text-vibrant) !important;
-  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2) !important;
+body.dark-mode :is(input, textarea, select):focus,
+body.dark-mode .p-inputtext:focus {
+  border-color: var(--text-vibrant);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 /* Botones */
-body.dark-mode .p-button.p-button-secondary,
-body.dark-mode .p-button.p-button-outlined {
-  background-color: transparent !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+body.dark-mode .p-button:is(.p-button-secondary, .p-button-outlined) {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
-body.dark-mode .p-button.p-button-secondary:hover,
-body.dark-mode .p-button.p-button-outlined:hover {
-  background-color: var(--bg-secondary) !important;
+body.dark-mode .p-button:is(.p-button-secondary, .p-button-outlined):hover {
+  background-color: var(--bg-secondary);
 }
 
-/* Dropdowns y Menús */
+/* Dropdowns y menus */
 body.dark-mode .p-dropdown {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
 }
 
-body.dark-mode .p-dropdown .p-dropdown-label,
-body.dark-mode .p-dropdown .p-dropdown-trigger,
-body.dark-mode .p-dropdown .p-dropdown-clear-icon {
-  color: var(--text-primary) !important;
+body.dark-mode .p-dropdown :is(.p-dropdown-label, .p-dropdown-trigger, .p-dropdown-clear-icon) {
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-dropdown-panel,
-body.dark-mode .p-menu,
-body.dark-mode .p-tieredmenu,
-/* La lista raiz del menubar tambien necesita fondo oscuro: en movil es la que se
-   despliega y, sin esto, quedaba blanca con texto claro (contraste 1,2:1). */
-body.dark-mode .p-menubar .p-menubar-root-list,
-body.dark-mode .p-menubar .p-submenu-list {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+body.dark-mode :is(.p-dropdown-panel, .p-menu, .p-tieredmenu),
+body.dark-mode .p-menubar :is(.p-menubar-root-list, .p-submenu-list) {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 16px var(--shadow-color);
 }
 
-body.dark-mode .p-dropdown-item,
-body.dark-mode .p-menuitem-link,
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link {
-  color: var(--text-primary) !important;
+body.dark-mode :is(.p-dropdown-item, .p-menuitem-link) {
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-text,
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-icon,
-body.dark-mode .p-menubar .p-submenu-list .p-submenu-icon {
-  color: var(--text-primary) !important;
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link :is(.p-menuitem-text, .p-menuitem-icon, .p-submenu-icon) {
+  color: var(--text-primary);
 }
 
-body.dark-mode .p-dropdown-item:hover,
-body.dark-mode .p-menuitem-link:hover,
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover {
-  background-color: var(--bg-secondary) !important;
+body.dark-mode :is(.p-dropdown-item, .p-menuitem-link):hover {
+  background-color: var(--bg-secondary);
 }
 
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-menuitem-text,
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-menuitem-icon,
-body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover .p-submenu-icon {
-  color: var(--text-vibrant) !important;
-}
-
-/* Submenús anidados (nivel 2+) */
-body.dark-mode .p-menubar .p-submenu-list .p-submenu-list {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
-}
-
-body.dark-mode .p-menubar .p-submenu-list .p-submenu-list .p-menuitem-link {
-  color: var(--text-primary) !important;
+body.dark-mode .p-menubar .p-submenu-list .p-menuitem-link:hover :is(.p-menuitem-text, .p-menuitem-icon, .p-submenu-icon) {
+  color: var(--text-vibrant);
 }
 
 body.dark-mode .p-menubar .p-submenu-list .p-submenu-list .p-menuitem-link:hover {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-vibrant) !important;
+  background-color: var(--bg-secondary);
+  color: var(--text-vibrant);
 }
 
 /* Dialogs */
 body.dark-mode .p-dialog {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
 }
 
-body.dark-mode .p-dialog-header {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-vibrant) !important;
+body.dark-mode .p-dialog .p-dialog-header {
+  background-color: var(--bg-secondary);
+  color: var(--text-vibrant);
 }
 
-/* Toasts y Messages */
+/* Toasts y messages */
 body.dark-mode .p-toast-message {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
 }
 
 /* ========================================
-   ESQUEMA DE COLOR Y CONTROLES NATIVOS
-   color-scheme en el elemento raiz hace que el navegador adapte los controles
-   nativos (inputs, scrollbars, canvas, date pickers) sin CSS adicional.
+   DETALLES DEL NAVEGADOR
    ======================================== */
-:root {
-  color-scheme: light;
-  accent-color: #4f46e5;
+
+/* Seleccion de texto acorde al tema */
+::selection {
+  background-color: var(--accent-soft);
 }
 
-html.dark-mode,
-body.dark-mode {
-  color-scheme: dark;
-  accent-color: #00d4ff;
-}
-
-/* Scrollbar con la propiedad estandar (compatible con Chrome 121+, Firefox y Safari).
+/* Scrollbars: se usa la propiedad estandar (Chrome 121+, Firefox y Safari).
    El fallback WebKit solo se aplica donde scrollbar-color no existe. */
-html {
-  scrollbar-color: #94a3b8 #f1f5f9;
-}
-
-html.dark-mode {
-  scrollbar-color: #475569 #0f172a;
-}
-
 @supports not (scrollbar-color: auto) {
   body.dark-mode ::-webkit-scrollbar {
     width: 10px;
@@ -283,27 +267,17 @@ html.dark-mode {
   }
 }
 
-/* Seleccion de texto acorde al tema */
-::selection {
-  background-color: rgba(79, 70, 229, 0.22);
-}
-
-html.dark-mode ::selection {
-  background-color: rgba(0, 212, 255, 0.28);
-}
-
-/* Transiciones suaves */
+/* Transiciones suaves. Los componentes de PrimeReact llevan un ancestro para
+   ganar al `transition` que trae el propio tema (.p-component). */
 body,
-.card,
-.p-component {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+body :is(.card, .p-component) {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Respeta a quien pide menos movimiento */
 @media (prefers-reduced-motion: reduce) {
   body,
-  .card,
-  .p-component {
-    transition: none !important;
+  body :is(.card, .p-component) {
+    transition: none;
   }
 }
