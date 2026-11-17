@@ -130,6 +130,14 @@ body.dark-mode .p-datatable .p-datatable-tbody > tr {
   color: var(--text-primary);
 }
 
+/* Filas impares: ZamAirDashboard.css las pinta con background #f9fafb !important
+   y :nth-child(odd) (mas especifico que la regla de arriba), asi que en modo
+   oscuro quedaban claras. Aqui se gana con !important + mas especificidad. */
+body.dark-mode .p-datatable .p-datatable-tbody > tr:nth-child(odd),
+body.dark-mode .p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd {
+  background-color: var(--bg-card) !important;
+}
+
 body.dark-mode .p-datatable .p-datatable-tbody > tr > td,
 body.dark-mode .p-datatable .p-datatable-emptymessage > td {
   background-color: var(--bg-card);
@@ -219,7 +227,8 @@ body.dark-mode .p-menubar .p-submenu-list .p-submenu-list .p-menuitem-link:hover
   color: var(--text-vibrant);
 }
 
-/* Dialogs */
+/* Dialogs. El contenido tambien se pinta: el tema le pone blanco propio y, sin
+   esta regla, en modo oscuro quedaba una caja blanca con texto claro. */
 body.dark-mode .p-dialog {
   background-color: var(--bg-card);
   border-color: var(--border-color);
@@ -228,6 +237,12 @@ body.dark-mode .p-dialog {
 body.dark-mode .p-dialog .p-dialog-header {
   background-color: var(--bg-secondary);
   color: var(--text-vibrant);
+}
+
+body.dark-mode .p-dialog .p-dialog-content,
+body.dark-mode .p-dialog .p-dialog-footer {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
 /* Toasts y messages */
