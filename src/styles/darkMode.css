@@ -157,6 +157,9 @@ body.dark-mode .p-button.p-button-outlined:hover {
 body.dark-mode .p-dropdown-panel,
 body.dark-mode .p-menu,
 body.dark-mode .p-tieredmenu,
+/* La lista raiz del menubar tambien necesita fondo oscuro: en movil es la que se
+   despliega y, sin esto, quedaba blanca con texto claro (contraste 1,2:1). */
+body.dark-mode .p-menubar .p-menubar-root-list,
 body.dark-mode .p-menubar .p-submenu-list {
   background-color: var(--bg-card) !important;
   border-color: var(--border-color) !important;
