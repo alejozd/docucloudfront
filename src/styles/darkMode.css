@@ -100,7 +100,10 @@ body.dark-mode .p-datatable-tbody > tr {
   color: var(--text-primary) !important;
 }
 
-body.dark-mode .p-datatable-tbody > tr > td {
+body.dark-mode .p-datatable-tbody > tr > td,
+body.dark-mode .p-datatable .p-datatable-emptymessage > td {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
 }
 
@@ -154,6 +157,17 @@ body.dark-mode .p-button.p-button-outlined:hover {
 }
 
 /* Dropdowns y Menús */
+body.dark-mode .p-dropdown {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .p-dropdown .p-dropdown-label,
+body.dark-mode .p-dropdown .p-dropdown-trigger,
+body.dark-mode .p-dropdown .p-dropdown-clear-icon {
+  color: var(--text-primary) !important;
+}
+
 body.dark-mode .p-dropdown-panel,
 body.dark-mode .p-menu,
 body.dark-mode .p-tieredmenu,
