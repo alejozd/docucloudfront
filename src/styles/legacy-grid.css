@@ -1,0 +1,59 @@
+/* ============================================================
+   Compatibilidad con clases de PrimeFlex v2 / PrimeReact v9
+   ------------------------------------------------------------
+   El proyecto esta en PrimeFlex 3, que renombro las utilidades
+   (p-formgrid -> formgrid, p-col-12 -> col-12, p-d-flex -> flex...).
+   Varias pantallas siguen usando los nombres antiguos; sin esto el
+   contenido se apila en vertical porque las clases no existen.
+   Solo se define lo que el codigo realmente usa.
+   ============================================================ */
+
+/* Rejilla de formulario --------------------------------------------------- */
+.p-formgrid,
+.p-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.p-grid.p-dir-col {
+  flex-direction: column;
+}
+
+.p-field {
+  min-width: 0;
+  margin-bottom: 0.25rem;
+}
+
+.p-col-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .p-md-6 {
+    flex: 0 0 calc(50% - 0.5rem);
+    max-width: calc(50% - 0.5rem);
+  }
+
+  .p-grid.p-md-dir-row {
+    flex-direction: row;
+  }
+}
+
+/* Utilidades de flexbox --------------------------------------------------- */
+.p-d-flex {
+  display: flex;
+}
+
+.p-ai-center {
+  align-items: center;
+}
+
+.p-jc-center {
+  justify-content: center;
+}
+
+.p-mt-4 {
+  margin-top: 1.5rem;
+}

@@ -6,6 +6,28 @@ import Navbar from "././components/layout/Navbar";
 import Home from "././pages/Home";
 import ProtectedRoute from "././components/features/ProtectedRoute";
 import "././styles/App.css";
+// Los estilos de las paginas se cargan de forma global: varias paginas reutilizan
+// clases de otra (p. ej. RegistroSolicitudesPage usa clientes-* de Clientes.css) y
+// con el code splitting por rutas esas hojas ya no llegaban a todas.
+import "./styles/AsociarClienteContacto.css";
+import "./styles/AudioPlayer.css";
+import "./styles/BatteryStatus.css";
+import "./styles/ClienteDialog.css";
+import "./styles/Clientes.css";
+import "./styles/Contactar.css";
+import "./styles/Contactos.css";
+import "./styles/ErpClave.css";
+import "./styles/Home.css";
+import "./styles/legacy-grid.css";
+import "./styles/Login.css";
+import "./styles/OpenWeatherMapComponent.css";
+import "./styles/SalesDashboard.css";
+import "./styles/TomaTensionDashboard.css";
+import "./styles/VideoPlayer.css";
+import "./styles/VideosPage.css";
+import "./styles/Weather.css";
+import "./styles/WorkTimeCalculator.css";
+import "./styles/ZamAirDashboard.css";
 import "./styles/darkMode.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
